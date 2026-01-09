@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Report Waste - Scan2Clean{% endblock %}
+
+{% block content %}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<div class="min-h-[calc(100vh-6rem)] py-12 px-4 relative flex items-center justify-center">
+
+  <!-- Content Container -->
+  <div class="w-full max-w-4xl relative z-10 animate-fade-up">
+
+    <!-- 🌈 Header -->
+    <div
+      class="relative bg-gradient-to-r from-waste-orange to-orange-600 rounded-3xl p-8 md:p-10 text-white mb-8 shadow-2xl overflow-hidden group">
+      <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+      <div
+        class="absolute -right-8 -bottom-8 text-8xl opacity-20 transform rotate-12 group-hover:rotate-6 transition-transform">
+        📸</div>
+
+      <h1 class="text-3xl md:text-4xl font-heading font-bold mb-2 drop-shadow-sm">Report Waste</h1>
+      <p class="text-orange-50 font-medium text-lg">Help keep our city clean by reporting issues you see.</p>
+    </div>
+
+    <!-- 📦 Form Card -->
+    <div class="glass-card rounded-3xl p-8 md:p-10 shadow-2xl border border-white/40">
+
+      {% if form.errors %}
+      <div class="bg-red-50 border border-red-100 text-red-700 p-4 rounded-xl mb-8 flex items-start gap-3">
+        <span class="text-xl">⚠️</span>
+        <div>
+          <p class="font-bold">Please correct the errors below:</p>
+          <ul class="list-disc ml-5 mt-1 text-sm">
+            {% for field in form %}
+            {% for error in field.errors %}
+            <li><span class="font-medium">{{ field.label }}</span>: {{ error }}</li>
+            {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data" class="space-y-8" novalidate>
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+          <!-- LEFT COLUMN -->
+          <div class="space-y-6">
+
+            <!-- 📷 Image -->
+            <div>
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <span>📷</span> Upload Photo
+              </label>
+              <div class="relative group">
+                <input type="file" name="image" required
+                  class="block w-full text-sm text-gray-500
+                              file:mr-4 file:py-3 file:px-6
+                              file:rounded-xl file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-orange-50 file:text-orange-700
+                              hover:file:bg-orange-100 file:transition-colors file:cursor-pointer
+                              cursor-pointer bg-white/50 border border-dashed border-gray-300 rounded-xl p-2 hover:bg-white transition-colors focus:ring-2 focus:ring-orange-500 outline-none">
+              </div>
+            </div>
+
+            <!-- 📝 Description -->
+            <div>
+              <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <span>📝</span> Description
+              </label>
+              <textarea name="description" rows="4" required
+                class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 dark:text-white px-4 py-3 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all resize-none shadow-sm"
+                placeholder="Describe the waste and location details..."></textarea>
+            </div>
+
+            <!-- Selects Row -->
+            <div class="grid grid-cols-2 gap-4">
+              <!-- 🗑️ Waste Type -->
+              <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">🗑️ Type</label>
+                <div class="relative">
+                  <select name="waste_type" required
+                    class="w-full appearance-none rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 dark:text-white px-4 py-3 pr-8 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all shadow-sm">
+                    <option value="">Select...</option>
+                    <option value="plastic">🥤 Plastic</option>
+                    <option value="organic">🍎 Organic</option>
+                    <option value="construction">🧱 Construction</option>
+                    <option value="ewaste">🔋 E-Waste</option>
+                    <option value="hazardous">☣️ Hazardous</option>
+                    <option value="other">❓ Other</option>
+                  </select>
+                  <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ⚠️ Severity -->
+              <div>
+                <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">⚠️ Severity</label>
+                <div class="relative">
+                  <select name="severity" required
+                    class="w-full appearance-none rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 dark:text-white px-4 py-3 pr-8 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all shadow-sm">
+                    <option value="">Select...</option>
+                    <option value="low">🟢 Low</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="high">🔴 High</option>
+                  </select>
+                  <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN (Map) -->
+          <div class="flex flex-col">
+            <label
+              class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between">
+              <span class="flex items-center gap-2">📍 Location</span>
+              <span id="location-status"
+                class="text-xs font-normal text-gray-500 dark:text-gray-400 animate-pulse">Detecting...</span>
+            </label>
+
+            <div
+              class="relative flex-grow rounded-2xl overflow-hidden border-2 border-white shadow-md order-last md:order-none min-h-[300px]">
+              <div id="map" class="absolute inset-0 z-0"></div>
+            </div>
+
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+          </div>
+
+        </div>
+
+        <!-- 🚀 Submit -->
+        <button type="submit"
+          class="w-full bg-gradient-to-r from-waste-orange to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-orange-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 text-lg">
+          <span>🚀</span> Submit Report
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const latInput = document.getElementById("latitude");
+    const lngInput = document.getElementById("longitude");
+    const status = document.getElementById("location-status");
+
+    let map, marker;
+
+    function setLatLng(lat, lng) {
+      if (latInput) latInput.value = lat.toFixed(6);
+      if (lngInput) lngInput.value = lng.toFixed(6);
+    }
+
+    function initMap(lat, lng) {
+      if (map) {
+        // If map exists, move the view and marker
+        map.setView([lat, lng], 15);
+        if (marker) marker.setLatLng([lat, lng]);
+        setLatLng(lat, lng);
+        return;
+      }
+
+      map = L.map("map", {
+        scrollWheelZoom: false,
+        touchZoom: true
+      }).setView([lat, lng], 15);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap"
+      }).addTo(map);
+
+      marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      setLatLng(lat, lng);
+
+      marker.on('dragend', function (e) {
+        var position = marker.getLatLng();
+        setLatLng(position.lat, position.lng);
+      });
+
+      map.on("click", function (e) {
+        marker.setLatLng(e.latlng);
+        setLatLng(e.latlng.lat, e.latlng.lng);
+      });
+
+      // Invalidate size to ensure it renders correctly
+      setTimeout(() => { map.invalidateSize(); }, 200);
+    }
+
+    function getLocation(highAccuracy = true) {
+      // Check if secure context (Geolocation requirement)
+      if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        status.innerText = "❌ Security Error: HTTPS required for GPS";
+        status.classList.remove("text-gray-500", "animate-pulse");
+        status.classList.add("text-red-600", "font-bold");
+        initMap(20.5937, 78.9629); // Default fallback
+        return;
+      }
+
+      status.innerText = highAccuracy ? "Detecting Precise Location..." : "Detecting Approximate Location...";
+
+      const options = {
+        enableHighAccuracy: highAccuracy,
+        timeout: 10000, // 10 seconds timeout
+        maximumAge: 30000 // 30 seconds cache
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          status.innerText = "✅ Location detected";
+          status.classList.remove("text-gray-500", "animate-pulse", "text-orange-600", "text-red-100");
+          status.classList.add("text-green-600", "font-bold");
+
+          initMap(lat, lng);
+        },
+        function (error) {
+          console.error("Geolocation Error:", error);
+
+          // Retry with lower accuracy if timeout occurred
+          if (highAccuracy && error.code === error.TIMEOUT) {
+            console.log("High accuracy timeout, retrying with low accuracy...");
+            getLocation(false);
+            return;
+          }
+
+          if (error.code === error.PERMISSION_DENIED) {
+            status.innerText = "❌ Location blocked. Enable in browser.";
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            status.innerText = "📍 Location unavailable. Use manual pin.";
+          } else {
+            status.innerText = "📍 GPS failed. Please pin on map.";
+          }
+
+          status.classList.remove("text-gray-500", "animate-pulse");
+          status.classList.add("text-orange-600", "font-bold");
+
+          // Initialize with fallback if not already done
+          if (!map) initMap(20.5937, 78.9629);
+        },
+        options
+      );
+    }
+
+    if ("geolocation" in navigator) {
+      getLocation(true);
+    } else {
+      status.innerText = "❌ GPS unsupported. Pin on map.";
+      status.classList.add("text-orange-600");
+      initMap(20.5937, 78.9629);
+    }
+  });
+</script>
+
+{% endblock %}

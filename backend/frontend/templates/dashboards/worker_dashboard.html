@@ -1,0 +1,244 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block dashboard_content %}
+
+<!-- 🌈 Header -->
+<div class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-up group">
+  <!-- Dynamic Background -->
+  <div
+    class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 transition-transform duration-1000 group-hover:scale-105">
+  </div>
+  <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+  <div
+    class="absolute -right-10 -bottom-10 text-9xl opacity-20 transform rotate-12 group-hover:rotate-6 transition-transform duration-700">
+    🚛</div>
+
+  <div class="relative z-10">
+    <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm">
+      Worker Dashboard
+    </h1>
+    <p class="text-blue-50 text-lg font-medium opacity-90">
+      Your mission: <strong>{{ pending_tasks|default:"0" }}</strong> tasks pending cleanup. Let's make the city shine! ✨
+    </p>
+  </div>
+</div>
+
+<!-- 📊 Worker Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+
+  <!-- 📊 Chart Card -->
+  <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-up row-span-2 flex flex-col">
+    <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-6 flex items-center gap-2">
+      <span class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">📊</span>
+      Performance
+    </h3>
+    <div class="flex-grow flex items-center justify-center relative min-h-[250px]">
+      <canvas id="workerChart"></canvas>
+      {% if assigned_tasks == 0 and completed_tasks == 0 %}
+      <div
+        class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl">
+        <p class="text-gray-500 dark:text-gray-400 font-medium">No activity yet</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const assignedVal = Number("{{ assigned_tasks|default:'0' }}");
+      const completedVal = Number("{{ completed_tasks|default:'0' }}");
+      const pendingVal = Number("{{ pending_tasks|default:'0' }}");
+
+      const workerCtx = document.getElementById('workerChart');
+      if (workerCtx) {
+        new Chart(workerCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Assigned', 'Completed', 'Pending'],
+            datasets: [{
+              label: 'Jobs',
+              data: [assignedVal, completedVal, pendingVal],
+              backgroundColor: ['#60a5fa', '#22c55e', '#facc15'],
+              borderRadius: 8,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(156, 163, 175, 0.1)' },
+                ticks: { color: '#9ca3af' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: '#9ca3af' }
+              }
+            },
+            maintainAspectRatio: false
+          }
+        });
+      }
+    });
+  </script>
+
+  <!-- 🗂️ Total Assigned -->
+  <div
+    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform duration-300 animate-fade-up delay-100 border-l-4 border-blue-500">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Total Assigned</p>
+        <p class="text-4xl font-heading font-bold text-gray-800 dark:text-white">{{ assigned_tasks|default:"0" }}</p>
+      </div>
+      <div class="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-2xl">📋
+      </div>
+    </div>
+  </div>
+
+  <!-- ⏳ Pending -->
+  <div
+    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform duration-300 animate-fade-up delay-200 border-l-4 border-yellow-400">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Pending Action</p>
+        <p class="text-4xl font-heading font-bold text-gray-800 dark:text-white">{{ pending_tasks|default:"0" }}</p>
+      </div>
+      <div class="h-12 w-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center text-2xl">
+        ⏳</div>
+    </div>
+  </div>
+
+  <!-- ✅ Completed -->
+  <div
+    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform duration-300 animate-fade-up delay-300 border-l-4 border-green-500">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Resolved</p>
+        <p class="text-4xl font-heading font-bold text-gray-800 dark:text-white">{{ completed_tasks|default:"0" }}</p>
+      </div>
+      <div class="h-12 w-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-2xl">✅
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 🗂️ Pending Tasks List -->
+<div class="glass-card rounded-2xl p-8 shadow-xl animate-fade-up delay-400">
+  <div class="flex items-center justify-between mb-6">
+    <h3 class="text-xl font-heading font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+      <span class="text-2xl">🚨</span> Priority Tasks
+    </h3>
+    <a href="{% url 'worker_assigned_reports' %}"
+      class="text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">View
+      All</a>
+  </div>
+
+  {% if assigned_reports %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+    {% for report in assigned_reports %}
+    <div
+      class="bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-gray-700/50 rounded-2xl p-5 hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row gap-4 group">
+
+      <img src="{{ report.image.url }}"
+        class="w-full h-40 sm:w-24 sm:h-24 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
+
+      <div class="flex-1 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-start">
+            <h4 class="font-bold text-gray-800 dark:text-gray-200 text-lg">{{ report.get_waste_type_display }}</h4>
+            <span
+              class="px-2 py-0.5 rounded text-xs font-bold uppercase
+                   {% if report.severity == 'high' %} bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 {% else %} bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 {% endif %}">
+              {{ report.severity }}
+            </span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Found {{ report.created_at|timesince }} ago</p>
+        </div>
+
+        <form method="post" action="{% url 'resolve_report' report.id %}" class="mt-3">
+          {% csrf_token %}
+          <button
+            class="w-full py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow-md hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2 text-sm">
+            ✅ Mark Resolved
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div
+    class="text-center py-12 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
+    <div class="text-5xl mb-4 grayscale opacity-30">☕️</div>
+    <p class="text-gray-500 dark:text-gray-400 font-medium">All caught up! No pending tasks assigned to you.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Real-time Location Tracking for Workers -->
+<script>
+  let locSocket = null;
+  let trackInterval = null;
+
+  function initLocationTracking() {
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    locSocket = new WebSocket(`${protocol}${window.location.host}/ws/location/worker/`);
+
+    locSocket.onopen = () => {
+      console.log("Location tracking socket connected.");
+      startTracking();
+    };
+
+    locSocket.onclose = () => {
+      console.log("Location tracking socket disconnected. Retrying in 5s...");
+      stopTracking();
+      setTimeout(initLocationTracking, 5000);
+    };
+  }
+
+  function startTracking() {
+    if (navigator.geolocation) {
+      // Send first update immediately
+      sendLocation();
+      // Then every 10 seconds
+      trackInterval = setInterval(sendLocation, 10000);
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }
+
+  function stopTracking() {
+    if (trackInterval) clearInterval(trackInterval);
+  }
+
+  function sendLocation() {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (locSocket && locSocket.readyState === WebSocket.OPEN) {
+          locSocket.send(JSON.stringify({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude
+          }));
+          console.log("Location sent:", pos.coords.latitude, pos.coords.longitude);
+        }
+      },
+      (err) => {
+        console.error("Error getting location:", err.message);
+      },
+      { enableHighAccuracy: true }
+    );
+  }
+
+  // Initialize on load
+  document.addEventListener('DOMContentLoaded', initLocationTracking);
+</script>
+
+{% endblock %}

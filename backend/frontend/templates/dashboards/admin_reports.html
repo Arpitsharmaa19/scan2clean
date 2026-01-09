@@ -1,0 +1,149 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% block dashboard_content %}
+
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 text-black animate-fade-up">
+  <div>
+    <h2 class="text-3xl font-heading font-bold text-gray-800">📋 All Waste Reports</h2>
+    <p class="text-gray-500 mt-1">Manage, assign, and track all community submissions.</p>
+  </div>
+
+  <div class="flex gap-3">
+    <a href="{% url 'export_reports_csv' %}"
+      class="bg-gradient-to-r from-eco-500 to-teal-500 hover:from-eco-600 hover:to-teal-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-eco-500/30 hover:shadow-eco-500/50 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      Export CSV
+    </a>
+    <div
+      class="bg-white/50 backdrop-blur px-4 py-2 rounded-xl text-sm font-bold border border-white/60 shadow-sm text-gray-600">
+      Total: {{ reports.count }}
+    </div>
+  </div>
+</div>
+
+{% if reports %}
+<div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-white/50 animate-fade-up">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-gray-50/50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-400 font-bold">
+          <th class="px-6 py-5">Issue Details</th>
+          <th class="px-6 py-5">Description</th>
+          <th class="px-6 py-5 text-center">Severity</th>
+          <th class="px-6 py-5 text-center">Status</th>
+          <th class="px-6 py-5">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for report in reports %}
+        <tr class="hover:bg-white/60 transition-colors group">
+
+          <!-- Issue Details -->
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-4">
+              <div class="h-16 w-16 flex-shrink-0 rounded-xl overflow-hidden shadow-sm border border-white">
+                <img src="{{ report.image.url }}"
+                  class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500">
+              </div>
+              <div>
+                <div class="font-bold text-gray-800 text-base mb-0.5">{{ report.get_waste_type_display }}</div>
+                <div class="text-xs text-gray-400 font-mono">ID: #{{ report.id }}</div>
+                <div class="text-xs text-gray-400 font-mono mt-0.5">{{ report.created_at|date:"M d, Y" }}</div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Description -->
+          <td class="px-6 py-4 max-w-xs">
+            <p class="text-sm text-gray-600 line-clamp-2 italic">
+              "{{ report.description }}"
+            </p>
+          </td>
+
+          <!-- Severity -->
+          <td class="px-6 py-4 text-center">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border
+              {% if report.severity == 'high' %} bg-red-50 text-red-600 border-red-100
+              {% elif report.severity == 'medium' %} bg-yellow-50 text-yellow-600 border-yellow-100
+              {% else %} bg-green-50 text-green-600 border-green-100 {% endif %}">
+              {{ report.severity|capfirst }}
+            </span>
+          </td>
+
+          <!-- Status -->
+          <td class="px-6 py-4 text-center">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+              {% if report.status == 'pending' %} bg-yellow-100 text-yellow-700
+              {% elif report.status == 'assigned' %} bg-blue-100 text-blue-700
+              {% else %} bg-green-100 text-green-700 {% endif %}">
+              {{ report.status }}
+            </span>
+            {% if report.status == 'assigned' %}
+            <div class="text-[10px] font-bold text-blue-500 mt-1">
+              👷 {{ report.assigned_worker.username }}
+            </div>
+            {% endif %}
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+
+              {% if report.status == 'pending' %}
+              <form method="post" class="flex items-center gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="report_id" value="{{ report.id }}">
+
+                <div class="relative w-40">
+                  <select name="worker_id" required
+                    class="w-full text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer hover:bg-white transition-colors">
+                    <option value="">Select Worker...</option>
+                    {% for worker in workers %}
+                    <option value="{{ worker.id }}">{{ worker.username }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <button type="submit"
+                  class="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg shadow-md hover:shadow-orange-500/30 transition-all"
+                  title="Assign">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </button>
+              </form>
+              {% endif %}
+
+              <a href="{% url 'admin_delete_report' report.id %}"
+                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                title="Delete Report">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </a>
+
+            </div>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div
+  class="flex flex-col items-center justify-center py-20 bg-white/50 backdrop-blur rounded-3xl border border-dashed border-gray-300 animate-fade-up">
+  <div class="text-6xl mb-4 grayscale opacity-30">📭</div>
+  <p class="text-gray-500 font-medium text-lg">No reports found.</p>
+</div>
+{% endif %}
+
+{% endblock %}

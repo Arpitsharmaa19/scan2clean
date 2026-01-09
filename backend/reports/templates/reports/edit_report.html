@@ -1,0 +1,41 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% block title %}Edit Report{% endblock %}
+
+{% block dashboard_content %}
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow p-8 mt-10">
+
+  <h1 class="text-2xl font-bold mb-6">✏️ Edit Report</h1>
+
+  <form method="POST" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Image -->
+    <div>
+      <label class="block font-medium mb-2">Update Image</label>
+      <img src="{{ report.image.url }}"
+           class="w-full h-48 object-cover rounded mb-2">
+      {{ form.image }}
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block font-medium mb-2">Description</label>
+      {{ form.description }}
+    </div>
+
+    <div class="flex justify-between">
+      <a href="/reports/my-reports/"
+         class="bg-gray-200 px-6 py-2 rounded-lg font-semibold">
+        Cancel
+      </a>
+
+      <button
+        type="submit"
+        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold">
+        Save Changes
+      </button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

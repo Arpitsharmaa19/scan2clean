@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>{% block title %}Scan2Clean{% endblock %}</title>
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS (Unpkg Fallback) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Dark Mode Logic -->
+  <script>
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.theme = 'light';
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.theme = 'dark';
+      }
+    }
+  </script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            eco: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            teal: {
+              500: '#14b8a6',
+              600: '#0d9488',
+            },
+            waste: {
+              orange: '#f97316',
+              red: '#ef4444',
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.6s ease-out forwards',
+            'slide-up': 'slideUp 0.6s ease-out forwards',
+            'scale-in': 'scaleIn 0.4s ease-out forwards',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            scaleIn: {
+              '0%': { opacity: '0', transform: 'scale(0.95)' },
+              '100%': { opacity: '1', transform: 'scale(1)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .dark ::-webkit-scrollbar-track {
+      background: #1f2937;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+      background: #4b5563;
+    }
+
+    /* Glassmorphism Utilities */
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .dark .glass {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .dark .glass-card {
+      background: rgba(31, 41, 55, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #f3f4f6;
+    }
+  </style>
+</head>
+
+<body
+  class="text-gray-800 font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- 🌟 GLOBAL NAVBAR (Sticky Glass) -->
+  <header class="fixed w-full top-0 z-50 glass shadow-sm transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2 group">
+        <div
+          class="bg-gradient-to-br from-eco-500 to-teal-500 rounded-lg p-2 shadow-lg group-hover:scale-105 transition-transform duration-300">
+          <span class="text-2xl">♻️</span>
+        </div>
+        <span
+          class="text-2xl font-heading font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300">
+          Scan<span class="text-eco-600">2Clean</span>
+        </span>
+      </a>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-4">
+
+        <!-- 🌓 Dark Mode Toggle -->
+        <button onclick="toggleDarkMode()"
+          class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition shadow-sm border border-gray-200 dark:border-gray-700">
+          <!-- Sun (show in dark) -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500 hidden dark:block" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <!-- Moon (show in light) -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 block dark:hidden" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+        {% if user.is_authenticated %}
+        <div class="hidden md:flex flex-col text-right mr-2">
+          <span class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ user.username }}</span>
+          <span class="text-xs text-eco-600 uppercase tracking-wider font-semibold">{{ user.role }}</span>
+        </div>
+        <a href="{% url 'logout' %}"
+          class="px-4 py-2 rounded-full border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 transition font-medium text-sm flex items-center gap-2">
+          Logout
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}" class="text-gray-600 hover:text-eco-600 font-medium mr-4">Login</a>
+        <a href="{% url 'register' %}"
+          class="bg-eco-600 text-white px-5 py-2.5 rounded-full hover:bg-eco-700 transition shadow-lg shadow-eco-500/30 font-medium">Get
+          Started</a>
+        {% endif %}
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Spacer for fixed header -->
+  <div class="h-24"></div>
+
+  <!-- Content -->
+  <main class="flex-grow w-full">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-8 text-center text-sm">
+    <p>&copy; 2024 Scan2Clean. Building a cleaner future.</p>
+  </footer>
+
+</body>
+
+</html>

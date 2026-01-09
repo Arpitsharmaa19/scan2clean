@@ -1,0 +1,256 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Track Worker - Scan2Clean{% endblock %}
+
+{% block dashboard_content %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<div class="max-w-5xl mx-auto animate-fade-up">
+
+    <!-- 🔝 Header Info -->
+    <div
+        class="glass-card rounded-3xl p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-white/40">
+        <div class="flex items-center gap-5">
+            <div
+                class="h-16 w-16 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center text-3xl shadow-inner">
+                🚚
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Tracking Your Cleanup</h2>
+                <p class="text-gray-500 dark:text-gray-400 font-medium">
+                    Worker: <span class="text-blue-600 dark:text-blue-400 font-bold">@{{ worker.username }}</span> is on
+                    the way!
+                </p>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <div
+                class="bg-white/80 dark:bg-gray-800/80 px-6 py-3 rounded-2xl border border-blue-100 dark:border-blue-900/40 shadow-sm text-center">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Estimated Arrival</p>
+                <p id="eta-display" class="text-2xl font-heading font-bold text-blue-600 dark:text-blue-400">
+                    Calculating...</p>
+            </div>
+            <div
+                class="bg-white/80 dark:bg-gray-800/80 px-6 py-3 rounded-2xl border border-blue-100 dark:border-blue-900/40 shadow-sm text-center">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Distance</p>
+                <p id="distance-display" class="text-2xl font-heading font-bold text-gray-800 dark:text-gray-100">-- km
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🗺️ Map Section -->
+    <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800"
+        style="height: 500px;">
+        <div id="tracking-map" class="h-full w-full bg-gray-100 dark:bg-gray-900"></div>
+
+        <!-- Status Floating Badge -->
+        <div class="absolute top-6 left-6 z-[1000]">
+            <span id="status-badge"
+                class="px-4 py-2 rounded-full bg-blue-600 text-white text-sm font-bold shadow-lg animate-pulse flex items-center gap-2">
+                <span class="h-2 w-2 bg-white rounded-full"></span>
+                On the Way
+            </span>
+        </div>
+
+        <!-- Pulse Overlay when worker is very near -->
+        <div id="nearby-overlay"
+            class="absolute inset-0 z-[999] bg-green-500/10 pointer-events-none hidden animate-pulse"></div>
+    </div>
+
+    <!-- 📋 Report Snippet -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-card p-6 rounded-3xl border border-white/40 flex items-center gap-4">
+            <img src="{{ report.image.url }}" class="h-20 w-20 rounded-2xl object-cover shadow-sm">
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase">Your Report</p>
+                <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ report.get_waste_type_display }}</h4>
+                <p class="text-sm text-gray-500">Target ID: #{{ report.id }}</p>
+            </div>
+        </div>
+        <div class="glass-card p-6 rounded-3xl border border-white/40 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="h-12 w-12 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center text-xl">
+                    🛡️</div>
+                <div>
+                    <h4 class="font-bold text-gray-800 dark:text-gray-100">Verified Worker</h4>
+                    <p class="text-xs text-gray-500">Worker is background-checked</p>
+                </div>
+            </div>
+            <button
+                class="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-xs font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition">Report
+                Issue</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    // --- Data Safety Pattern ---
+    const citizenLat = Number("{{ report.latitude|default:'0' }}");
+    const citizenLng = Number("{{ report.longitude|default:'0' }}");
+    const citizenPos = [citizenLat, citizenLng];
+
+    const workerLat = Number("{{ worker.latitude|default:'0' }}");
+    const workerLng = Number("{{ worker.longitude|default:'0' }}");
+    const workerId = Number("{{ worker.id|default:'0' }}");
+
+    let workerPos = null;
+    if (workerLat !== 0 && workerLng !== 0) {
+        workerPos = [workerLat, workerLng];
+    }
+
+    // --- Map Setup ---
+    const map = L.map('tracking-map', {
+        zoomControl: false
+    }).setView(citizenPos, 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // --- Custom Icons ---
+    const citizenIcon = L.divIcon({
+        html: `<div class="relative">
+                <div class="absolute -inset-4 bg-orange-500/20 rounded-full animate-ping"></div>
+                <div class="relative bg-orange-500 text-white p-2 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-lg">🏠</div>
+               </div>`,
+        className: '',
+        iconSize: [32, 32]
+    });
+
+    const workerIcon = L.divIcon({
+        html: `<div class="relative">
+                <div class="absolute -inset-4 bg-blue-500/20 rounded-full animate-ping"></div>
+                <div class="relative bg-blue-600 text-white p-2 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-lg">🚛</div>
+               </div>`,
+        className: '',
+        iconSize: [32, 32]
+    });
+
+    // --- Markers & Layers ---
+    L.marker(citizenPos, { icon: citizenIcon }).addTo(map).bindPopup("Your Location");
+    let workerMarker = null;
+    let routeLine = null;
+
+    if (workerPos) {
+        updateWorkerOnMap(workerPos[0], workerPos[1]);
+    }
+
+    function updateWorkerOnMap(lat, lng) {
+        const newPos = [lat, lng];
+
+        // Marker
+        if (!workerMarker) {
+            workerMarker = L.marker(newPos, { icon: workerIcon }).addTo(map);
+        } else {
+            workerMarker.setLatLng(newPos);
+        }
+
+        // Route Line
+        if (routeLine) map.removeLayer(routeLine);
+        routeLine = L.polyline([newPos, citizenPos], {
+            color: '#3b82f6',
+            weight: 4,
+            dashArray: '10, 10',
+            opacity: 0.6
+        }).addTo(map);
+
+        // Autofit
+        const group = L.featureGroup([L.marker(newPos), L.marker(citizenPos)]);
+        map.fitBounds(group.getBounds(), { padding: [100, 100], maxZoom: 16 });
+
+        // Calculations
+        updateStats(lat, lng);
+    }
+
+    function updateStats(lat, lng) {
+        const dist = calculateDistance(lat, lng, citizenPos[0], citizenPos[1]);
+        const distKm = dist.toFixed(2);
+
+        const distEl = document.getElementById('distance-display');
+        if (distEl) distEl.innerText = `${distKm} km`;
+
+        const avgSpeed = 20;
+        const timeHours = dist / avgSpeed;
+        const timeMinutes = Math.round(timeHours * 60);
+
+        const etaDisplay = document.getElementById('eta-display');
+        const badge = document.getElementById('status-badge');
+        const overlay = document.getElementById('nearby-overlay');
+
+        if (etaDisplay) {
+            if (timeMinutes < 2) {
+                etaDisplay.innerText = "Almost There! 🚀";
+                etaDisplay.className = "text-2xl font-heading font-bold text-green-500 animate-bounce";
+                if (badge) {
+                    badge.innerText = "📍 Nearby";
+                    badge.className = "px-4 py-2 rounded-full bg-green-500 text-white text-sm font-bold shadow-lg flex items-center gap-2";
+                }
+                if (overlay) overlay.classList.remove('hidden');
+            } else {
+                etaDisplay.innerText = `~${timeMinutes} mins`;
+                etaDisplay.className = "text-2xl font-heading font-bold text-blue-600";
+                if (badge) {
+                    badge.innerText = "🚚 On the Way";
+                    badge.className = "px-4 py-2 rounded-full bg-blue-600 text-white text-sm font-bold shadow-lg animate-pulse flex items-center gap-2";
+                }
+                if (overlay) overlay.classList.add('hidden');
+            }
+        }
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socket = new WebSocket(`${protocol}${window.location.host}/ws/location/citizen/`);
+
+    socket.onopen = () => {
+        socket.send(JSON.stringify({
+            action: 'track_worker',
+            worker_id: workerId
+        }));
+    };
+
+    socket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.type === 'location_update' && data.worker_id == workerId) {
+            updateWorkerOnMap(data.lat, data.lng);
+        }
+    };
+</script>
+
+<style>
+    @keyframes ping {
+        0% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+
+        100% {
+            transform: scale(2.5);
+            opacity: 0;
+        }
+    }
+
+    .animate-ping {
+        animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+</style>
+{% endblock %}

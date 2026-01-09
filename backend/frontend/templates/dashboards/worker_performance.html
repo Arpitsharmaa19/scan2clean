@@ -1,0 +1,99 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% block title %}Worker Performance{% endblock %}
+
+{% block dashboard_content %}
+<div>
+
+  <div class="flex justify-between items-center mb-10">
+    <div>
+      <h1 class="text-3xl font-heading font-bold text-gray-800">Worker Performance</h1>
+      <p class="text-gray-500 mt-1">Analytics for field team efficiency and resolution times.</p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+    <table class="min-w-full leading-normal">
+      <thead>
+        <tr class="bg-gray-50 text-left">
+          <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Worker Name</th>
+          <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Total Assigned</th>
+          <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Resolved</th>
+          <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Pending</th>
+          <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-left">Avg Resolution Time
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for worker in workers %}
+        <tr class="hover:bg-gray-50/80 transition-colors group">
+
+          <!-- NAME -->
+          <td class="px-6 py-5">
+            <div class="flex items-center">
+              <div
+                class="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-500 flex items-center justify-center font-bold text-sm border border-indigo-200">
+                {{ worker.username|first|upper }}
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                  {{ worker.username }}
+                </p>
+                <p class="text-xs text-gray-500">{{ worker.email }}</p>
+              </div>
+            </div>
+          </td>
+
+          <!-- ASSIGNED -->
+          <td class="px-6 py-5 text-center">
+            <span
+              class="inline-flex items-center justify-center px-3 py-1 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">
+              {{ worker.total_assigned }}
+            </span>
+          </td>
+
+          <!-- RESOLVED -->
+          <td class="px-6 py-5 text-center">
+            <span
+              class="inline-flex items-center justify-center px-3 py-1 bg-green-100 text-green-700 border border-green-200 rounded-lg font-bold text-sm shadow-sm">
+              ✅ {{ worker.resolved_count }}
+            </span>
+          </td>
+
+          <!-- PENDING -->
+          <td class="px-6 py-5 text-center">
+            <span
+              class="inline-flex items-center justify-center px-3 py-1 bg-orange-100 text-orange-700 border border-orange-200 rounded-lg font-bold text-sm shadow-sm">
+              ⏳ {{ worker.pending_count }}
+            </span>
+          </td>
+
+          <!-- TIME -->
+          <td class="px-6 py-5">
+            {% if worker.avg_resolution_time_formatted %}
+            <div class="flex items-center gap-2 text-sm text-gray-700 font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {{ worker.avg_resolution_time_formatted }}
+            </div>
+            {% else %}
+            <span class="text-gray-400 text-xs italic">No data</span>
+            {% endif %}
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if not workers %}
+  <div class="text-center py-12">
+    <p class="text-gray-400">No workers found.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

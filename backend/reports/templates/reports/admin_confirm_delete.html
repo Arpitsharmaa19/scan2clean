@@ -1,0 +1,37 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% block dashboard_content %}
+
+<div class="max-w-xl mx-auto bg-white rounded-xl shadow p-8 mt-10">
+
+  <h1 class="text-2xl font-bold text-red-600 mb-4">
+    ⚠️ Admin Delete Report
+  </h1>
+
+  <p class="mb-6">
+    Are you sure you want to permanently delete this report?
+  </p>
+
+  <p class="font-semibold mb-6">
+    Report ID: {{ report.id }} |
+    {{ report.get_waste_type_display }} |
+    {{ report.status }}
+  </p>
+
+  <form method="POST" class="flex gap-4">
+    {% csrf_token %}
+
+    <button
+      type="submit"
+      class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold">
+      Delete
+    </button>
+
+    <a href="/reports/admin/"
+       class="bg-gray-200 px-6 py-2 rounded-lg font-semibold">
+      Cancel
+    </a>
+  </form>
+
+</div>
+
+{% endblock %}

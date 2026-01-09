@@ -1,0 +1,102 @@
+from django.db import models
+from django.conf import settings
+
+
+class WasteReport(models.Model):
+
+    # ====================
+    # CHOICES
+    # ====================
+    WASTE_TYPE_CHOICES = [
+        ('plastic', 'Plastic'),
+        ('organic', 'Organic'),
+        ('construction', 'Construction'),
+        ('ewaste', 'E-Waste'),
+        ('hazardous', 'Hazardous'),
+        ('other', 'Other'),
+    ]
+
+    SEVERITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('assigned', 'Assigned'),
+        ('resolved', 'Resolved'),
+    ]
+
+    # ====================
+    # RELATIONSHIPS
+    # ====================
+    citizen = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='waste_reports'
+    )
+
+    assigned_worker = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_reports'
+    )
+
+    # ====================
+    # REPORT DETAILS
+    # ====================
+    image = models.ImageField(upload_to='waste_images/')
+    description = models.TextField()
+
+    waste_type = models.CharField(
+        max_length=20,
+        choices=WASTE_TYPE_CHOICES
+    )
+
+    severity = models.CharField(
+        max_length=10,
+        choices=SEVERITY_CHOICES
+    )
+
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+    location_source = models.CharField(
+    max_length=10,
+    choices=[
+        ('auto', 'Auto-detected'),
+        ('manual', 'Manually Selected')
+    ],
+    default='auto'
+)
+
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return (
+            f"Report #{self.id} | "
+            f"{self.waste_type} | "
+            f"{self.severity} | "
+            f"{self.status}"
+        )

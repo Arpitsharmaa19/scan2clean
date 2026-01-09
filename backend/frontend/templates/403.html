@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied - Scan2Clean{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-6rem)] flex items-center justify-center px-4">
+    <div class="max-w-md w-full text-center animate-fade-in">
+        <div class="text-9xl mb-8">🚫</div>
+        <h1 class="text-4xl font-heading font-bold text-gray-800 dark:text-white mb-4">Access Denied</h1>
+        <p class="text-gray-600 dark:text-gray-400 mb-8 text-lg">
+            Sorry, you don't have permission to access this page. Please contact an administrator if you believe this is
+            an error.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/"
+                class="bg-eco-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-eco-500/30 hover:shadow-eco-500/50 hover:-translate-y-1 transition-all">
+                Go Home
+            </a>
+            <a href="{% url 'dashboard' %}"
+                class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-8 py-3 rounded-xl font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                My Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

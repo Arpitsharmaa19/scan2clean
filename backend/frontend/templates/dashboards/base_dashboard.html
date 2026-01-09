@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex min-h-[calc(100vh-6rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8 relative">
+  <!-- Global Background for Dashboards -->
+  <div
+    class="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-eco-50/50 to-transparent dark:from-eco-900/20 dark:to-transparent -z-10 rounded-b-3xl">
+  </div>
+  <div
+    class="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30 dark:opacity-10 pointer-events-none -z-20">
+  </div>
+
+  <!-- 📚 MODERN SIDEBAR -->
+  <aside class="w-72 hidden lg:block">
+    <div
+      class="sticky top-28 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/50 dark:border-gray-700/50 p-6">
+
+      <div class="mb-6 px-2">
+        <h2 class="text-2xl font-bold text-orange-500 mb-6">
+          ♻️ Scan2Clean
+        </h2>
+      </div>
+
+      <nav class="space-y-2">
+
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'admin_dashboard' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">💎</span> Dashboard
+        </a>
+        <a href="{% url 'admin_all_reports' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">🛠️</span> Manage Reports
+        </a>
+        <a href="{% url 'admin_analytics' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">📊</span> Analytics
+        </a>
+        <a href="{% url 'worker_performance_dashboard' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">👷</span> Worker Performance
+        </a>
+        <a href="{% url 'waste_map' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">🗺️</span> Global Map
+        </a>
+        <!-- Django Admin Link -->
+        <div class="my-4 border-t border-gray-100 dark:border-gray-700"></div>
+        <a href="{% url 'admin:index' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 group text-gray-500 dark:text-gray-400 font-medium text-sm">
+          ⚙️ System Admin
+        </a>
+        {% endif %}
+
+        {% if request.user.role == 'citizen' %}
+        <a href="{% url 'citizen_dashboard' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">🏡</span> Home
+        </a>
+        <a href="{% url 'report_waste' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-eco-500 to-teal-500 text-white shadow-lg shadow-eco-500/30 hover:shadow-eco-500/50 transition-all duration-200 font-bold">
+          <span class="animate-bounce">📸</span> Report Waste
+        </a>
+        <a href="{% url 'my_reports' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">📂</span> My Reports
+        </a>
+        <a href="{% url 'waste_map' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">🗺️</span> Map View
+        </a>
+        {% endif %}
+
+        {% if request.user.role == 'worker' %}
+        <a href="{% url 'worker_dashboard' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">📋</span> Dashboard
+        </a>
+        <a href="{% url 'worker_assigned_reports' %}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
+          <span class="group-hover:scale-110 transition-transform">🚛</span> Assigned Jobs
+        </a>
+        {% endif %}
+
+      </nav>
+
+      <!-- User Card -->
+      <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex items-center gap-3">
+        <div
+          class="h-10 w-10 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-300">
+          {{ user.username|first|upper }}
+        </div>
+        <div class="flex flex-col">
+          <span class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ user.username }}</span>
+          <span class="text-xs text-gray-400 dark:text-gray-500 capitalize">{{ user.role }} Account</span>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 🧩 MAIN DASHBOARD CONTENT -->
+  <main class="flex-1 animate-fade-in">
+    {% block dashboard_content %}{% endblock %}
+  </main>
+
+</div>
+{% endblock %}

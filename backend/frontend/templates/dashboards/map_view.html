@@ -1,0 +1,232 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Global Waste Map{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+<div style="height: calc(100vh - 8rem);" class="flex flex-col animate-fade-up">
+
+  <!-- 🛠️ Map Controls Header -->
+  <div
+    class="glass-card p-4 rounded-xl shadow-lg mb-4 flex flex-col md:flex-row flex-wrap gap-4 items-center justify-between z-10">
+
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">🌍 Global Map</h1>
+      <span
+        class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 text-xs px-2 py-1 rounded-full font-bold">{{
+        reports|length }}
+        Reports</span>
+    </div>
+
+    <!-- Filters Form -->
+    <form method="get" class="flex flex-wrap gap-2 items-center text-sm">
+
+      <!-- Time Filter -->
+      <select name="days" onchange="this.form.submit()"
+        class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
+        <option value="" {% if not request.GET.days %}selected{% endif %}>📅 All Time</option>
+        <option value="1" {% if request.GET.days == '1' %}selected{% endif %}>Last 24 Hours</option>
+        <option value="7" {% if request.GET.days == '7' %}selected{% endif %}>Last 7 Days</option>
+        <option value="30" {% if request.GET.days == '30' %}selected{% endif %}>Last 30 Days</option>
+      </select>
+
+      <!-- Status Filter -->
+      <select name="status" onchange="this.form.submit()"
+        class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
+        <option value="" {% if not request.GET.status %}selected{% endif %}>📌 All Status</option>
+        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="assigned" {% if request.GET.status == 'assigned' %}selected{% endif %}>Assigned</option>
+        <option value="resolved" {% if request.GET.status == 'resolved' %}selected{% endif %}>Resolved</option>
+      </select>
+
+      <!-- Severity Filter -->
+      <select name="severity" onchange="this.form.submit()"
+        class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
+        <option value="" {% if not request.GET.severity %}selected{% endif %}>⚠️ All Severity</option>
+        <option value="high" {% if request.GET.severity == 'high' %}selected{% endif %}>High</option>
+        <option value="medium" {% if request.GET.severity == 'medium' %}selected{% endif %}>Medium</option>
+        <option value="low" {% if request.GET.severity == 'low' %}selected{% endif %}>Low</option>
+      </select>
+
+      <a href="{% url 'waste_map' %}" class="text-gray-400 hover:text-red-500 px-2 font-bold">✕ Clear</a>
+    </form>
+
+    <!-- Map Mode Toggle -->
+    <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+      <button onclick="setMode('markers')" id="btn-markers"
+        class="px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-100">
+        📍 Markers
+      </button>
+      <button onclick="setMode('heatmap')" id="btn-heatmap"
+        class="px-3 py-1.5 rounded-md text-xs font-bold transition-all text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100">
+        🔥 Heatmap
+      </button>
+    </div>
+
+  </div>
+
+  <!-- 🗺️ Map Container -->
+  <div class="relative flex-grow rounded-2xl overflow-hidden shadow-2xl border-2 border-white dark:border-gray-700">
+    <div id="map" class="absolute inset-0 z-0 bg-gray-100 dark:bg-gray-800"></div>
+
+    <!-- Floating 'My Location' Button -->
+    <button onclick="locateUser()"
+      class="absolute bottom-6 right-6 z-[1000] bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-110 transition-transform text-blue-600 dark:text-blue-400"
+      title="My Location">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    </button>
+  </div>
+
+</div>
+
+<!-- Libraries -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+{{ reports|json_script:"reports-data" }}
+<script>
+  const reports = JSON.parse(document.getElementById('reports-data').textContent);
+
+  // --- Map Init ---
+  const map = L.map("map").setView([20.5937, 78.9629], 5);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
+
+  // --- Layers ---
+  const markersLayer = L.markerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: false });
+  let heatLayer = null;
+
+  // --- Icons ---
+  function getIcon(severity) {
+    let color = "#22c55e"; // low
+    if (severity === "High") color = "#ef4444";
+    else if (severity === "Medium") color = "#f59e0b";
+
+    return L.divIcon({
+      html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 0 5px rgba(0,0,0,0.3);"></div>`,
+      className: ''
+    });
+  }
+
+  // --- Render Markers ---
+  function renderMarkers() {
+    markersLayer.clearLayers();
+
+    reports.forEach(r => {
+      const popup = `
+        <div class="w-48">
+          <div class="relative h-24 mb-2 overflow-hidden rounded-lg">
+            ${r.image ? `<img src="${r.image}" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gray-200"></div>'}
+            <div class="absolute bottom-0 left-0 bg-black/50 text-white text-[10px] px-2 py-1 font-bold">
+              ${r.waste_type}
+            </div>
+          </div>
+          <div class="mb-2">
+            <span class="text-xs font-bold uppercase ${r.severity === 'High' ? 'text-red-500' : 'text-gray-600'}">${r.severity} Severity</span>
+            <br>
+            <span class="text-xs text-gray-400">${r.created_at}</span>
+          </div>
+          <a href="${r.detail_url}" class="block text-center bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1.5 rounded transition">View Details</a>
+        </div>
+      `;
+      const m = L.marker([r.lat, r.lng], { icon: getIcon(r.severity) }).bindPopup(popup);
+      markersLayer.addLayer(m);
+    });
+
+    map.addLayer(markersLayer);
+    if (heatLayer) map.removeLayer(heatLayer);
+
+    // Fit bounds if markers exist
+    if (markersLayer.getLayers().length) {
+      map.fitBounds(markersLayer.getBounds(), { padding: [50, 50] });
+    }
+  }
+
+  // --- Render Heatmap ---
+  function renderHeatmap() {
+    map.removeLayer(markersLayer);
+
+    if (!heatLayer) {
+      // [lat, lng, intensity]
+      // Intensity based on severity? High=1.0, Med=0.6, Low=0.3
+      const points = reports.map(r => {
+        let intensity = 0.4;
+        if (r.severity === 'High') intensity = 1.0;
+        else if (r.severity === 'Medium') intensity = 0.7;
+        return [r.lat, r.lng, intensity];
+      });
+
+      heatLayer = L.heatLayer(points, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 17,
+        gradient: { 0.4: 'lime', 0.65: 'yellow', 1: 'red' }
+      });
+    }
+
+    map.addLayer(heatLayer);
+  }
+
+  // --- Toggle Mode ---
+  function setMode(mode) {
+    const btnM = document.getElementById('btn-markers');
+    const btnH = document.getElementById('btn-heatmap');
+
+    if (mode === 'markers') {
+      btnM.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm bg-white text-gray-800";
+      btnH.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all text-gray-500 hover:text-gray-800";
+      renderMarkers();
+    } else {
+      btnH.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm bg-white text-red-600";
+      btnM.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all text-gray-500 hover:text-gray-800";
+      renderHeatmap();
+    }
+  }
+
+  // --- Locate User ---
+  function locateUser() {
+    if (navigator.geolocation) {
+      const btn = event.currentTarget;
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = '⌛'; // Loading state
+
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          btn.innerHTML = originalContent;
+          const { latitude, longitude } = pos.coords;
+          map.setView([latitude, longitude], 14);
+          L.marker([latitude, longitude]).addTo(map).bindPopup("You are here").openPopup();
+        },
+        err => {
+          btn.innerHTML = originalContent;
+          console.error("Locate error:", err);
+          let msg = "Could not determine location.";
+          if (err.code === 1) msg = "Location permission denied.";
+          else if (err.code === 3) msg = "Location request timed out.";
+          alert(msg);
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  }
+
+  // Default Init
+  renderMarkers();
+
+</script>
+{% endblock %}
