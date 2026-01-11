@@ -8,10 +8,13 @@ from django.utils.timezone import localdate
 from datetime import timedelta
 import json
 
-from .models import WasteReport
-from .forms import WasteReportForm, WasteReportEditForm
+from .models import WasteReport, SupportTicket
+from .forms import WasteReportForm, WasteReportEditForm, SupportTicketForm
 from django.utils import timezone
 from django.db.models import Count, Avg, F, ExpressionWrapper, fields, Q
+from notifications.models import Notification
+from .utils import send_realtime_notification
+import random
 
 User = get_user_model()
 
@@ -122,21 +125,68 @@ def worker_assigned_reports(request):
     return render(request, "reports/worker_assigned_reports.html", {"reports": reports})
 
 # =====================================================
-# ✅ WORKER — RESOLVE REPORT
-# =====================================================
 @login_required
 def resolve_report(request, report_id):
     if request.method == "POST":
         report = get_object_or_404(
             WasteReport,
             id=report_id,
-            assigned_worker=request.user
+            assigned_worker=request.user,
+            status="assigned"
         )
-        report.status = "resolved"
-        report.resolved_at = timezone.now()
+        # Generate 6-digit OTP
+        otp = str(random.randint(100000, 999999))
+        report.verification_otp = otp
         report.save()
+
+        # Notify Citizen
+        send_realtime_notification(
+            user=report.citizen,
+            title="Cleanup Verification OTP",
+            message=f"The worker has completed the cleanup for your report. Please share this OTP with them to verify: {otp}",
+            level="success"
+        )
+        
+        # Add a success message or flag to the session to show OTP input on the dashboard
+        request.session[f'verifying_report_{report_id}'] = True
+        return redirect(f"/dashboard/worker/?verify={report_id}")
     
     return redirect("/reports/assigned/")
+
+@login_required
+def verify_otp(request, report_id):
+    if request.method == "POST":
+        otp_input = request.POST.get("otp")
+        report = get_object_or_404(
+            WasteReport,
+            id=report_id,
+            assigned_worker=request.user,
+            status="assigned"
+        )
+
+        if report.verification_otp == otp_input:
+            report.status = "resolved"
+            report.resolved_at = timezone.now()
+            report.verification_otp = None # Clear OTP after use
+            report.save()
+            
+            # Final notification to citizen
+            send_realtime_notification(
+                user=report.citizen,
+                title="Cleanup Confirmed! 🎉",
+                message=f"Your waste report #{report.id} has been verified and successfully cleaned up.",
+                level="success"
+            )
+            
+            if f'verifying_report_{report_id}' in request.session:
+                del request.session[f'verifying_report_{report_id}']
+                
+            return redirect("/dashboard/worker/")
+        else:
+            # Handle incorrect OTP (maybe add a flash message)
+            return redirect(f"/dashboard/worker/?verify={report_id}&error=1")
+            
+    return redirect("/dashboard/worker/")
 
 # =====================================================
 # 🛠️ ADMIN — ALL REPORTS
@@ -155,6 +205,14 @@ def admin_all_reports(request):
         report.assigned_worker = worker
         report.status = "assigned"
         report.save()
+
+        # Notify Worker
+        send_realtime_notification(
+            user=worker,
+            title="New Job Assigned 🚛",
+            message=f"You have been assigned to clean up Waste Report #{report.id} ({report.get_waste_type_display()}).",
+            level="info"
+        )
         return redirect("/reports/admin/")
 
     return render(request, "dashboards/admin_reports.html", {
@@ -332,3 +390,89 @@ def track_worker(request, report_id):
         "report": report,
         "worker": report.assigned_worker
     })
+
+@login_required
+def rate_report(request, report_id):
+    if request.method == "POST":
+        report = get_object_or_404(
+            WasteReport,
+            id=report_id,
+            citizen=request.user,
+            status="resolved"
+        )
+        
+        rating = request.POST.get("rating")
+        review_text = request.POST.get("review_text", "")
+        
+        if rating and rating.isdigit():
+            rating_val = int(rating)
+            report.rating = rating_val
+            report.review_text = review_text
+            report.save()
+            
+            # Update Worker Performance
+            worker = report.assigned_worker
+            if worker:
+                # Calculate new average
+                stats = WasteReport.objects.filter(assigned_worker=worker, rating__isnull=False).aggregate(
+                    avg_rating=Avg('rating'),
+                    count=Count('id')
+                )
+                worker.average_rating = stats['avg_rating'] or 0.0
+                worker.total_ratings = stats['count'] or 0
+                worker.save()
+
+                send_realtime_notification(
+                    user=worker,
+                    title="New Review Received! ⭐",
+                    message=f"A citizen rated your cleanup for Report #{report.id} as {rating_val}/5 stars.",
+                    level="success"
+                )
+                
+        return redirect("/dashboard/citizen/")
+    
+    return redirect("/dashboard/citizen/")
+
+
+# =====================================================
+# 🛠️ SUPPORT TICKETS (Report a Problem)
+# =====================================================
+@login_required
+def report_problem(request):
+    """View for citizens to report general system issues"""
+    if request.method == "POST":
+        form = SupportTicketForm(request.POST)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            ticket.user = request.user
+            ticket.save()
+            return render(request, "reports/report_problem.html", {
+                "success": True,
+                "form": SupportTicketForm()
+            })
+    else:
+        form = SupportTicketForm()
+    
+    return render(request, "reports/report_problem.html", {"form": form})
+
+
+@login_required
+def admin_support_tickets(request):
+    """Admin view to see all support tickets"""
+    if getattr(request.user, "role", None) != "admin":
+        return redirect("/dashboard/citizen/")
+    
+    tickets = SupportTicket.objects.all().order_by("-created_at")
+    return render(request, "reports/admin_support_tickets.html", {"tickets": tickets})
+
+
+@login_required
+def resolve_ticket(request, ticket_id):
+    """Toggle resolution status of a support ticket"""
+    if getattr(request.user, "role", None) != "admin":
+        return redirect("/dashboard/citizen/")
+    
+    ticket = get_object_or_404(SupportTicket, id=ticket_id)
+    ticket.is_resolved = not ticket.is_resolved
+    ticket.save()
+    return redirect("admin_support_tickets")

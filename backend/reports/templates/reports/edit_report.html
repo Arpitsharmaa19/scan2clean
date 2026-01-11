@@ -12,8 +12,13 @@
     <!-- Image -->
     <div>
       <label class="block font-medium mb-2">Update Image</label>
-      <img src="{{ report.image.url }}"
-           class="w-full h-48 object-cover rounded mb-2">
+      {% if report.image %}
+      <img src="{{ report.image.url }}" class="w-full h-48 object-cover rounded mb-2">
+      {% else %}
+      <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400 rounded mb-2">
+        <span>No image available</span>
+      </div>
+      {% endif %}
       {{ form.image }}
     </div>
 
@@ -24,14 +29,11 @@
     </div>
 
     <div class="flex justify-between">
-      <a href="/reports/my-reports/"
-         class="bg-gray-200 px-6 py-2 rounded-lg font-semibold">
+      <a href="/reports/my-reports/" class="bg-gray-200 px-6 py-2 rounded-lg font-semibold">
         Cancel
       </a>
 
-      <button
-        type="submit"
-        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold">
+      <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold">
         Save Changes
       </button>
     </div>

@@ -39,8 +39,14 @@
         <div
           class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60 group-hover:opacity-40 transition-opacity">
         </div>
+        {% if report.image %}
         <img src="{{ report.image.url }}"
           class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+        {% else %}
+        <div class="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+          <span class="text-4xl">📸</span>
+        </div>
+        {% endif %}
 
         <!-- Severity Indicator overlay -->
         <div class="absolute bottom-4 left-4 text-white">
@@ -80,6 +86,15 @@
               📍 Track
             </a>
             {% endif %}
+
+            <a href="{% url 'export_report_pdf' report.id %}" class="text-gray-400 hover:text-eco-600 transition"
+              title="Download PDF">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </a>
 
             {% if report.status == "pending" %}
             <a href="{% url 'edit_report' report.id %}" class="text-gray-400 hover:text-blue-500 transition"

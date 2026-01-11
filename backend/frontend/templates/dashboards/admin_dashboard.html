@@ -2,8 +2,35 @@
 
 {% block dashboard_content %}
 
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton"
+  class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <div class="h-48 w-full skeleton rounded-3xl"></div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+    </div>
+    <div class="flex gap-8">
+      <div class="flex-1 h-96 skeleton rounded-3xl"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const skeleton = document.getElementById('dashboard-skeleton');
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      setTimeout(() => skeleton.remove(), 700);
+    }
+  });
+</script>
+
 <!-- 🌈 Admin Header -->
-<div class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-up group">
+<div class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-up group spotlight-card">
   <!-- Dynamic Background -->
   <div
     class="absolute inset-0 bg-gradient-to-r from-gray-800 to-slate-900 transition-transform duration-1000 group-hover:scale-105">
@@ -16,7 +43,7 @@
 
   <div class="relative z-10">
     <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm flex items-center gap-3">
-      Admin Control Center
+      Welcome, {{ user.username|default:"Admin" }}
     </h1>
     <p class="text-gray-300 text-lg font-medium opacity-90">
       System Overview • <span class="text-green-400 font-bold">● Operational</span>
@@ -29,11 +56,11 @@
 
   <!-- Users -->
   <div
-    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-indigo-500 animate-fade-up delay-100">
+    class="glass-card spotlight-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-indigo-500 animate-fade-up delay-100">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Users</p>
-        <p class="text-3xl font-heading font-bold text-gray-800">{{ total_users|default:"0" }}</p>
+        <p class="text-3xl font-heading font-bold text-gray-800 dark:text-white">{{ total_users|default:"0" }}</p>
       </div>
       <div class="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center text-xl">👥</div>
     </div>
@@ -41,11 +68,11 @@
 
   <!-- Reports -->
   <div
-    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-orange-500 animate-fade-up delay-200">
+    class="glass-card spotlight-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-orange-500 animate-fade-up delay-200">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Reports</p>
-        <p class="text-3xl font-heading font-bold text-gray-800">{{ total_reports|default:"0" }}</p>
+        <p class="text-3xl font-heading font-bold text-gray-800 dark:text-white">{{ total_reports|default:"0" }}</p>
       </div>
       <div class="h-10 w-10 bg-orange-100 rounded-full flex items-center justify-center text-xl">📝</div>
     </div>
@@ -53,11 +80,11 @@
 
   <!-- Pending -->
   <div
-    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-yellow-400 animate-fade-up delay-300">
+    class="glass-card spotlight-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-yellow-400 animate-fade-up delay-300">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Pending</p>
-        <p class="text-3xl font-heading font-bold text-gray-800">{{ pending_reports|default:"0" }}</p>
+        <p class="text-3xl font-heading font-bold text-gray-800 dark:text-white">{{ pending_reports|default:"0" }}</p>
       </div>
       <div class="h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center text-xl">⏳</div>
     </div>
@@ -65,11 +92,11 @@
 
   <!-- Resolved -->
   <div
-    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-green-500 animate-fade-up delay-400">
+    class="glass-card spotlight-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-green-500 animate-fade-up delay-400">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Resolved</p>
-        <p class="text-3xl font-heading font-bold text-gray-800">{{ resolved_reports|default:"0" }}</p>
+        <p class="text-3xl font-heading font-bold text-gray-800 dark:text-white">{{ resolved_reports|default:"0" }}</p>
       </div>
       <div class="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center text-xl">✅</div>
     </div>
@@ -82,8 +109,9 @@
 
   <!-- Status Chart -->
   <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-up delay-500">
-    <h3 class="text-lg font-bold text-gray-700 mb-6 flex items-center gap-2">
-      <span class="p-2 bg-purple-100 text-purple-600 rounded-lg">📊</span> Report Status Distribution
+    <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-6 flex items-center gap-2">
+      <span class="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg">📊</span> Report Status
+      Distribution
     </h3>
     <div class="relative h-64">
       <canvas id="adminStatusChart"></canvas>
@@ -92,8 +120,8 @@
 
   <!-- Waste Type Chart -->
   <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-up delay-500">
-    <h3 class="text-lg font-bold text-gray-700 mb-6 flex items-center gap-2">
-      <span class="p-2 bg-teal-100 text-teal-600 rounded-lg">🗑️</span> Waste Composition
+    <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-6 flex items-center gap-2">
+      <span class="p-2 bg-teal-100 dark:bg-teal-900/30 text-teal-600 rounded-lg">🗑️</span> Waste Composition
     </h3>
     <div class="relative h-64 flex justify-center">
       <canvas id="adminWasteChart"></canvas>
@@ -106,35 +134,34 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 animate-fade-up delay-600">
 
   <a href="{% url 'admin_all_reports' %}"
-    class="glass-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 bg-gradient-to-br from-white to-gray-50">
+    class="glass-card spotlight-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
     <div
       class="h-12 w-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
       📍</div>
-    <h3 class="text-lg font-bold text-gray-800 mb-1">Manage Reports</h3>
-    <p class="text-gray-500 text-sm">Assign reports to workers and track resolution.</p>
+    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">Manage Reports</h3>
+    <p class="text-gray-500 dark:text-gray-400 text-sm">Assign reports to workers and track resolution.</p>
   </a>
 
   <a href="{% url 'worker_performance_dashboard' %}"
-    class="glass-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 bg-gradient-to-br from-white to-gray-50">
+    class="glass-card spotlight-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
     <div
       class="h-12 w-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
       👷</div>
-    <h3 class="text-lg font-bold text-gray-800 mb-1">Worker Management</h3>
-    <p class="text-gray-500 text-sm">Monitor performance metrics and efficiency.</p>
+    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">Worker Management</h3>
+    <p class="text-gray-500 dark:text-gray-400 text-sm">Monitor performance metrics and efficiency.</p>
   </a>
 
-  <div
-    class="glass-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 bg-gradient-to-br from-white to-gray-50 cursor-pointer opacity-75 hover:opacity-100">
+  <a href="{% url 'admin_support_tickets' %}"
+    class="glass-card spotlight-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
     <div
-      class="h-12 w-12 bg-gray-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
-      ⚙️</div>
-    <h3 class="text-lg font-bold text-gray-800 mb-1">System Settings</h3>
-    <p class="text-gray-500 text-sm">Configure user roles and system parameters.</p>
-  </div>
+      class="h-12 w-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+      🎫</div>
+    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">Support Tickets</h3>
+    <p class="text-gray-500 dark:text-gray-400 text-sm">Review issues and feedback reported by citizens.</p>
+  </a>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Status Chart
@@ -142,25 +169,35 @@
     const assignedVal = Number("{{ assigned_reports|default:'0' }}");
     const resolvedVal = Number("{{ resolved_reports|default:'0' }}");
 
-    const statusCtx = document.getElementById('adminStatusChart');
-    if (statusCtx) {
-      new Chart(statusCtx, {
+    const statusCanvas = document.getElementById('adminStatusChart');
+    if (statusCanvas) {
+      const ctx = statusCanvas.getContext('2d');
+      new Chart(ctx, {
         type: 'bar',
         data: {
           labels: ['Pending', 'Assigned', 'Resolved'],
           datasets: [{
             label: 'Count',
             data: [pendingVal, assignedVal, resolvedVal],
-            backgroundColor: ['#facc15', '#60a5fa', '#22c55e'],
-            borderRadius: 6
+            backgroundColor: [
+              createChartGradient(ctx, '#facc15', '#a16207'),
+              createChartGradient(ctx, '#60a5fa', '#1d4ed8'),
+              createChartGradient(ctx, '#22c55e', '#15803d')
+            ],
+            borderRadius: 10
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
+          animation: {
+            duration: 2000,
+            easing: 'easeOutElastic',
+            delay: (context) => context.dataIndex * 150
+          },
           scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+            y: { beginAtZero: true, grid: { color: 'rgba(156, 163, 175, 0.05)' } },
             x: { grid: { display: false } }
           }
         }
@@ -171,9 +208,10 @@
     const wasteLabels = JSON.parse('{{ waste_labels|safe|default:"[]" }}');
     const wasteValues = JSON.parse('{{ waste_values|safe|default:"[]" }}');
 
-    const wasteCtx = document.getElementById('adminWasteChart');
-    if (wasteCtx) {
-      new Chart(wasteCtx, {
+    const wasteCanvas = document.getElementById('adminWasteChart');
+    if (wasteCanvas) {
+      const ctx = wasteCanvas.getContext('2d');
+      new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: wasteLabels,
@@ -181,7 +219,7 @@
             data: wasteValues,
             backgroundColor: ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ef4444'],
             borderWidth: 0,
-            hoverOffset: 10
+            hoverOffset: 15
           }]
         },
         options: {
@@ -189,7 +227,13 @@
           maintainAspectRatio: false,
           cutout: '65%',
           plugins: {
-            legend: { position: 'right', labels: { usePointStyle: true, font: { family: 'Inter', size: 11 } } }
+            legend: { position: 'right', labels: { usePointStyle: true, font: { weight: 'bold', size: 11 } } }
+          },
+          animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 2500,
+            easing: 'easeOutElastic'
           }
         }
       });

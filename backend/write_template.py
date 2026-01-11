@@ -1,0 +1,257 @@
+import os
+
+content = """{% extends "dashboards/base_dashboard.html" %}
+
+{% block dashboard_content %}
+
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton" class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <div class="h-48 w-full skeleton rounded-3xl"></div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+    </div>
+    <div class="flex gap-8">
+      <div class="flex-1 h-96 skeleton rounded-3xl"></div>
+      <div class="w-80 h-96 skeleton rounded-3xl hidden xl:block"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const skeleton = document.getElementById('dashboard-skeleton');
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      setTimeout(() => skeleton.remove(), 700);
+    }
+  });
+</script>
+
+<!-- 🌈 Welcome Banner -->
+<div class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-down group spotlight-card">
+  <div class="absolute inset-0 bg-gradient-to-r from-waste-orange to-orange-500 transition-transform duration-1000 group-hover:scale-105"></div>
+  <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+  <div class="absolute -right-10 -bottom-10 text-9xl opacity-20 transform animate-sway">👋</div>
+
+  <div class="relative z-10">
+    <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm">Welcome back, {{ request.user.username }}!</h1>
+    <p class="text-orange-50 text-lg font-medium opacity-90 max-w-xl">
+      Ready to make a difference? You've helped clear <strong>{{ resolved_reports|default:"0" }}</strong> waste spots so far. Let's keep the streak going! ♻️
+    </p>
+  </div>
+</div>
+
+<!-- 🚀 Live Command Center Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+  
+  <!-- 🔦 Left: Main Mission Area (3 cols) -->
+  <div class="xl:col-span-3 space-y-8">
+    
+    <!-- 📊 Compact Stats Bar -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass-card spotlight-card p-4 rounded-2xl border-l-4 border-orange-400 animate-fade-up" style="animation-delay: 0.1s">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Total Filed</p>
+        <p class="text-2xl font-black text-gray-800 dark:text-white">{{ total_reports|default:"0" }}</p>
+      </div>
+      <div class="glass-card spotlight-card p-4 rounded-2xl border-l-4 border-yellow-400 animate-fade-up" style="animation-delay: 0.2s">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">In Progress</p>
+        <p class="text-2xl font-black text-gray-800 dark:text-white">{{ pending_reports|default:"0" }}</p>
+      </div>
+      <div class="glass-card spotlight-card p-4 rounded-2xl border-l-4 border-eco-500 animate-fade-up" style="animation-delay: 0.3s">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Resolved</p>
+        <p class="text-2xl font-black text-gray-800 dark:text-white">{{ resolved_reports|default:"0" }}</p>
+      </div>
+      <div class="glass-card spotlight-card p-4 rounded-2xl bg-eco-500 text-white flex items-center justify-center shadow-lg shadow-eco-500/20 animate-fade-up relative overflow-hidden group" style="animation-delay: 0.4s">
+        <div class="absolute inset-0 shimmer-gradient animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <a href="{% url 'report_waste' %}" class="font-bold text-xs flex items-center gap-2 relative z-10">
+          <span>📸</span> New Report
+        </a>
+      </div>
+    </div>
+
+    <!-- 🔑 Live Tasks (OTPs & Tracking) -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between px-2 animate-fade-in">
+        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest">⚡ Live Response</h3>
+        <span class="text-[10px] font-medium px-2 py-0.5 bg-red-100 text-red-600 rounded-full animate-pulse-glow">Real-time</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4">
+        <!-- OTP ALERTS -->
+        {% for report in verifying_reports %}
+        <div class="bg-white dark:bg-gray-800/80 rounded-2xl p-4 border-2 border-red-100/50 dark:border-red-900/40 shadow-xl flex items-center justify-between group overflow-hidden relative animate-scale-in spotlight-card">
+          <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500"></div>
+          <div class="flex items-center gap-4">
+            <div class="h-14 w-14 rounded-xl overflow-hidden border-2 border-white shadow-sm group-hover:scale-110 transition-transform">
+               {% if report.image %}<img src="{{ report.image.url }}" class="w-full h-full object-cover">
+               {% else %}<div class="bg-gray-100 dark:bg-gray-700 h-full w-full flex items-center justify-center text-xl">📸</div>{% endif %}
+            </div>
+            <div>
+              <h4 class="font-bold text-gray-800 dark:text-white text-sm">Action Needed: #{{ report.id }}</h4>
+              <p class="text-xs text-gray-500">Share code with <span class="text-eco-600 font-bold">{{ report.assigned_worker.username }}</span></p>
+            </div>
+          </div>
+          <div class="bg-red-500 text-white px-5 py-2.5 rounded-2xl font-mono font-black text-xl tracking-widest shadow-lg shadow-red-500/20 animate-pulse">
+            {{ report.verification_otp }}
+          </div>
+        </div>
+        {% endfor %}
+
+        <!-- ⭐ PENDING RATINGS -->
+        {% for report in unrated_reports %}
+        <div class="glass-card spotlight-card rounded-2xl p-5 border-2 border-yellow-100/50 dark:border-yellow-900/20 shadow-xl animate-fade-up">
+           <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                 <span class="text-2xl animate-sway">🎉</span>
+                 <div>
+                    <h4 class="font-extrabold text-gray-800 dark:text-white text-sm">Cleanup Confirmed for #{{ report.id }}!</h4>
+                    <p class="text-[11px] text-gray-500">How was the service by <b>{{ report.assigned_worker.username }}</b>?</p>
+                 </div>
+              </div>
+              <div class="h-10 w-10 rounded-lg overflow-hidden border border-gray-100 group-hover:rotate-6 transition-transform">
+                 {% if report.image %}<img src="{{ report.image.url }}" class="w-full h-full object-cover">{% endif %}
+              </div>
+           </div>
+           
+           <form method="post" action="{% url 'rate_report' report.id %}" class="flex flex-col md:flex-row gap-6 items-center">
+              {% csrf_token %}
+              <div class="star-rating">
+                 <input type="radio" name="rating" value="5" id="star-{{ report.id }}-5" required>
+                 <label for="star-{{ report.id }}-5">★</label>
+                 <input type="radio" name="rating" value="4" id="star-{{ report.id }}-4">
+                 <label for="star-{{ report.id }}-4">★</label>
+                 <input type="radio" name="rating" value="3" id="star-{{ report.id }}-3">
+                 <label for="star-{{ report.id }}-3">★</label>
+                 <input type="radio" name="rating" value="2" id="star-{{ report.id }}-2">
+                 <label for="star-{{ report.id }}-2">★</label>
+                 <input type="radio" name="rating" value="1" id="star-{{ report.id }}-1">
+                 <label for="star-{{ report.id }}-1">★</label>
+              </div>
+              <input type="text" name="review_text" placeholder="Optional comment..." class="flex-1 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-yellow-400 outline-none transition-all">
+              <button type="submit" class="bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-8 py-3 rounded-xl text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-lg">Submit ⭐</button>
+           </form>
+        </div>
+        {% endfor %}
+
+        <!-- 🚚 TRACKING CARDS -->
+        {% for report in recent_reports %}
+          {% if report.status == 'assigned' and not report.verification_otp %}
+          <div class="glass-card spotlight-card rounded-2xl p-4 border border-blue-100/50 dark:border-blue-900/20 flex items-center justify-between animate-fade-in hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-4">
+              <div class="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-xl animate-float">🚚</div>
+              <div>
+                <h4 class="font-bold text-gray-800 dark:text-white text-sm">Worker on Route</h4>
+                <p class="text-xs text-gray-500">Tracking for #{{ report.id }} is active</p>
+              </div>
+            </div>
+            <a href="{% url 'track_worker' report.id %}" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all flex items-center gap-2 group">
+              <span class="group-hover:translate-x-1 transition-transform">📍</span> Live Track
+            </a>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <!-- 🪴 Right: Activity & Growth -->
+  <div class="space-y-8 animate-fade-in" style="animation-delay: 0.5s">
+     <div class="glass-card spotlight-card rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow">
+        <h4 class="text-xs font-bold text-gray-400 uppercase mb-4">Resolution Rate</h4>
+        <div class="relative h-40">
+           <canvas id="citizenStatusChart"></canvas>
+           {% if total_reports == 0 %}
+           <div class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl">
+             <p class="text-gray-500 font-medium">No reports yet</p>
+           </div>
+           {% endif %}
+        </div>
+     </div>
+
+     <div class="glass-card spotlight-card rounded-2xl p-5 border border-blue-50 dark:border-blue-900/20 bg-gradient-to-br from-blue-50/50 to-transparent animate-float">
+        <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-2">Join the Fleet</h4>
+        <p class="text-[11px] text-gray-500 mb-4">Upgraded workers earn priority slots based on community ratings.</p>
+        <form method="POST" action="{% url 'become_worker' %}">
+          {% csrf_token %}
+          <button type="submit" onclick="return confirm('⚠️ Switch to Worker view?');" class="w-full py-2 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-xl text-xs font-bold hover:opacity-90 transition-all shadow-lg hover:shadow-xl">Become a Worker →</button>
+        </form>
+     </div>
+
+     <div class="glass-card spotlight-card rounded-2xl p-5 border border-red-50 dark:border-red-900/20 bg-gradient-to-br from-red-50/50 to-transparent hover:scale-[1.02] transition-transform">
+        <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-2">Facing issues?</h4>
+        <p class="text-[11px] text-gray-500 mb-4">Report bugs or technical problems directly to our admin team.</p>
+        <a href="{% url 'report_problem' %}" class="block w-full py-2 bg-red-500 text-white text-center rounded-xl text-xs font-bold hover:bg-red-600 transition-all shadow-lg hover:shadow-red-500/40">Report a Problem</a>
+     </div>
+  </div>
+</div>
+
+<!-- 🕒 Recent History -->
+<div class="mt-12 glass-card spotlight-card rounded-3xl p-8 shadow-xl animate-fade-up" style="animation-delay: 0.6s">
+  <div class="flex items-center justify-between mb-6">
+    <h3 class="text-xl font-heading font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2"><span class="text-2xl animate-sway">🕒</span> Recent History</h3>
+    <a href="{% url 'my_reports' %}" class="text-sm font-bold text-eco-600 hover:text-eco-700 hover:underline">Full Audit</a>
+  </div>
+
+  {% if recent_reports %}
+  <div class="space-y-4">
+    {% for report in recent_reports %}
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-gray-800/40 border border-white dark:border-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all shadow-sm group">
+      <div class="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl">
+        {% if report.image %}
+          <img src="{{ report.image.url }}" class="h-full w-full object-cover transition-transform group-hover:scale-125 duration-500">
+        {% else %}
+          <div class="h-full w-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-xl">📸</div>
+        {% endif %}
+      </div>
+      <div class="flex-1">
+        <h4 class="font-bold text-gray-800 dark:text-white">#{{ report.id }} - {{ report.get_waste_type_display }}</h4>
+        <p class="text-xs text-gray-500">
+          📅 {{ report.created_at|date:"M d, Y" }}
+          {% if report.rating %}
+            <span class="ml-2 text-yellow-500 font-bold">⭐ {{ report.rating }}/5</span>
+          {% endif %}
+        </p>
+      </div>
+      <div class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all group-hover:px-6 {% if report.status == 'pending' %} bg-yellow-100 text-yellow-700 {% elif report.status == 'assigned' %} bg-blue-100 text-blue-700 {% else %} bg-eco-100 text-eco-700 {% endif %}">
+        {{ report.status }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-center text-gray-400 py-10 font-medium animate-pulse">No activity recorded yet.</p>
+  {% endif %}
+</div>
+
+<div id="stats-data" data-pending="{{ pending_reports|default:0 }}" data-assigned="{{ assigned_reports|default:0 }}" data-resolved="{{ resolved_reports|default:0 }}" class="hidden"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const statsElem = document.getElementById('stats-data');
+    if (!statsElem) return;
+    const ctx = document.getElementById('citizenStatusChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pending', 'Assigned', 'Resolved'],
+          datasets: [{
+            data: [parseInt(statsElem.dataset.pending), parseInt(statsElem.dataset.assigned), parseInt(statsElem.dataset.resolved)],
+            backgroundColor: ['#facc15', '#3b82f6', '#22c55e'],
+            borderWidth: 0
+          }]
+        },
+        options: { cutout: '75%', plugins: { legend: { display: false } }, maintainAspectRatio: false }
+      });
+    }
+  });
+</script>
+
+{% endblock %}"""
+
+with open("/Users/SS/Desktop/Project/waste ai/backend/frontend/templates/dashboards/citizen_dashboard.html", "w") as f:
+    f.write(content)

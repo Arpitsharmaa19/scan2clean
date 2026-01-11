@@ -130,26 +130,73 @@
     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
 
     <div class="container mx-auto px-6 relative z-10 text-center">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center" id="stats-counter">
 
             <div>
-                <div class="text-5xl font-heading font-extrabold text-green-400 mb-2">10k+</div>
-                <div class="text-lg text-green-100 opacity-80">Reports Resolved</div>
+                <div class="text-6xl font-heading font-extrabold text-green-400 mb-2 counter"
+                    data-target="{{ total_resolved }}">{{ total_resolved }}</div>
+                <div class="text-lg text-green-100 opacity-80 uppercase tracking-widest font-bold">Reports Resolved
+                </div>
             </div>
 
             <div>
-                <div class="text-5xl font-heading font-extrabold text-teal-400 mb-2">50+</div>
-                <div class="text-lg text-teal-100 opacity-80">Cities Covered</div>
+                <div class="text-6xl font-heading font-extrabold text-teal-400 mb-2 counter"
+                    data-target="{{ total_citizens }}">{{ total_citizens }}</div>
+                <div class="text-lg text-teal-100 opacity-80 uppercase tracking-widest font-bold">Eco-Warriors</div>
             </div>
 
             <div>
-                <div class="text-5xl font-heading font-extrabold text-yellow-400 mb-2">98%</div>
-                <div class="text-lg text-yellow-100 opacity-80">Cleanup Rate</div>
+                <div class="text-6xl font-heading font-extrabold text-yellow-400 mb-2 counter"
+                    data-target="{{ cleanup_rate }}">{{ cleanup_rate }}</div>
+                <div class="text-lg text-yellow-100 opacity-80 uppercase tracking-widest font-bold">% Cleanup Rate</div>
             </div>
 
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200; // The lower the slower
+
+        const startCount = (target, element) => {
+            let count = 0;
+            const inc = target / speed;
+
+            const updateCount = () => {
+                if (count < target) {
+                    count += inc;
+                    element.innerText = Math.ceil(count);
+                    setTimeout(updateCount, 1);
+                } else {
+                    element.innerText = target;
+                    if (element.nextElementSibling.innerText.includes("%")) {
+                        element.innerText += "%";
+                    }
+                }
+            };
+            updateCount();
+        };
+
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target;
+                    const target = +counter.getAttribute('data-target');
+                    startCount(target, counter);
+                    observer.unobserve(counter);
+                }
+            });
+        }, observerOptions);
+
+        counters.forEach(counter => observer.observe(counter));
+    });
+</script>
 
 <!-- CSS for Blobs -->
 <style>

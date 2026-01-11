@@ -4,8 +4,11 @@
 {% block title %}Track Worker - Scan2Clean{% endblock %}
 
 {% block dashboard_content %}
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<!-- Leaflet & Routing -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 
 <div class="max-w-5xl mx-auto animate-fade-up">
 
@@ -64,7 +67,13 @@
     <!-- 📋 Report Snippet -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="glass-card p-6 rounded-3xl border border-white/40 flex items-center gap-4">
+            {% if report.image %}
             <img src="{{ report.image.url }}" class="h-20 w-20 rounded-2xl object-cover shadow-sm">
+            {% else %}
+            <div class="h-20 w-20 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
+                <span class="text-xl">📸</span>
+            </div>
+            {% endif %}
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase">Your Report</p>
                 <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ report.get_waste_type_display }}</h4>
@@ -89,8 +98,7 @@
 
 </div>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- Leaflet & Routing -->
 
 <script>
     // --- Data Safety Pattern ---
@@ -138,7 +146,7 @@
     // --- Markers & Layers ---
     L.marker(citizenPos, { icon: citizenIcon }).addTo(map).bindPopup("Your Location");
     let workerMarker = null;
-    let routeLine = null;
+    let routingControl = null;
 
     if (workerPos) {
         updateWorkerOnMap(workerPos[0], workerPos[1]);
@@ -154,18 +162,24 @@
             workerMarker.setLatLng(newPos);
         }
 
-        // Route Line
-        if (routeLine) map.removeLayer(routeLine);
-        routeLine = L.polyline([newPos, citizenPos], {
-            color: '#3b82f6',
-            weight: 4,
-            dashArray: '10, 10',
-            opacity: 0.6
-        }).addTo(map);
+        // Road-Aware Route
+        if (routingControl) map.removeControl(routingControl);
 
-        // Autofit
-        const group = L.featureGroup([L.marker(newPos), L.marker(citizenPos)]);
-        map.fitBounds(group.getBounds(), { padding: [100, 100], maxZoom: 16 });
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(lat, lng),
+                L.latLng(citizenLat, citizenLng)
+            ],
+            routeWhileDragging: false,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            show: false,
+            fitSelectedRoutes: true,
+            lineOptions: {
+                styles: [{ color: '#3b82f6', opacity: 0.7, weight: 6 }]
+            },
+            createMarker: function () { return null; } // SUPPRESS ALL DEFAULT MARKERS
+        }).addTo(map);
 
         // Calculations
         updateStats(lat, lng);
@@ -251,6 +265,10 @@
 
     .animate-ping {
         animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    .leaflet-routing-container {
+        display: none !important;
     }
 </style>
 {% endblock %}

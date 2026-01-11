@@ -2,16 +2,46 @@
 {% block title %}Worker Performance{% endblock %}
 
 {% block dashboard_content %}
+
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton"
+  class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <div class="h-10 w-64 skeleton rounded-xl"></div>
+    <div class="h-[500px] w-full skeleton rounded-3xl"></div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const skeleton = document.getElementById('dashboard-skeleton');
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      setTimeout(() => skeleton.remove(), 700);
+    }
+  });
+</script>
+
 <div>
 
-  <div class="flex justify-between items-center mb-10">
-    <div>
-      <h1 class="text-3xl font-heading font-bold text-gray-800">Worker Performance</h1>
-      <p class="text-gray-500 mt-1">Analytics for field team efficiency and resolution times.</p>
+  <!-- 🌈 Header -->
+  <div
+    class="relative overflow-hidden rounded-3xl p-8 text-white mb-10 shadow-2xl animate-fade-down group spotlight-card bg-gradient-to-r from-teal-800 to-emerald-900 border border-white/10">
+    <div class="scan-beam"></div>
+    <div class="relative z-10">
+      <h1 class="text-3xl font-heading font-bold text-white flex items-center gap-3">
+        <span class="animate-sway">👷</span> Squad Performance
+      </h1>
+      <p class="text-emerald-100/80 mt-1 font-medium italic opacity-80">Real-time metrics for field team efficiency and
+        systemic cleanup velocity.</p>
     </div>
+    <div
+      class="absolute -right-6 -bottom-6 text-9xl opacity-10 transform -rotate-12 group-hover:rotate-0 transition-transform duration-1000">
+      🚛</div>
   </div>
 
-  <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800 animate-fade-up">
     <table class="min-w-full leading-normal">
       <thead>
         <tr class="bg-gray-50 text-left">
@@ -23,9 +53,9 @@
           </th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
         {% for worker in workers %}
-        <tr class="hover:bg-gray-50/80 transition-colors group">
+        <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors group">
 
           <!-- NAME -->
           <td class="px-6 py-5">
@@ -35,10 +65,11 @@
                 {{ worker.username|first|upper }}
               </div>
               <div class="ml-4">
-                <p class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                <p
+                  class="text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                   {{ worker.username }}
                 </p>
-                <p class="text-xs text-gray-500">{{ worker.email }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ worker.email }}</p>
               </div>
             </div>
           </td>
@@ -46,7 +77,7 @@
           <!-- ASSIGNED -->
           <td class="px-6 py-5 text-center">
             <span
-              class="inline-flex items-center justify-center px-3 py-1 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">
+              class="inline-flex items-center justify-center px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg font-bold text-sm">
               {{ worker.total_assigned }}
             </span>
           </td>
@@ -70,7 +101,7 @@
           <!-- TIME -->
           <td class="px-6 py-5">
             {% if worker.avg_resolution_time_formatted %}
-            <div class="flex items-center gap-2 text-sm text-gray-700 font-medium">
+            <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 font-medium">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

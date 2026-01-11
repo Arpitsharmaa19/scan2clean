@@ -92,6 +92,11 @@ class WasteReport(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
+    verification_otp = models.CharField(max_length=6, null=True, blank=True)
+
+    # Citizen Feedback
+    rating = models.PositiveSmallIntegerField(null=True, blank=True)
+    review_text = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return (
@@ -100,3 +105,18 @@ class WasteReport(models.Model):
             f"{self.severity} | "
             f"{self.status}"
         )
+
+
+class SupportTicket(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='support_tickets'
+    )
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    is_resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Ticket from {self.user.username}: {self.subject}"

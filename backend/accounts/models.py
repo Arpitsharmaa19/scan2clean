@@ -24,5 +24,9 @@ class User(AbstractUser):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     last_location_update = models.DateTimeField(null=True, blank=True)
 
+    # Performance tracking
+    average_rating = models.FloatField(default=0.0)
+    total_ratings = models.IntegerField(default=0)
+
     def __str__(self):
         return f"{self.username} ({self.role})"

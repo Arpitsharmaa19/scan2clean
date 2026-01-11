@@ -3,7 +3,11 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#15803d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Scan2Clean" />
 
   <title>{% block title %}Scan2Clean{% endblock %}</title>
 
@@ -67,21 +71,62 @@
           },
           animation: {
             'fade-in': 'fadeIn 0.6s ease-out forwards',
+            'fade-up': 'fadeUp 0.8s ease-out forwards',
+            'fade-down': 'fadeDown 0.8s ease-out forwards',
             'slide-up': 'slideUp 0.6s ease-out forwards',
             'scale-in': 'scaleIn 0.4s ease-out forwards',
+            'sway': 'sway 3s ease-in-out infinite',
+            'float': 'float 4s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+            'shimmer': 'shimmer 2s linear infinite',
           },
           keyframes: {
             fadeIn: {
               '0%': { opacity: '0' },
               '100%': { opacity: '1' },
             },
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            fadeDown: {
+              '0%': { opacity: '0', transform: 'translateY(-30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            sway: {
+              '0%, 100%': { transform: 'rotate(-5deg)' },
+              '50%': { transform: 'rotate(5deg)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '1', boxShadow: '0 0 20px rgba(34, 197, 94, 0.2)' },
+              '50%': { opacity: '0.8', boxShadow: '0 0 40px rgba(34, 197, 94, 0.4)' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' },
+            },
             slideUp: {
               '0%': { opacity: '0', transform: 'translateY(20px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
             },
             scaleIn: {
-              '0%': { opacity: '0', transform: 'scale(0.95)' },
+              '0%': { opacity: '0', transform: 'scale(0.9)' },
               '100%': { opacity: '1', transform: 'scale(1)' },
+            },
+            holographicScan: {
+              '0%': { top: '-10%', opacity: '0' },
+              '10%': { opacity: '0.5' },
+              '90%': { opacity: '0.5' },
+              '100%': { top: '110%', opacity: '0' }
+            },
+            leafRustle: {
+              '0%, 100%': { transform: 'rotate(0deg) translateY(0)' },
+              '25%': { transform: 'rotate(2deg) translateY(-2px)' },
+              '75%': { transform: 'rotate(-2deg) translateY(2px)' }
             }
           }
         }
@@ -141,11 +186,263 @@
       border: 1px solid rgba(255, 255, 255, 0.05);
       color: #f3f4f6;
     }
+
+    .shimmer-gradient {
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      background-size: 200% 100%;
+    }
+
+    /* 🧊 Elite Glassmorphism Spotlight */
+    .spotlight-card {
+      position: relative;
+    }
+
+    .spotlight-card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: radial-gradient(var(--spotlight-size, 400px) circle at var(--x, 0) var(--y, 0),
+          rgba(255, 255, 255, 0.3),
+          transparent 40%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .spotlight-card:hover::before {
+      opacity: 1;
+    }
+
+    /* 🦴 Skeleton Shimmer */
+    .skeleton {
+      background: linear-gradient(90deg,
+          rgba(255, 255, 255, 0.05) 25%,
+          rgba(255, 255, 255, 0.1) 50%,
+          rgba(255, 255, 255, 0.05) 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 2s infinite linear;
+      border-radius: 0.5rem;
+    }
+
+    /* 🔬 Holographic Scanning Effect */
+    .scan-beam {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 100px;
+      background: linear-gradient(to bottom, transparent, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.2), transparent);
+      z-index: 5;
+      pointer-events: none;
+      animation: holographicScan 4s ease-in-out infinite;
+    }
+
+    .dark .scan-beam {
+      background: linear-gradient(to bottom, transparent, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.15), transparent);
+    }
+
+    /* 🧲 Magnetic Magnetic Effect on Hover */
+    .magnetic-card {
+      transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .magnetic-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 🍃 Ambient Particles Canvas */
+    #ambient-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -5;
+      pointer-events: none;
+    }
+
+    /* ⭐ Interactive Star Rating */
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      gap: 0.25rem;
+    }
+
+    .star-rating input {
+      display: none;
+    }
+
+    .star-rating label {
+      cursor: pointer;
+      font-size: 1.875rem;
+      /* 3xl */
+      color: #e5e7eb;
+      /* gray-200 */
+      transition: all 0.2s ease;
+    }
+
+    .dark .star-rating label {
+      color: #374151;
+      /* gray-700 */
+    }
+
+    .star-rating input:checked~label,
+    .star-rating label:hover,
+    .star-rating label:hover~label {
+      color: #facc15 !important;
+      /* yellow-400 */
+      transform: scale(1.1);
+    }
+
+    /* 📱 Native Mobile Feel */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+
+    .pb-safe-area {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Disable text selection on UI elements */
+    nav,
+    button,
+    .glass-card h4 {
+      user-select: none;
+      -webkit-user-select: none;
+    }
   </style>
 </head>
 
 <body
   class="text-gray-800 font-sans antialiased min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- 🍃 Ambient Canvas -->
+  <canvas id="ambient-canvas"></canvas>
+
+  <script>
+    // 🧊 Spotlight Logic
+    document.addEventListener('mousemove', (e) => {
+      document.querySelectorAll('.spotlight-card').forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--x', `${x}px`);
+        card.style.setProperty('--y', `${y}px`);
+      });
+    });
+
+    // 🍃 Particle System
+    const canvas = document.getElementById('ambient-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 4 + 1;
+        this.speedX = Math.random() * 0.4 - 0.2;
+        this.speedY = Math.random() * 0.4 - 0.2;
+        this.opacity = Math.random() * 0.5;
+        this.color = Math.random() > 0.5 ? 'rgba(34, 197, 94, ' : 'rgba(20, 184, 166, ';
+      }
+      update(mouseX, mouseY) {
+        // Subtle Mouse Repulsion
+        if (mouseX && mouseY) {
+          const dx = this.x - mouseX;
+          const dy = this.y - mouseY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 150) {
+            const force = (150 - dist) / 1500;
+            this.x += dx * force;
+            this.y += dy * force;
+          }
+        }
+
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+      }
+      draw() {
+        ctx.fillStyle = this.color + `${this.opacity})`;
+        ctx.beginPath();
+        // Draw eco-shapes (circles and diamonds)
+        if (this.size > 3) {
+          ctx.moveTo(this.x, this.y - this.size);
+          ctx.lineTo(this.x + this.size, this.y);
+          ctx.lineTo(this.x, this.y + this.size);
+          ctx.lineTo(this.x - this.size, this.y);
+        } else {
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    }
+
+    let mouse = { x: null, y: null };
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    function init() {
+      particles = Array.from({ length: 60 }, () => new Particle());
+      resize();
+      animate();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(mouse.x, mouse.y); p.draw(); });
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resize);
+    init();
+  </script>
+
+  <!-- 📊 Chart.js & Elite Chart Global Config -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    if (typeof Chart !== 'undefined') {
+      // Elite Global Defaults
+      Chart.defaults.font.family = "'Outfit', sans-serif";
+      Chart.defaults.color = 'rgba(156, 163, 175, 0.8)';
+      Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(17, 24, 39, 0.9)';
+      Chart.defaults.plugins.tooltip.padding = 12;
+      Chart.defaults.plugins.tooltip.cornerRadius = 12;
+      Chart.defaults.plugins.tooltip.titleFont = { size: 14, weight: 'bold' };
+
+      // Custom Elite Animation Logic
+      Chart.defaults.animation = {
+        duration: 2000,
+        easing: 'easeInOutQuart',
+        onProgress: function (animation) {
+          // Future hook for per-frame custom drawings if needed
+        }
+      };
+
+      // Helper to create gradients
+      function createChartGradient(ctx, color1, color2) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(1, color2);
+        return gradient;
+      }
+    }
+  </script>
 
   <!-- 🌟 GLOBAL NAVBAR (Sticky Glass) -->
   <header class="fixed w-full top-0 z-50 glass shadow-sm transition-all duration-300">
@@ -209,6 +506,78 @@
   <!-- Spacer for fixed header -->
   <div class="h-24"></div>
 
+  <!-- 🍞 GLOBAL TOAST CONTAINER -->
+  <div id="toast-container"
+    class="fixed bottom-8 right-8 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
+
+  <style>
+    .toast-enter {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    .toast-enter-active {
+      transform: translateX(0);
+      opacity: 1;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast-exit {
+      transform: scale(0.9);
+      opacity: 1;
+    }
+
+    .toast-exit-active {
+      transform: scale(0.8);
+      opacity: 0;
+      transition: all 0.3s ease-in;
+    }
+  </style>
+
+  <script>
+    function showToast(title, message, level = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+
+      const colors = {
+        info: 'bg-blue-600',
+        success: 'bg-green-600',
+        warning: 'bg-yellow-500',
+        error: 'bg-red-600'
+      };
+
+      const icons = {
+        info: '🔵',
+        success: '✅',
+        warning: '⚠️',
+        error: '❌'
+      };
+
+      toast.className = `pointer-events-auto w-full glass-card p-4 rounded-2xl shadow-2xl border-l-4 ${colors[level].replace('bg-', 'border-')} flex items-start gap-4 toast-enter bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-white/40 dark:border-gray-700/40`;
+
+      toast.innerHTML = `
+        <div class="text-2xl">${icons[level]}</div>
+        <div class="flex-1">
+          <h4 class="font-bold text-gray-800 dark:text-gray-100 text-sm">${title}</h4>
+          <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 leading-tight">${message}</p>
+        </div>
+        <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" onclick="this.parentElement.remove()">✕</button>
+      `;
+
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.replace('toast-enter', 'toast-enter-active');
+      });
+
+      setTimeout(() => {
+        toast.classList.replace('toast-enter-active', 'toast-exit-active');
+        setTimeout(() => toast.remove(), 300);
+      }, 6000);
+    }
+  </script>
+
   <!-- Content -->
   <main class="flex-grow w-full">
     {% block content %}{% endblock %}
@@ -219,6 +588,7 @@
     <p>&copy; 2024 Scan2Clean. Building a cleaner future.</p>
   </footer>
 
+  {% block extra_js %}{% endblock %}
 </body>
 
 </html>

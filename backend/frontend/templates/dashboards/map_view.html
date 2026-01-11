@@ -10,6 +10,25 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton"
+  class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <div class="h-16 w-full skeleton rounded-xl"></div>
+    <div class="h-[700px] w-full skeleton rounded-3xl"></div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const skeleton = document.getElementById('dashboard-skeleton');
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      setTimeout(() => skeleton.remove(), 700);
+    }
+  });
+</script>
+
 <div style="height: calc(100vh - 8rem);" class="flex flex-col animate-fade-up">
 
   <!-- 🛠️ Map Controls Header -->

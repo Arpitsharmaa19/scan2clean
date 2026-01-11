@@ -2,6 +2,25 @@
 {% block title %}Report #{{ report.id }}{% endblock %}
 
 {% block content %}
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton"
+  class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <div class="h-10 w-48 skeleton rounded-xl"></div>
+    <div class="h-[600px] w-full skeleton rounded-3xl"></div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const skeleton = document.getElementById('dashboard-skeleton');
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      setTimeout(() => skeleton.remove(), 700);
+    }
+  });
+</script>
+
 <div class="min-h-[calc(100vh-6rem)] py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
   <!-- Breadcrumb -->
@@ -19,7 +38,14 @@
 
     <!-- Left: Image Section -->
     <div class="relative h-96 lg:h-full min-h-[500px]">
+      {% if report.image %}
       <img src="{{ report.image.url }}" class="absolute inset-0 w-full h-full object-cover">
+      {% else %}
+      <div
+        class="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400">
+        <span class="text-6xl">📸</span>
+      </div>
+      {% endif %}
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
       <div class="absolute bottom-8 left-8 text-white">
@@ -51,6 +77,19 @@
       </div>
 
       <div class="space-y-8">
+
+        <!-- 📄 Download PDF Report Card -->
+        <div>
+          <a href="{% url 'export_report_pdf' report.id %}"
+            class="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-eco-600 transition-colors uppercase tracking-widest">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Download Official Report Card (PDF)
+          </a>
+        </div>
 
         <!-- Severity Section -->
         <div>

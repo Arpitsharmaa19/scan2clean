@@ -2,243 +2,555 @@
 
 {% block dashboard_content %}
 
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton"
+  class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <div class="h-48 w-full skeleton rounded-3xl"></div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+      <div class="h-24 skeleton rounded-2xl"></div>
+    </div>
+    <div class="h-96 w-full skeleton rounded-3xl"></div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const skeleton = document.getElementById('dashboard-skeleton');
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      setTimeout(() => skeleton.remove(), 700);
+    }
+  });
+</script>
+
 <!-- 🌈 Header -->
-<div class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-up group">
-  <!-- Dynamic Background -->
+<div class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-up group spotlight-card">
   <div
     class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 transition-transform duration-1000 group-hover:scale-105">
   </div>
   <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+  <div class="scan-beam"></div>
   <div
     class="absolute -right-10 -bottom-10 text-9xl opacity-20 transform rotate-12 group-hover:rotate-6 transition-transform duration-700">
     🚛</div>
 
-  <div class="relative z-10">
-    <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm">
-      Worker Dashboard
-    </h1>
-    <p class="text-blue-50 text-lg font-medium opacity-90">
-      Your mission: <strong>{{ pending_tasks|default:"0" }}</strong> tasks pending cleanup. Let's make the city shine! ✨
-    </p>
+  <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div>
+      <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm">
+        Welcome back, {{ user.username|default:"Officer" }}!
+      </h1>
+      <p class="text-blue-50 text-lg font-medium opacity-90">
+        You have <strong>{{ pending_tasks|default:"0" }}</strong> active cleaning jobs. Let's make the city shine! ✨
+      </p>
+    </div>
+
+    <!-- 📡 Live Uplink Toggle -->
+    <div class="glass p-1 rounded-2xl flex items-center gap-2 pr-6 shadow-2xl border-white/20">
+      <label class="relative inline-flex items-center cursor-pointer group p-2">
+        <input type="checkbox" id="worker-online-toggle" class="sr-only peer">
+        <div
+          class="w-14 h-8 bg-gray-700/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[12px] after:start-[12px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500 shadow-inner">
+        </div>
+        <span class="ms-3 text-sm font-black text-white uppercase tracking-widest" id="status-text">Offline</span>
+      </label>
+
+      <!-- Pulsing Beacon (Hidden when offline) -->
+      <div id="status-beacon" class="hidden">
+        <div class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- 📊 Worker Stats -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
 
   <!-- 📊 Chart Card -->
-  <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-up row-span-2 flex flex-col">
-    <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-6 flex items-center gap-2">
-      <span class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">📊</span>
-      Performance
-    </h3>
-    <div class="flex-grow flex items-center justify-center relative min-h-[250px]">
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg animate-fade-up flex flex-col min-h-[160px]">
+    <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Activity Trend</h3>
+    <div class="flex-grow flex items-center justify-center relative">
       <canvas id="workerChart"></canvas>
       {% if assigned_tasks == 0 and completed_tasks == 0 %}
-      <div
-        class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl">
-        <p class="text-gray-500 dark:text-gray-400 font-medium">No activity yet</p>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <p class="text-[10px] text-gray-400 font-bold uppercase">No data</p>
       </div>
       {% endif %}
     </div>
   </div>
 
+  <!-- ⏳ Pending -->
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-all border-l-4 border-yellow-400">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">On Route</p>
+        <p class="text-4xl font-black text-gray-800 dark:text-white">{{ pending_tasks|default:"0" }}</p>
+      </div>
+      <div class="h-10 w-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center text-xl">⏳
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Completed -->
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-all border-l-4 border-green-500">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Cleaned</p>
+        <p class="text-4xl font-black text-gray-800 dark:text-white">{{ completed_tasks|default:"0" }}</p>
+      </div>
+      <div class="h-10 w-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center text-xl">✅
+      </div>
+    </div>
+  </div>
+
+  <!-- ⭐ Rating Card -->
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-all border-l-4 border-purple-500">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Impact Score</p>
+        <div class="flex items-center gap-2">
+          <p class="text-4xl font-black text-gray-800 dark:text-white">{{ request.user.average_rating|floatformat:1 }}
+          </p>
+          <span class="text-xl text-yellow-400">★</span>
+        </div>
+        <p class="text-[9px] text-gray-500 font-bold uppercase mt-1">{{ request.user.total_ratings }} reviews</p>
+      </div>
+      <div class="h-10 w-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-xl">⭐
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 🗂️ Priority Jobs -->
+<div class="glass-card spotlight-card magnetic-card rounded-3xl p-8 shadow-xl animate-fade-up relative overflow-hidden">
+  <div class="scan-beam" style="animation-duration: 5s; opacity: 0.2;"></div>
+  <div class="flex items-center justify-between mb-8">
+    <h3 class="text-xl font-heading font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
+      <span class="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl text-lg">🚨</span> Priority Jobs
+    </h3>
+    <div class="flex items-center gap-3">
+      <button onclick="calculateOptimizedRoute()"
+        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:shadow-blue-500/40 transition-all flex items-center gap-2">
+        <span>🛰️</span> Smart Routing
+      </button>
+      <a href="{% url 'worker_assigned_reports' %}"
+        class="text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest">Active Queue →</a>
+    </div>
+  </div>
+
+  {% if assigned_reports %}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for report in assigned_reports %}
+    <div
+      class="flex gap-5 p-5 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-sm group magnetic-card relative overflow-hidden">
+      <div class="scan-beam" style="animation-duration: 8s; opacity: 0.1;"></div>
+      <div
+        class="h-24 w-24 rounded-2xl overflow-hidden shadow-md flex-shrink-0 group-hover:scale-105 transition-transform">
+        {% if report.image %}
+        <img src="{{ report.image.url }}" class="h-full w-full object-cover">
+        {% else %}
+        <div class="h-full w-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-2xl">📸</div>
+        {% endif %}
+      </div>
+
+      <div class="flex-grow min-w-0">
+        <div class="flex justify-between items-start mb-2">
+          <h4 class="font-bold text-gray-800 dark:text-white truncate">Job #{{ report.id }}</h4>
+          <span class="px-2 py-1 rounded-md text-[9px] font-black uppercase bg-red-100 text-red-600">{{ report.severity
+            }}</span>
+        </div>
+        <p class="text-xs text-gray-500 mb-4 line-clamp-1">{{ report.description }}</p>
+
+        <div class="mt-auto flex items-center gap-3">
+          {% if report.verification_otp %}
+          <form method="post" action="{% url 'verify_otp' report.id %}" class="flex gap-2 w-full">
+            {% csrf_token %}
+            <input type="text" name="otp" placeholder="Code"
+              class="w-16 px-2 py-1.5 rounded-lg text-xs border border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 text-center font-bold tracking-widest">
+            <button type="submit"
+              class="flex-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700">Verify</button>
+          </form>
+          {% else %}
+          <form method="post" action="{% url 'resolve_report' report.id %}" class="w-full">
+            {% csrf_token %}
+            <button
+              class="w-full py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold text-xs shadow-md transition-all">✅
+              Mark Done</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-12">
+    <div class="text-6xl mb-4 grayscale opacity-30">✅</div>
+    <p class="text-gray-500 font-medium">All clear! No pending tasks in your area.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Leaflet & Routing -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+<!-- 🗺️ Active Mission Map (Appears after Beginning) -->
+<div id="active-mission-container" class="hidden mb-12 animate-fade-up">
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-3xl p-8 shadow-xl border border-blue-100 dark:border-blue-900/40 relative overflow-hidden">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-heading font-bold text-gray-800 dark:text-gray-100 flex items-center gap-3">
+        <span class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-lg">🎯</span> Active Mission Path
+      </h3>
+      <button onclick="stopMission()"
+        class="text-[10px] font-black uppercase text-red-500 hover:text-red-600 tracking-widest">End Mission</button>
+    </div>
+    <div class="h-[400px] rounded-24 overflow-hidden border border-gray-100 dark:border-gray-700 shadow-inner relative">
+      <div id="main-mission-map" class="h-full w-full z-10"></div>
+    </div>
+  </div>
+</div>
+
+<div id="routing-modal" class="fixed inset-0 z-[100] hidden">
+  <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeRoutingModal()">
+  </div>
+  <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl">
+    <div class="glass-card spotlight-card rounded-3xl p-8 shadow-2xl animate-scale-in border border-white/20 m-4">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold font-heading text-gray-800 dark:text-white flex items-center gap-2">
+          <span>🚀</span> Optimized Mission Path
+        </h3>
+        <button onclick="closeRoutingModal()" class="text-gray-400 hover:text-gray-600 p-2">✕</button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- List View -->
+        <div id="routing-content" class="space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+          <!-- Content injected by JS -->
+        </div>
+
+        <!-- Map View -->
+        <div
+          class="relative h-[450px] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-inner bg-gray-50 dark:bg-gray-800">
+          <div id="routing-map" class="h-full w-full z-10"></div>
+        </div>
+      </div>
+
+      <div
+        class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest text-center sm:text-left">Road-aware
+          batching applied</p>
+        <button onclick="beginMission()"
+          class="w-full sm:w-auto px-12 py-4 bg-blue-600 dark:bg-white dark:text-gray-900 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-500/20">
+          Confirm & Begin Mission
+        </button>
+      </div>
+    </div>
+  </div>
+  <style>
+    .leaflet-routing-container {
+      display: none !important;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    let routingMap = null;
+    let activeMissionMap = null;
+    let routingMarkers = [];
+    let routingControl = null;
+    let missionRoutingControl = null;
+    let workerMarkerMain = null;
+    let missionWaypoints = [];
+
+    function closeRoutingModal() {
+      document.getElementById('routing-modal').classList.add('hidden');
+    }
+
+    function beginMission() {
+      closeRoutingModal();
+      document.getElementById('active-mission-container').classList.remove('hidden');
+
+      if (!activeMissionMap) {
+        activeMissionMap = L.map('main-mission-map').setView([0, 0], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(activeMissionMap);
+      }
+
+      // Clear old mission route
+      if (missionRoutingControl) activeMissionMap.removeControl(missionRoutingControl);
+
+      // Setup New Mission Plan
+      missionRoutingControl = L.Routing.control({
+        waypoints: missionWaypoints,
+        routeWhileDragging: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        fitSelectedRoutes: true,
+        show: false,
+        lineOptions: {
+          styles: [{ color: '#22c55e', opacity: 0.8, weight: 6 }]
+        },
+        createMarker: function (i, wp) {
+          if (i === 0) return null; // Don't show marker at start, we use the truck icon
+          return L.marker(wp.latLng, {
+            icon: L.divIcon({
+              html: `<div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-lg">${i}</div>`,
+              iconSize: [32, 32],
+              iconAnchor: [16, 16]
+            })
+          });
+        }
+      }).addTo(activeMissionMap);
+
+      showToast("Mission Accepted", "Real-road routing active. Your movement is now live.", "success");
+      setTimeout(() => activeMissionMap.invalidateSize(), 500);
+
+      // Initial Marker Sync
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          updateMainMarker(pos.coords.latitude, pos.coords.longitude);
+        });
+      }
+    }
+
+    function stopMission() {
+      document.getElementById('active-mission-container').classList.add('hidden');
+      if (missionRoutingControl) activeMissionMap.removeControl(missionRoutingControl);
+      showToast("Mission Ended", "Navigation stopped.", "info");
+    }
+
+    async function calculateOptimizedRoute() {
+      try {
+        showToast("Calculating...", "Analysing road networks...", "info");
+        const response = await fetch('/api/waste-reports/optimized_route/');
+        const data = await response.json();
+
+        if (data.error) {
+          showToast("Routing Error", data.error, "error");
+          return;
+        }
+
+        const content = document.getElementById('routing-content');
+        const modal = document.getElementById('routing-modal');
+
+        modal.classList.remove('hidden');
+
+        if (!routingMap) {
+          routingMap = L.map('routing-map').setView([0, 0], 13);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(routingMap);
+        }
+
+        if (routingControl) routingMap.removeControl(routingControl);
+
+        if (!data.batches || data.batches.length === 0) {
+          content.innerHTML = '<div class="text-center py-10 text-gray-400">No active jobs to optimize.</div>';
+        } else {
+          // List View Rendering
+          content.innerHTML = data.batches.map((batch, index) => `
+          <div class="relative pl-8 pb-4">
+            <div class="absolute left-0 top-0 bottom-0 w-px bg-blue-100 dark:bg-blue-900/30"></div>
+            <div class="absolute left-[-4px] top-0 h-2 w-2 rounded-full bg-blue-600 border-4 border-blue-100 dark:border-blue-900/50"></div>
+            <div class="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100/50 dark:border-blue-900/20">
+              <div class="flex justify-between items-start mb-2">
+                <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest text-blue-600">Stop #${index + 1}</span>
+              </div>
+              <h4 class="font-bold text-gray-800 dark:text-white text-sm">Report #${batch.main_report.id}</h4>
+              <p class="text-xs text-gray-500 mt-1">${batch.main_report.type} - ${batch.main_report.severity} Priority</p>
+            </div>
+          </div>
+        `).join('');
+
+          // Prepare Waypoints
+          missionWaypoints = [];
+          if (data.worker_location) {
+            missionWaypoints.push(L.latLng(data.worker_location.lat, data.worker_location.lng));
+          }
+          data.batches.forEach(batch => {
+            missionWaypoints.push(L.latLng(batch.main_report.lat, batch.main_report.lng));
+          });
+
+          // Add Road-Aware Polyline
+          routingControl = L.Routing.control({
+            waypoints: missionWaypoints,
+            routeWhileDragging: false,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true,
+            show: false,
+            lineOptions: {
+              styles: [{ color: '#3b82f6', opacity: 0.6, weight: 4 }]
+            },
+            createMarker: function (i, wp) {
+              if (i === 0) return null; // Use manual marker or truck
+              return L.marker(wp.latLng, {
+                icon: L.divIcon({
+                  html: `<div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold border-2 border-white shadow-lg">${i}</div>`,
+                  iconSize: [24, 24],
+                  iconAnchor: [12, 12]
+                })
+              });
+            }
+          }).addTo(routingMap);
+
+          setTimeout(() => routingMap.invalidateSize(), 300);
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("Error", "Routing engine unavailable.", "error");
+      }
+    }
+
+    // Handle Live Updates for Marker Position
+    function updateMainMarker(lat, lng) {
+      if (!activeMissionMap) return;
+
+      if (!workerMarkerMain) {
+        workerMarkerMain = L.marker([lat, lng], {
+          icon: L.divIcon({
+            html: `<div class="relative"><div class="absolute -inset-4 bg-blue-500/20 rounded-full animate-ping"></div><div class="relative bg-blue-600 text-white p-3 rounded-full border-2 border-white shadow-2xl flex items-center justify-center text-xl">🚛</div></div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+          })
+        }).addTo(activeMissionMap);
+      } else {
+        workerMarkerMain.setLatLng([lat, lng]);
+      }
+
+      // Dynamic Waypoint Update (Start from current pos)
+      if (missionRoutingControl) {
+        const wps = missionRoutingControl.getWaypoints();
+        wps[0] = L.Routing.waypoint(L.latLng(lat, lng));
+        missionRoutingControl.setWaypoints(wps);
+      }
+    }
+
+    // 🛰️ Worker Live Broadcasting Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('worker-online-toggle');
+      const statusText = document.getElementById('status-text');
+      const beacon = document.getElementById('status-beacon');
+      let locationInterval = null;
+      let socket = null;
+
+      function connectSocket() {
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        socket = new WebSocket(`${protocol}${window.location.host}/ws/location/worker/`);
+
+        socket.onopen = () => console.log("📡 Satellite Uplink Established");
+        socket.onclose = () => {
+          console.warn("📡 Uplink Lost. Retrying...");
+          if (toggle.checked) setTimeout(connectSocket, 5000);
+        };
+      }
+
+      function sendLocation() {
+        if (!navigator.geolocation) return;
+
+        navigator.geolocation.getCurrentPosition((position) => {
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            }));
+            console.log("📍 Location Sync:", position.coords.latitude, position.coords.longitude);
+
+            // Update local mission map
+            if (typeof updateMainMarker === 'function') {
+              updateMainMarker(position.coords.latitude, position.coords.longitude);
+            }
+          }
+        }, (err) => console.error("📍 GPS Error:", err), {
+          enableHighAccuracy: true
+        });
+      }
+
+      toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          statusText.innerText = "Online";
+          statusText.classList.replace('text-white', 'text-green-400');
+          beacon.classList.remove('hidden');
+
+          connectSocket();
+          sendLocation(); // Initial send
+          locationInterval = setInterval(sendLocation, 10000); // Sync every 10s
+
+          showToast("System Online", "Your live location is now visible to citizens tracking their reports.", "success");
+        } else {
+          statusText.innerText = "Offline";
+          statusText.classList.replace('text-green-400', 'text-white');
+          beacon.classList.add('hidden');
+
+          if (locationInterval) clearInterval(locationInterval);
+          if (socket) socket.close();
+
+          showToast("System Offline", "Location broadcasting has been disabled.", "info");
+        }
+      });
+
+      // Handle initial state if needed
+      if (toggle.checked) {
+        connectSocket();
+        locationInterval = setInterval(sendLocation, 10000);
+      }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       const assignedVal = Number("{{ assigned_tasks|default:'0' }}");
       const completedVal = Number("{{ completed_tasks|default:'0' }}");
       const pendingVal = Number("{{ pending_tasks|default:'0' }}");
 
-      const workerCtx = document.getElementById('workerChart');
-      if (workerCtx) {
-        new Chart(workerCtx, {
+      const canvas = document.getElementById('workerChart');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
           type: 'bar',
           data: {
-            labels: ['Assigned', 'Completed', 'Pending'],
+            labels: ['Assigned', 'Done', 'Active'],
             datasets: [{
-              label: 'Jobs',
               data: [assignedVal, completedVal, pendingVal],
-              backgroundColor: ['#60a5fa', '#22c55e', '#facc15'],
+              backgroundColor: [
+                createChartGradient(ctx, '#3b82f6', '#1d4ed8'),
+                createChartGradient(ctx, '#22c55e', '#15803d'),
+                createChartGradient(ctx, '#facc15', '#a16207')
+              ],
               borderRadius: 8,
-              borderSkipped: false
+              barThickness: 15
             }]
           },
           options: {
             responsive: true,
-            plugins: {
-              legend: { display: false }
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            animation: {
+              duration: 2500,
+              easing: 'easeOutElastic',
+              delay: (context) => context.dataIndex * 300
             },
             scales: {
-              y: {
-                beginAtZero: true,
-                grid: { color: 'rgba(156, 163, 175, 0.1)' },
-                ticks: { color: '#9ca3af' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#9ca3af' }
-              }
-            },
-            maintainAspectRatio: false
+              y: { display: false, beginAtZero: true },
+              x: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' }, color: '#9ca3af' } }
+            }
           }
         });
       }
     });
   </script>
 
-  <!-- 🗂️ Total Assigned -->
-  <div
-    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform duration-300 animate-fade-up delay-100 border-l-4 border-blue-500">
-    <div class="flex justify-between items-start">
-      <div>
-        <p class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Total Assigned</p>
-        <p class="text-4xl font-heading font-bold text-gray-800 dark:text-white">{{ assigned_tasks|default:"0" }}</p>
-      </div>
-      <div class="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-2xl">📋
-      </div>
-    </div>
-  </div>
-
-  <!-- ⏳ Pending -->
-  <div
-    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform duration-300 animate-fade-up delay-200 border-l-4 border-yellow-400">
-    <div class="flex justify-between items-start">
-      <div>
-        <p class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Pending Action</p>
-        <p class="text-4xl font-heading font-bold text-gray-800 dark:text-white">{{ pending_tasks|default:"0" }}</p>
-      </div>
-      <div class="h-12 w-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center text-2xl">
-        ⏳</div>
-    </div>
-  </div>
-
-  <!-- ✅ Completed -->
-  <div
-    class="glass-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform duration-300 animate-fade-up delay-300 border-l-4 border-green-500">
-    <div class="flex justify-between items-start">
-      <div>
-        <p class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Resolved</p>
-        <p class="text-4xl font-heading font-bold text-gray-800 dark:text-white">{{ completed_tasks|default:"0" }}</p>
-      </div>
-      <div class="h-12 w-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-2xl">✅
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- 🗂️ Pending Tasks List -->
-<div class="glass-card rounded-2xl p-8 shadow-xl animate-fade-up delay-400">
-  <div class="flex items-center justify-between mb-6">
-    <h3 class="text-xl font-heading font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-      <span class="text-2xl">🚨</span> Priority Tasks
-    </h3>
-    <a href="{% url 'worker_assigned_reports' %}"
-      class="text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">View
-      All</a>
-  </div>
-
-  {% if assigned_reports %}
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-    {% for report in assigned_reports %}
-    <div
-      class="bg-white/60 dark:bg-gray-800/60 border border-white/50 dark:border-gray-700/50 rounded-2xl p-5 hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row gap-4 group">
-
-      <img src="{{ report.image.url }}"
-        class="w-full h-40 sm:w-24 sm:h-24 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
-
-      <div class="flex-1 flex flex-col justify-between">
-        <div>
-          <div class="flex justify-between items-start">
-            <h4 class="font-bold text-gray-800 dark:text-gray-200 text-lg">{{ report.get_waste_type_display }}</h4>
-            <span
-              class="px-2 py-0.5 rounded text-xs font-bold uppercase
-                   {% if report.severity == 'high' %} bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 {% else %} bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 {% endif %}">
-              {{ report.severity }}
-            </span>
-          </div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Found {{ report.created_at|timesince }} ago</p>
-        </div>
-
-        <form method="post" action="{% url 'resolve_report' report.id %}" class="mt-3">
-          {% csrf_token %}
-          <button
-            class="w-full py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow-md hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2 text-sm">
-            ✅ Mark Resolved
-          </button>
-        </form>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div
-    class="text-center py-12 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
-    <div class="text-5xl mb-4 grayscale opacity-30">☕️</div>
-    <p class="text-gray-500 dark:text-gray-400 font-medium">All caught up! No pending tasks assigned to you.</p>
-  </div>
-  {% endif %}
-</div>
-
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Real-time Location Tracking for Workers -->
-<script>
-  let locSocket = null;
-  let trackInterval = null;
-
-  function initLocationTracking() {
-    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    locSocket = new WebSocket(`${protocol}${window.location.host}/ws/location/worker/`);
-
-    locSocket.onopen = () => {
-      console.log("Location tracking socket connected.");
-      startTracking();
-    };
-
-    locSocket.onclose = () => {
-      console.log("Location tracking socket disconnected. Retrying in 5s...");
-      stopTracking();
-      setTimeout(initLocationTracking, 5000);
-    };
-  }
-
-  function startTracking() {
-    if (navigator.geolocation) {
-      // Send first update immediately
-      sendLocation();
-      // Then every 10 seconds
-      trackInterval = setInterval(sendLocation, 10000);
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-    }
-  }
-
-  function stopTracking() {
-    if (trackInterval) clearInterval(trackInterval);
-  }
-
-  function sendLocation() {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        if (locSocket && locSocket.readyState === WebSocket.OPEN) {
-          locSocket.send(JSON.stringify({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude
-          }));
-          console.log("Location sent:", pos.coords.latitude, pos.coords.longitude);
-        }
-      },
-      (err) => {
-        console.error("Error getting location:", err.message);
-      },
-      { enableHighAccuracy: true }
-    );
-  }
-
-  // Initialize on load
-  document.addEventListener('DOMContentLoaded', initLocationTracking);
-</script>
-
-{% endblock %}
+  {% endblock %}

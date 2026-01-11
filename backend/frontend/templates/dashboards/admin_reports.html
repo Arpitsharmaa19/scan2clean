@@ -1,55 +1,87 @@
 {% extends "dashboards/base_dashboard.html" %}
 {% block dashboard_content %}
 
-<!-- Header -->
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 text-black animate-fade-up">
-  <div>
-    <h2 class="text-3xl font-heading font-bold text-gray-800">📋 All Waste Reports</h2>
-    <p class="text-gray-500 mt-1">Manage, assign, and track all community submissions.</p>
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton"
+  class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <div class="h-16 w-full skeleton rounded-xl"></div>
+    <div class="h-[600px] w-full skeleton rounded-3xl"></div>
   </div>
+</div>
 
-  <div class="flex gap-3">
-    <a href="{% url 'export_reports_csv' %}"
-      class="bg-gradient-to-r from-eco-500 to-teal-500 hover:from-eco-600 hover:to-teal-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-eco-500/30 hover:shadow-eco-500/50 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-      Export CSV
-    </a>
-    <div
-      class="bg-white/50 backdrop-blur px-4 py-2 rounded-xl text-sm font-bold border border-white/60 shadow-sm text-gray-600">
-      Total: {{ reports.count }}
+<script>
+  window.addEventListener('load', () => {
+    const skeleton = document.getElementById('dashboard-skeleton');
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      setTimeout(() => skeleton.remove(), 700);
+    }
+  });
+</script>
+
+<!-- 🌈 Header -->
+<div
+  class="relative overflow-hidden rounded-3xl p-8 text-white mb-10 shadow-2xl animate-fade-down group spotlight-card bg-gradient-to-r from-gray-800 to-gray-900 border border-white/10">
+  <div class="scan-beam"></div>
+  <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <h2 class="text-3xl font-heading font-bold text-white flex items-center gap-3">
+        <span class="animate-sway">📋</span> Operations Ledger
+      </h2>
+      <p class="text-gray-300 mt-1 font-medium italic opacity-80">Audit, assign, and verify systemic waste resolutions.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <a href="{% url 'export_reports_csv' %}"
+        class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-bold font-heading text-sm shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 relative z-10 uppercase tracking-wider">
+        <span>📥</span> Export Audit
+      </a>
+      <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-xl border border-white/10 shadow-inner">
+        <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest leading-none mb-1">Total Payload</p>
+        <p class="text-xl font-black text-white leading-none">{{ reports.count }}</p>
+      </div>
     </div>
   </div>
 </div>
 
 {% if reports %}
-<div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-white/50 animate-fade-up">
+<div
+  class="glass-card spotlight-card magnetic-card rounded-3xl shadow-xl overflow-hidden border border-white/50 dark:border-gray-800 animate-fade-up">
   <div class="overflow-x-auto">
     <table class="w-full text-left border-collapse">
       <thead>
-        <tr class="bg-gray-50/50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-400 font-bold">
+        <tr
+          class="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700 text-xs uppercase tracking-wider text-gray-400 font-bold">
           <th class="px-6 py-5">Issue Details</th>
           <th class="px-6 py-5">Description</th>
           <th class="px-6 py-5 text-center">Severity</th>
           <th class="px-6 py-5 text-center">Status</th>
+          <th class="px-6 py-5">Feedback</th>
           <th class="px-6 py-5">Action</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
         {% for report in reports %}
-        <tr class="hover:bg-white/60 transition-colors group">
+        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
 
           <!-- Issue Details -->
           <td class="px-6 py-4">
             <div class="flex items-center gap-4">
               <div class="h-16 w-16 flex-shrink-0 rounded-xl overflow-hidden shadow-sm border border-white">
+                {% if report.image %}
                 <img src="{{ report.image.url }}"
                   class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500">
+                {% else %}
+                <div class="h-full w-full bg-gray-100 flex items-center justify-center text-gray-400">
+                  <span class="text-xl">📸</span>
+                </div>
+                {% endif %}
               </div>
               <div>
-                <div class="font-bold text-gray-800 text-base mb-0.5">{{ report.get_waste_type_display }}</div>
+                <div class="font-bold text-gray-800 dark:text-gray-100 text-base mb-0.5">{{
+                  report.get_waste_type_display }}</div>
                 <div class="text-xs text-gray-400 font-mono">ID: #{{ report.id }}</div>
                 <div class="text-xs text-gray-400 font-mono mt-0.5">{{ report.created_at|date:"M d, Y" }}</div>
               </div>
@@ -58,7 +90,7 @@
 
           <!-- Description -->
           <td class="px-6 py-4 max-w-xs">
-            <p class="text-sm text-gray-600 line-clamp-2 italic">
+            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 italic">
               "{{ report.description }}"
             </p>
           </td>
@@ -81,10 +113,29 @@
               {% else %} bg-green-100 text-green-700 {% endif %}">
               {{ report.status }}
             </span>
-            {% if report.status == 'assigned' %}
+            {% if report.assigned_worker %}
             <div class="text-[10px] font-bold text-blue-500 mt-1">
-              👷 {{ report.assigned_worker.username }}
+              👷 {{ report.assigned_worker.get_full_name|default:report.assigned_worker.username }}
             </div>
+            {% endif %}
+          </td>
+
+          <td class="px-6 py-4">
+            {% if report.status == "resolved" %}
+              {% if report.rating %}
+                <div class="flex flex-col gap-1">
+                  <div class="text-yellow-500 font-bold text-sm">
+                    {% for i in '12345'|make_list %}{% if forloop.counter <= report.rating %}★{% else %}☆{% endif %}{% endfor %}
+                  </div>
+                  {% if report.review_text %}
+                    <p class="text-[10px] text-gray-500 italic line-clamp-2 max-w-[150px]">"{{ report.review_text }}"</p>
+                  {% endif %}
+                </div>
+              {% else %}
+                <span class="text-[10px] text-gray-400 italic">No rating yet</span>
+              {% endif %}
+            {% else %}
+              <span class="text-[10px] text-gray-400">---</span>
             {% endif %}
           </td>
 
@@ -99,10 +150,12 @@
 
                 <div class="relative w-40">
                   <select name="worker_id" required
-                    class="w-full text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer hover:bg-white transition-colors">
+                    class="w-full text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-gray-200 rounded-lg px-2 py-2 outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-colors">
                     <option value="">Select Worker...</option>
                     {% for worker in workers %}
-                    <option value="{{ worker.id }}">{{ worker.username }}</option>
+                    <option value="{{ worker.id }}">
+                      {{ worker.get_full_name|default:worker.username }} (⭐ {{ worker.average_rating|floatformat:1 }})
+                    </option>
                     {% endfor %}
                   </select>
                 </div>
@@ -142,7 +195,7 @@
 <div
   class="flex flex-col items-center justify-center py-20 bg-white/50 backdrop-blur rounded-3xl border border-dashed border-gray-300 animate-fade-up">
   <div class="text-6xl mb-4 grayscale opacity-30">📭</div>
-  <p class="text-gray-500 font-medium text-lg">No reports found.</p>
+  <p class="text-gray-500 dark:text-gray-400 font-medium text-lg">No reports found.</p>
 </div>
 {% endif %}
 

@@ -1,0 +1,112 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% block title %}Admin | Support Tickets{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton"
+    class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+    <div class="max-w-7xl mx-auto space-y-8">
+        <div class="h-20 w-80 skeleton rounded-xl"></div>
+        <div class="space-y-6">
+            <div class="h-64 w-full skeleton rounded-[2rem]"></div>
+            <div class="h-64 w-full skeleton rounded-[2rem]"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener('load', () => {
+        const skeleton = document.getElementById('dashboard-skeleton');
+        if (skeleton) {
+            skeleton.style.opacity = '0';
+            setTimeout(() => skeleton.remove(), 700);
+        }
+    });
+</script>
+
+<div class="max-w-6xl mx-auto">
+
+    <div class="mb-10 flex items-center justify-between animate-fade-down spotlight-card glass-card p-8 rounded-3xl">
+        <div>
+            <h1 class="text-4xl font-heading font-bold text-gray-800 dark:text-gray-100 flex items-center gap-4">
+                <span class="p-3 bg-red-100 dark:bg-red-900/30 rounded-2xl text-2xl shadow-sm animate-sway">🎫</span>
+                Support Tickets
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Manage and resolve issues reported by citizens.</p>
+        </div>
+        <div class="flex gap-4">
+            <div class="glass-card px-6 py-3 rounded-2xl text-sm font-bold border border-gray-100 dark:border-gray-700">
+                Total: {{ tickets.count }}
+            </div>
+        </div>
+    </div>
+
+    {% if tickets %}
+    <div class="grid grid-cols-1 gap-6">
+        {% for ticket in tickets %}
+        <div
+            class="glass-card spotlight-card rounded-[2rem] p-8 shadow-lg hover:shadow-xl transition-all animate-fade-up relative overflow-hidden group {% if ticket.is_resolved %}opacity-60 grayscale-[0.5]{% endif %}">
+
+            <!-- Status Badge -->
+            <div class="absolute top-8 right-8">
+                {% if ticket.is_resolved %}
+                <span
+                    class="px-4 py-1.5 rounded-full bg-green-100 text-green-700 text-xs font-black uppercase tracking-widest border border-green-200">Resolved</span>
+                {% else %}
+                <span
+                    class="px-4 py-1.5 rounded-full bg-red-100 text-red-700 text-xs font-black uppercase tracking-widest border border-red-200 animate-pulse">Open</span>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div
+                            class="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-lg font-bold text-gray-400">
+                            {{ ticket.user.username|make_list|first|upper }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 dark:text-gray-200">{{ ticket.user.username }}</p>
+                            <p class="text-xs text-gray-400">{{ ticket.created_at|date:"M d, Y • h:i A" }}</p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">{{ ticket.subject }}</h3>
+                    <p
+                        class="text-gray-600 dark:text-gray-400 leading-relaxed bg-gray-50 dark:bg-gray-900/50 p-6 rounded-2xl border border-gray-100/50 dark:border-gray-700/50">
+                        {{ ticket.message }}
+                    </p>
+                </div>
+
+                <div
+                    class="md:w-64 flex flex-col justify-center items-center gap-4 border-l border-gray-100 dark:border-gray-700 pl-8">
+                    <form method="POST" action="{% url 'resolve_ticket' ticket.id %}" class="w-full">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm transition-all shadow-md
+              {% if ticket.is_resolved %}
+              bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-red-50 hover:text-red-600
+              {% else %}
+              bg-green-600 text-white hover:bg-green-700 shadow-green-500/20
+              {% endif %}">
+                            {% if ticket.is_resolved %}Re-open Ticket{% else %}Mark as Resolved{% endif %}
+                        </button>
+                    </form>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Ticket ID: #{{
+                        ticket.id }}</p>
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 glass-card rounded-[3rem] animate-scale-in">
+        <div class="text-8xl mb-6">🏜️</div>
+        <h3 class="text-2xl font-black text-gray-400 uppercase tracking-widest">No tickets yet</h3>
+        <p class="text-gray-400 mt-2">Everything seems to be running smoothly!</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
