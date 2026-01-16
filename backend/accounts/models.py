@@ -18,6 +18,7 @@ class User(AbstractUser):
         default='citizen'
     )
     phone = models.CharField(max_length=15, blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     
     # Real-time tracking
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -27,6 +28,9 @@ class User(AbstractUser):
     # Performance tracking
     average_rating = models.FloatField(default=0.0)
     total_ratings = models.IntegerField(default=0)
+    
+    # UI Preferences
+    dark_mode = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.username} ({self.role})"

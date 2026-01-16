@@ -1,97 +1,212 @@
 {% extends "base.html" %}
 
+{% block title %}Login - Scan2Clean{% endblock %}
+
 {% block content %}
+<!-- 🍃 Leaf Animation Canvas -->
+<canvas id="leaves-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
 <div class="min-h-[calc(100vh-6rem)] flex items-center justify-center p-4 relative overflow-hidden">
 
-  <!-- Background Image with Overlay -->
-  <div class="absolute inset-0 z-0">
-    <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=2940&auto=format&fit=crop"
-      class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/90 to-teal-600/90 backdrop-blur-sm"></div>
-  </div>
+  <!-- 🌈 Background Glows -->
+  <div class="absolute top-1/4 -right-20 w-80 h-80 bg-eco-500/20 rounded-full blur-[120px] animate-pulse"></div>
+  <div class="absolute bottom-1/4 -left-20 w-80 h-80 bg-teal-500/20 rounded-full blur-[120px] animate-pulse"
+    style="animation-delay: 2s"></div>
 
   <div
-    class="w-full max-w-5xl bg-white/10 dark:bg-gray-900/40 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex z-10 border border-white border-opacity-20 animate-scale-in">
+    class="w-full max-w-5xl glass-card rounded-[3rem] shadow-2xl overflow-hidden z-10 border border-white/20 dark:border-gray-700/30 animate-scale-in flex flex-col lg:flex-row min-h-[500px]">
 
-    <!-- Left: Welcome Section (Hidden on mobile) -->
+    <!-- 🌿 Left Sidebar: Eco Inspiration (Reversed for Login) -->
     <div
-      class="hidden lg:flex w-1/2 bg-gradient-to-br from-emerald-600 to-teal-600 bg-opacity-90 p-12 flex-col justify-between relative">
-      <div class="absolute inset-0 bg-noise opacity-10"></div>
+      class="lg:w-2/5 bg-gradient-to-br from-gray-900 via-emerald-950 to-teal-900 p-12 flex flex-col justify-between relative overflow-hidden order-1 lg:order-none">
+      <!-- Decor -->
+      <div class="absolute top-0 right-0 p-8 opacity-10 text-9xl">🍃</div>
+      <div class="absolute bottom-0 left-0 p-8 opacity-5 text-8xl">🌱</div>
 
-      <div>
+      <div class="relative z-10">
         <div
-          class="h-16 w-16 bg-white bg-opacity-20 backdrop-blur-md rounded-2xl flex items-center justify-center text-4xl mb-8 shadow-inner">
+          class="h-14 w-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl mb-8 border border-white/20 shadow-xl">
           ♻️
         </div>
-        <h2 class="text-4xl font-heading font-bold text-white mb-4">Welcome to Scan2Clean!</h2>
-        <p class="text-white text-opacity-90 text-lg leading-relaxed">
-          Join the movement towards a cleaner planet. Track, report, and resolve waste issues in your community.
+        <h2 class="text-4xl font-heading font-black text-white mb-6 leading-tight">
+          Welcome <span class="text-eco-500">Back</span>, Hero.
+        </h2>
+        <p class="text-emerald-50/70 text-lg font-medium leading-relaxed">
+          The planet missed you. Log in to continue your mission of cleaning our communities.
         </p>
       </div>
 
-      <div class="space-y-4">
-        <div class="flex items-center gap-4 text-white text-opacity-80">
-          <div class="p-2 bg-white bg-opacity-10 rounded-lg">📊</div>
-          <span>Real-time Analytics</span>
+      <div class="relative z-10 space-y-6">
+        <div class="flex items-center gap-4 group">
+          <div
+            class="h-10 w-10 rounded-xl bg-eco-500/20 flex items-center justify-center text-eco-400 group-hover:scale-110 transition-transform">
+            📊</div>
+          <p class="text-sm font-bold text-white/80">Check Your Impact</p>
         </div>
-        <div class="flex items-center gap-4 text-white text-opacity-80">
-          <div class="p-2 bg-white bg-opacity-10 rounded-lg">🌍</div>
-          <span>Community Impact</span>
-        </div>
-        <div class="flex items-center gap-4 text-white text-opacity-80">
-          <div class="p-2 bg-white bg-opacity-10 rounded-lg">🚀</div>
-          <span>Fast Resolution</span>
+        <div class="flex items-center gap-4 group">
+          <div
+            class="h-10 w-10 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
+            🚀</div>
+          <p class="text-sm font-bold text-white/80">Active Mission Control</p>
         </div>
       </div>
-
     </div>
 
-    <!-- Right: Login Form -->
-    <div class="w-full lg:w-1/2 bg-white dark:bg-gray-800 p-10 md:p-14">
-
-      <h3 class="text-3xl font-heading font-bold text-gray-800 dark:text-gray-100 mb-2">Login</h3>
-      <p class="text-gray-500 dark:text-gray-400 mb-8">Enter your credentials to access your account.</p>
+    <!-- 🔐 Right Section: Login Form -->
+    <div class="lg:w-3/5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-10 md:p-14 flex flex-col justify-center">
+      <div class="mb-10 text-center lg:text-left">
+        <h3 class="text-3xl font-heading font-black text-gray-900 dark:text-white mb-2">Login</h3>
+        <p class="text-gray-500 dark:text-gray-400 font-medium">Access your Eco-Warrior command center.</p>
+      </div>
 
       {% if error %}
-      <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
-        <p class="text-red-700 text-sm font-medium">{{ error }}</p>
+      <div class="bg-red-500/10 border-l-4 border-red-500 p-4 mb-6 rounded-r-xl">
+        <p class="text-red-600 dark:text-red-400 text-sm font-bold">{{ error }}</p>
       </div>
       {% endif %}
 
       <form method="post" class="space-y-6">
         {% csrf_token %}
 
+        <!-- Email/Username -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Username</label>
-          <input type="text" name="username" required
-            class="w-full px-5 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 dark:text-white focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-eco-500 focus:border-transparent transition-all outline-none"
-            placeholder="e.g. johndoe">
+          <label class="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Email
+            Address or Username</label>
+          <div class="relative group">
+            <span
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-eco-500 transition-colors">👤</span>
+            <input type="text" name="username" required
+              class="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-eco-500 focus:bg-white dark:focus:bg-gray-700 outline-none transition-all font-bold text-gray-700 dark:text-white"
+              placeholder="Enter email or username">
+          </div>
         </div>
 
+        <!-- Password -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Password</label>
-          <input type="password" name="password" required
-            class="w-full px-5 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 dark:text-white focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-eco-500 focus:border-transparent transition-all outline-none"
-            placeholder="••••••••">
+          <label
+            class="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2">Password</label>
+          <div class="relative group">
+            <span
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-eco-500 transition-colors">🔒</span>
+            <input type="password" name="password" required
+              class="w-full pl-12 pr-12 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-eco-500 focus:bg-white dark:focus:bg-gray-700 outline-none transition-all font-bold text-gray-700 dark:text-white"
+              placeholder="••••••••">
+            <button type="button" onclick="togglePassword(this)"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-eco-500 transition-colors focus:outline-none z-10 cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <button type="submit" style="background: linear-gradient(to right, #22c55e, #14b8a6);"
-          class="w-full bg-gradient-to-r from-eco-500 to-teal-500 hover:from-eco-600 hover:to-teal-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-eco-500/30 hover:shadow-eco-500/50 hover:-translate-y-0.5 transition-all duration-300">
-          Sign In
+        <button type="submit"
+          class="w-full bg-gradient-to-r from-eco-500 to-teal-600 hover:from-eco-600 hover:to-teal-700 text-white font-black py-5 rounded-[2rem] shadow-2xl shadow-eco-500/20 hover:shadow-eco-500/40 hover:-translate-y-1 active:scale-95 transition-all duration-300 uppercase tracking-widest mt-4">
+          Sign In ⮕
         </button>
 
       </form>
 
-      <div class="mt-8 text-center">
-        <p class="text-gray-500 text-sm">
-          Don't have an account?
-          <a href="/register/" class="text-eco-600 font-bold hover:underline decoration-2 underline-offset-2">Create
-            Account</a>
+      <div class="mt-10 text-center">
+        <p class="text-gray-500 dark:text-gray-400 text-sm font-bold">
+          New to the movement?
+          <a href="{% url 'register' %}"
+            class="text-eco-600 dark:text-eco-400 hover:underline underline-offset-4">Create Account</a>
         </p>
       </div>
-
     </div>
-
   </div>
 </div>
+
+<script>
+  // 🍃 Falling Leaves Particle System
+  const leafCanvas = document.getElementById('leaves-canvas');
+  const leafCtx = leafCanvas.getContext('2d');
+  let leaves = [];
+
+  function resizeLeafCanvas() {
+    leafCanvas.width = window.innerWidth;
+    leafCanvas.height = window.innerHeight;
+  }
+
+  class Leaf {
+    constructor() {
+      this.reset();
+      this.y = Math.random() * leafCanvas.height;
+    }
+    reset() {
+      this.x = Math.random() * leafCanvas.width;
+      this.y = -40;
+      this.size = Math.random() * 10 + 8;
+      this.speedY = Math.random() * 1.5 + 0.8;
+      this.speedX = Math.random() * 2 - 1;
+      this.rotation = Math.random() * 360;
+      this.rotationSpeed = Math.random() * 2 - 1;
+      this.opacity = Math.random() * 0.4 + 0.1;
+      this.color = Math.random() > 0.6 ? '#22c55e' : (Math.random() > 0.5 ? '#16a34a' : '#14b8a6');
+    }
+    update() {
+      this.y += this.speedY;
+      this.x += Math.sin(this.y / 60) * 1.8;
+      this.rotation += this.rotationSpeed;
+      if (this.y > leafCanvas.height + 40) this.reset();
+    }
+    draw() {
+      leafCtx.save();
+      leafCtx.translate(this.x, this.y);
+      leafCtx.rotate(this.rotation * Math.PI / 180);
+      leafCtx.globalAlpha = this.opacity;
+      leafCtx.fillStyle = this.color;
+      leafCtx.beginPath();
+      leafCtx.moveTo(0, 0);
+      leafCtx.quadraticCurveTo(this.size, -this.size, this.size * 2, 0);
+      leafCtx.quadraticCurveTo(this.size, this.size, 0, 0);
+      leafCtx.fill();
+      leafCtx.restore();
+    }
+  }
+
+  function initLeaves() {
+    leaves = Array.from({ length: 45 }, () => new Leaf());
+    resizeLeafCanvas();
+    animateLeaves();
+  }
+
+  function animateLeaves() {
+    leafCtx.clearRect(0, 0, leafCanvas.width, leafCanvas.height);
+    leaves.forEach(leaf => {
+      leaf.update();
+      leaf.draw();
+    });
+    requestAnimationFrame(animateLeaves);
+  }
+
+  window.addEventListener('resize', resizeLeafCanvas);
+  initLeaves();
+
+  // 👁️ Password Toggle Logic
+  function togglePassword(button) {
+    const input = button.previousElementSibling;
+    const svg = button.querySelector('svg');
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      // Switch to "Hide" icon (Slash eye)
+      svg.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.057 10.057 0 01-1.555 3.03m-1.94 1.94a9.935 9.935 0 01-3.279 1.54"/>
+      `;
+    } else {
+      input.type = 'password';
+      // Switch back to "Show" icon (Normal eye)
+      svg.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      `;
+    }
+  }
+</script>
 {% endblock %}

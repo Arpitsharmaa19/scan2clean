@@ -33,7 +33,7 @@
 <div class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-up group spotlight-card">
   <!-- Dynamic Background -->
   <div
-    class="absolute inset-0 bg-gradient-to-r from-gray-800 to-slate-900 transition-transform duration-1000 group-hover:scale-105">
+    class="absolute inset-0 bg-gradient-to-br from-gray-900 via-emerald-950 to-teal-950 transition-transform duration-1000 group-hover:scale-105">
   </div>
   <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30">
   </div>
@@ -41,13 +41,20 @@
     class="absolute -right-10 -bottom-10 text-9xl opacity-10 transform rotate-12 group-hover:rotate-6 transition-transform duration-700">
     ⚙️</div>
 
-  <div class="relative z-10">
-    <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm flex items-center gap-3">
-      Welcome, {{ user.username|default:"Admin" }}
-    </h1>
-    <p class="text-gray-300 text-lg font-medium opacity-90">
-      System Overview • <span class="text-green-400 font-bold">● Operational</span>
-    </p>
+  <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+    <div
+      class="h-20 w-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl border border-white/20 shadow-2xl animate-float">
+      💎
+    </div>
+
+    <div>
+      <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm flex items-center gap-3">
+        Welcome, {{ request.user.first_name|default:request.user.username }}
+      </h1>
+      <p class="text-gray-100 text-lg font-medium opacity-90">
+        System Overview • <span class="text-green-400 font-bold">● Operational</span>
+      </p>
+    </div>
   </div>
 </div>
 
@@ -56,35 +63,35 @@
 
   <!-- Users -->
   <div
-    class="glass-card spotlight-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-indigo-500 animate-fade-up delay-100">
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-emerald-500 cursor-default">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Users</p>
-        <p class="text-3xl font-heading font-bold text-gray-800 dark:text-white">{{ total_users|default:"0" }}</p>
+        <p id="count-users" class="text-3xl font-heading font-bold text-gray-800 dark:text-white">0</p>
       </div>
-      <div class="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center text-xl">👥</div>
+      <div class="h-10 w-10 bg-emerald-100 rounded-full flex items-center justify-center text-xl">👥</div>
     </div>
   </div>
 
   <!-- Reports -->
   <div
-    class="glass-card spotlight-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-orange-500 animate-fade-up delay-200">
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-teal-500 cursor-default">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Reports</p>
-        <p class="text-3xl font-heading font-bold text-gray-800 dark:text-white">{{ total_reports|default:"0" }}</p>
+        <p id="count-reports" class="text-3xl font-heading font-bold text-gray-800 dark:text-white">0</p>
       </div>
-      <div class="h-10 w-10 bg-orange-100 rounded-full flex items-center justify-center text-xl">📝</div>
+      <div class="h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-xl">📝</div>
     </div>
   </div>
 
   <!-- Pending -->
   <div
-    class="glass-card spotlight-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-yellow-400 animate-fade-up delay-300">
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-yellow-400 cursor-default">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Pending</p>
-        <p class="text-3xl font-heading font-bold text-gray-800 dark:text-white">{{ pending_reports|default:"0" }}</p>
+        <p id="count-pending" class="text-3xl font-heading font-bold text-gray-800 dark:text-white">0</p>
       </div>
       <div class="h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center text-xl">⏳</div>
     </div>
@@ -92,11 +99,11 @@
 
   <!-- Resolved -->
   <div
-    class="glass-card spotlight-card rounded-2xl p-6 shadow-lg hover:-translate-y-1 transition-transform border-l-4 border-green-500 animate-fade-up delay-400">
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-green-500 cursor-default">
     <div class="flex justify-between items-start">
       <div>
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Resolved</p>
-        <p class="text-3xl font-heading font-bold text-gray-800 dark:text-white">{{ resolved_reports|default:"0" }}</p>
+        <p id="count-resolved" class="text-3xl font-heading font-bold text-gray-800 dark:text-white">0</p>
       </div>
       <div class="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center text-xl">✅</div>
     </div>
@@ -104,37 +111,109 @@
 
 </div>
 
+<!-- 🧪 System Health & Trends -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+
+  <!-- Uptime Sparkline -->
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-5 border-t-2 border-green-500 shadow-md cursor-default">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">System Uptime</h4>
+        <p class="text-xl font-black text-gray-800 dark:text-white">99.98%</p>
+      </div>
+      <div class="h-8 w-24">
+        <canvas id="uptimeSparkline"></canvas>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
+      <span class="text-[9px] font-bold text-green-600 uppercase">All systems operational</span>
+    </div>
+  </div>
+
+  <!-- Latency Sparkline -->
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-5 border-t-2 border-blue-500 shadow-md cursor-default">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">API Latency</h4>
+        <p class="text-xl font-black text-gray-800 dark:text-white">42ms</p>
+      </div>
+      <div class="h-8 w-24">
+        <canvas id="latencySparkline"></canvas>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-[9px] font-bold text-blue-600 uppercase">⚡ Optimized routing active</span>
+    </div>
+  </div>
+
+  <!-- Socket Connections -->
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-5 border-t-2 border-purple-500 shadow-md cursor-default">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Live Nodes</h4>
+        <p class="text-xl font-black text-gray-800 dark:text-white">{{ active_workers|default:"12" }}</p>
+      </div>
+      <div class="h-8 w-24">
+        <canvas id="nodesSparkline"></canvas>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-[9px] font-bold text-purple-600 uppercase">📡 System Nodes Verified</span>
+    </div>
+  </div>
+</div>
+
 <!-- 📈 Data Visualization -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
 
   <!-- Status Chart -->
-  <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-up delay-500">
-    <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-6 flex items-center gap-2">
-      <span class="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg">📊</span> Report Status
-      Distribution
+  <div class="glass-card magnetic-card rounded-2xl p-6 shadow-lg animate-fade-up delay-500 cursor-default">
+    <h3
+      class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="p-2 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg">📊</span>
+        Success Metrics
+      </div>
+      <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 text-[9px] font-black rounded-full">+12%
+        Advanced routing</span>
     </h3>
-    <div class="relative h-64">
+    <div class="relative h-64 flex items-center justify-center">
       <canvas id="adminStatusChart"></canvas>
+      <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <span id="admin-efficiency-text"
+          class="text-3xl font-black text-gray-800 dark:text-white leading-none">0%</span>
+        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter mt-1">Resolution</span>
+      </div>
     </div>
   </div>
 
   <!-- Waste Type Chart -->
-  <div class="glass-card rounded-2xl p-6 shadow-lg animate-fade-up delay-500">
-    <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200 mb-6 flex items-center gap-2">
-      <span class="p-2 bg-teal-100 dark:bg-teal-900/30 text-teal-600 rounded-lg">🗑️</span> Waste Composition
+  <div class="glass-card magnetic-card rounded-2xl p-6 shadow-lg animate-fade-up delay-500 cursor-default">
+    <h3
+      class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+      <span class="p-2 bg-teal-100 dark:bg-teal-900/30 text-teal-600 rounded-lg">🗑️</span> Waste Profile
     </h3>
-    <div class="relative h-64 flex justify-center">
+    <div class="relative h-64 flex items-center justify-center">
       <canvas id="adminWasteChart"></canvas>
+      <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <span id="top-waste-type"
+          class="text-sm font-black text-gray-800 dark:text-white uppercase tracking-tighter text-center max-w-[80px]">...</span>
+        <span class="text-[7px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Primary</span>
+      </div>
     </div>
   </div>
 
 </div>
 
 <!-- 🧭 Admin Actions -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 animate-fade-up delay-600">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 delay-600">
 
   <a href="{% url 'admin_all_reports' %}"
-    class="glass-card spotlight-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+    class="glass-card spotlight-card magnetic-card p-6 rounded-2xl shadow-md active:scale-[0.95] transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
     <div
       class="h-12 w-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
       📍</div>
@@ -143,7 +222,7 @@
   </a>
 
   <a href="{% url 'worker_performance_dashboard' %}"
-    class="glass-card spotlight-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+    class="glass-card spotlight-card magnetic-card p-6 rounded-2xl shadow-md active:scale-[0.95] transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
     <div
       class="h-12 w-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
       👷</div>
@@ -152,7 +231,7 @@
   </a>
 
   <a href="{% url 'admin_support_tickets' %}"
-    class="glass-card spotlight-card p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+    class="glass-card spotlight-card magnetic-card p-6 rounded-2xl shadow-md active:scale-[0.95] transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
     <div
       class="h-12 w-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
       🎫</div>
@@ -160,10 +239,97 @@
     <p class="text-gray-500 dark:text-gray-400 text-sm">Review issues and feedback reported by citizens.</p>
   </a>
 
+  <a href="{% url 'waste_map' %}"
+    class="glass-card spotlight-card magnetic-card p-6 rounded-2xl shadow-md active:scale-[0.95] transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+    <div
+      class="h-12 w-12 bg-teal-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+      🗺️</div>
+    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">Global Heatmap</h3>
+    <p class="text-gray-500 dark:text-gray-400 text-sm">Visualise waste hotspots across the city.</p>
+  </a>
+
+  <a href="{% url 'export_reports_csv' %}"
+    class="glass-card spotlight-card magnetic-card p-6 rounded-2xl shadow-md active:scale-[0.95] transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+    <div
+      class="h-12 w-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+      📥</div>
+    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">Export Data</h3>
+    <p class="text-gray-500 dark:text-gray-400 text-sm">Download full reporting history as CSV.</p>
+  </a>
+
+  <a href="{% url 'admin:index' %}" target="_blank"
+    class="glass-card spotlight-card magnetic-card p-6 rounded-2xl shadow-md active:scale-[0.95] transition-all duration-300 group ring-1 ring-black/5 dark:ring-white/5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+    <div
+      class="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+      ⚙️</div>
+    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">System Control</h3>
+    <p class="text-gray-500 dark:text-gray-400 text-sm">Advanced database configuration & logs.</p>
+  </a>
+</div>
 </div>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // --- Number Counter Animation ---
+    const animateValue = (id, start, end, duration) => {
+      const obj = document.getElementById(id);
+      if (!obj) return;
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    };
+
+    // Trigger KPI Counters
+    animateValue('count-users', 0, Number("{{ total_users|default:'0' }}"), 2000);
+    animateValue('count-reports', 0, Number("{{ total_reports|default:'0' }}"), 2000);
+    animateValue('count-pending', 0, Number("{{ pending_reports|default:'0' }}"), 1500);
+    animateValue('count-resolved', 0, Number("{{ resolved_reports|default:'0' }}"), 2000);
+
+    // --- Sparkline Helper (Upgraded) ---
+    function createSparkline(id, data, color) {
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, 40)
+      gradient.addColorStop(0, color + '70');
+      gradient.addColorStop(1, 'transparent');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: new Array(data.length).fill(''),
+          datasets: [{
+            data: data,
+            borderColor: color,
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: true,
+            backgroundColor: gradient,
+            tension: 0.45
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: { x: { display: false }, y: { display: false } },
+          animation: { duration: 2000, easing: 'easeOutQuart' }
+        }
+      });
+    }
+
+    createSparkline('uptimeSparkline', [99, 99.5, 99.2, 99.8, 99.7, 99.9, 99.8], '#22c55e');
+    createSparkline('latencySparkline', [60, 45, 50, 35, 48, 42, 40], '#3b82f6');
+    createSparkline('nodesSparkline', [10, 12, 11, 14, 13, 15, 12], '#a855f7');
+
     // Status Chart
     const pendingVal = Number("{{ pending_reports|default:'0' }}");
     const assignedVal = Number("{{ assigned_reports|default:'0' }}");
@@ -172,33 +338,62 @@
     const statusCanvas = document.getElementById('adminStatusChart');
     if (statusCanvas) {
       const ctx = statusCanvas.getContext('2d');
+      const total = pendingVal + assignedVal + resolvedVal;
+      const efficiency = total > 0 ? Math.round((resolvedVal / total) * 100) : 0;
+
+      // Calculate active segments to determine if spacing is needed
+      const activeSegments = [pendingVal, assignedVal, resolvedVal].filter(v => v > 0).length;
+
+      // Update Center Efficiency Text
+      const efficiencyLabel = document.getElementById('admin-efficiency-text');
+      if (efficiencyLabel) {
+        let current = 0;
+        const target = efficiency;
+        const step = () => {
+          if (current < target) {
+            current++;
+            efficiencyLabel.innerText = current + '%';
+            requestAnimationFrame(step);
+          } else {
+            efficiencyLabel.innerText = target + '%';
+          }
+        };
+        requestAnimationFrame(step);
+      }
+
       new Chart(ctx, {
-        type: 'bar',
+        type: 'doughnut',
         data: {
           labels: ['Pending', 'Assigned', 'Resolved'],
           datasets: [{
-            label: 'Count',
             data: [pendingVal, assignedVal, resolvedVal],
-            backgroundColor: [
-              createChartGradient(ctx, '#facc15', '#a16207'),
-              createChartGradient(ctx, '#60a5fa', '#1d4ed8'),
-              createChartGradient(ctx, '#22c55e', '#15803d')
-            ],
-            borderRadius: 10
+            backgroundColor: ['#facc15', '#3b82f6', '#22c55e'],
+            hoverBackgroundColor: ['#fde047', '#60a5fa', '#4ade80'],
+            borderWidth: 0,
+            hoverOffset: 25,
+            borderRadius: 12,
+            spacing: activeSegments > 1 ? 8 : 0
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          animation: {
-            duration: 2000,
-            easing: 'easeOutElastic',
-            delay: (context) => context.dataIndex * 150
+          cutout: '82%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(17, 24, 39, 0.95)',
+              padding: 12,
+              cornerRadius: 12,
+              callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw} issues` }
+            }
           },
-          scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(156, 163, 175, 0.05)' } },
-            x: { grid: { display: false } }
+          animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 2500,
+            easing: 'easeOutElastic'
           }
         }
       });
@@ -211,23 +406,57 @@
     const wasteCanvas = document.getElementById('adminWasteChart');
     if (wasteCanvas) {
       const ctx = wasteCanvas.getContext('2d');
+
+      const activeWasteSegments = wasteValues.filter(v => v > 0).length;
+
+      // Find Top Waste Type
+      let maxVal = -1;
+      let topType = "N/A";
+      wasteValues.forEach((val, idx) => {
+        if (val > maxVal) {
+          maxVal = val;
+          topType = wasteLabels[idx];
+        }
+      });
+      const topLabel = document.getElementById('top-waste-type');
+      if (topLabel) topLabel.innerText = topType;
+
       new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: wasteLabels,
           datasets: [{
             data: wasteValues,
-            backgroundColor: ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ef4444'],
+            backgroundColor: ['#22c55e', '#f97316', '#3b82f6', '#a855f7', '#ef4444'],
+            hoverBackgroundColor: ['#4ade80', '#fb923c', '#60a5fa', '#c084fc', '#f87171'],
             borderWidth: 0,
-            hoverOffset: 15
+            hoverOffset: 25,
+            borderRadius: 12,
+            spacing: activeWasteSegments > 1 ? 8 : 0
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          cutout: '65%',
+          cutout: '82%',
           plugins: {
-            legend: { position: 'right', labels: { usePointStyle: true, font: { weight: 'bold', size: 11 } } }
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 15,
+                font: { weight: 'bold', size: 9 },
+                color: '#9ca3af',
+                boxWidth: 8
+              }
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(17, 24, 39, 0.95)',
+              padding: 12,
+              cornerRadius: 12,
+              callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw}%` }
+            }
           },
           animation: {
             animateRotate: true,

@@ -1,0 +1,179 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block dashboard_content %}
+<div class="max-w-4xl mx-auto animate-fade-up">
+
+    <!-- Profile Header -->
+    <div
+        class="relative min-h-[200px] rounded-[2.5rem] p-8 text-white mb-8 overflow-hidden shadow-2xl group spotlight-card">
+        <div
+            class="absolute inset-0 bg-gradient-to-r from-gray-900 via-indigo-950 to-purple-950 transition-transform duration-1000 group-hover:scale-105">
+        </div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20">
+        </div>
+
+        <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            <div class="relative group/avatar">
+                <form method="post" enctype="multipart/form-data" id="avatar-form">
+                    {% csrf_token %}
+                    <div
+                        class="h-32 w-32 rounded-full p-1 bg-white/20 backdrop-blur-md shadow-2xl relative group-hover:scale-105 transition-transform duration-500">
+                        <div
+                            class="h-full w-full rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-5xl text-white font-bold border-4 border-white/50 overflow-hidden relative">
+                            {% if request.user.avatar %}
+                            <img src="{{ request.user.avatar.url }}" class="h-full w-full object-cover">
+                            {% else %}
+                            {{ request.user.username|first|upper }}
+                            {% endif %}
+
+                            <!-- Overlay -->
+                            <label for="avatar-input"
+                                class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer z-10">
+                                <span class="text-white text-3xl drop-shadow-md">📸</span>
+                            </label>
+                        </div>
+                        <input type="file" name="avatar" id="avatar-input" class="hidden" accept="image/*"
+                            onchange="document.getElementById('avatar-form').submit()">
+                    </div>
+                </form>
+                <div class="absolute bottom-1 right-1 bg-green-500 h-6 w-6 rounded-full border-4 border-indigo-900 shadow-md z-20"
+                    title="Online"></div>
+            </div>
+
+            <div class="text-center md:text-left flex-1">
+                <h1 class="text-4xl font-heading font-bold text-white mb-2 drop-shadow-md">{{ request.user.first_name }}
+                    {{ request.user.last_name }}</h1>
+                <p class="text-indigo-200 text-lg font-medium mb-4">@{{ request.user.username }}</p>
+
+                <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                    <span
+                        class="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                        {% if request.user.role == "citizen" %}🏡{% elif request.user.role == "worker" %}🚛{% else %}💎{% endif %}
+                        {{ request.user.get_role_display }}
+                    </span>
+                    <span
+                        class="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                        📅 Joined {{ request.user.date_joined|date:"M Y" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personal Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Contact Info -->
+        <div class="glass-card spotlight-card rounded-3xl p-8 shadow-lg border border-white/40 dark:border-gray-700">
+            <div class="flex items-center gap-4 mb-6">
+                <div
+                    class="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xl text-blue-600">
+                    📇</div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Contact Information</h3>
+            </div>
+
+            <div class="space-y-6">
+                <div class="group">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email
+                        Address</label>
+                    <div
+                        class="flex items-center gap-3 p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 group-hover:border-blue-200 transition-colors">
+                        <span class="text-gray-400">✉️</span>
+                        <span class="text-gray-700 dark:text-gray-200 font-medium">{{ user_email }}</span>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phone
+                        Number</label>
+                    <div
+                        class="flex items-center gap-3 p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 group-hover:border-blue-200 transition-colors">
+                        <span class="text-gray-400">📱</span>
+                        <span class="text-gray-700 dark:text-gray-200 font-medium">{{ user_phone|default:"--" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Stats -->
+        <div class="glass-card spotlight-card rounded-3xl p-8 shadow-lg border border-white/40 dark:border-gray-700">
+            <div class="flex items-center gap-4 mb-6">
+                <div
+                    class="h-10 w-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-xl text-purple-600">
+                    📊</div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Account Stats</h3>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div
+                    class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 text-center border border-gray-100 dark:border-gray-700">
+                    <p class="text-2xl font-black text-gray-800 dark:text-white mb-1">
+                        {% if request.user.role == 'citizen' %}
+                        {{ total_filed|default:"--" }}
+                        {% elif request.user.role == 'worker' %}
+                        {{ completed_tasks|default:"--" }}
+                        {% else %}
+                        ∞
+                        {% endif %}
+                    </p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        {% if request.user.role == 'citizen' %}Reports Filed{% else %}Tasks Done{% endif %}
+                    </p>
+                </div>
+
+                <div
+                    class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 text-center border border-gray-100 dark:border-gray-700">
+                    <p class="text-2xl font-black text-gray-800 dark:text-white mb-1">
+                        {% if request.user.average_rating %}
+                        {{ request.user.average_rating|floatformat:1 }}
+                        {% else %}
+                        New
+                        {% endif %}
+                    </p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Rating</p>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-gray-400">Account Status</span>
+                    <span
+                        class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase tracking-widest">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🚨 Danger Zone -->
+        <div
+            class="md:col-span-2 glass-card spotlight-card rounded-3xl p-8 shadow-lg border border-red-200 dark:border-red-900/30 bg-red-50/30 dark:bg-red-900/10">
+            <div class="flex items-center gap-4 mb-6">
+                <div
+                    class="h-10 w-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-xl text-red-600">
+                    ⚠️</div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Danger Zone</h3>
+            </div>
+
+            <div
+                class="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/50 dark:bg-gray-800/50 border border-red-100 dark:border-red-900/30">
+                <div>
+                    <h4 class="font-bold text-red-600 dark:text-red-400 mb-1">Delete Account</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Permanently remove your account and all
+                        associated data. This action cannot be undone.</p>
+                </div>
+                <form action="{% url 'delete_account' %}" method="POST"
+                    onsubmit="return confirm('⚠️ ARE YOU SURE?\n\nThis will permanently delete your account and all your data.\nThis action CANNOT be undone.');">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-sm shadow-lg shadow-red-500/30 transition-all hover:scale-105 active:scale-95">
+                        Delete Account
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+{% endblock %}

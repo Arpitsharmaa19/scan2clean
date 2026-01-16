@@ -27,6 +27,9 @@ def admin_analytics(request):
         return render(request, "403.html")
 
     total_reports = WasteReport.objects.count()
+    pending_count = WasteReport.objects.filter(status='pending').count()
+    resolved_count = WasteReport.objects.filter(status='resolved').count()
+    efficiency_rate = (resolved_count / total_reports * 100) if total_reports > 0 else 0
 
     status_counts = list(
         WasteReport.objects.values("status").annotate(count=Count("id"))
@@ -64,6 +67,9 @@ def admin_analytics(request):
 
     return render(request, "dashboards/admin_analytics.html", {
         "total_reports": total_reports,
+        "pending_count": pending_count,
+        "resolved_count": resolved_count,
+        "efficiency_rate": f"{efficiency_rate:.1f}%",
         "status_counts": json.dumps(status_counts),
         "severity_counts": json.dumps(severity_counts),
         "waste_type_counts": json.dumps(waste_type_counts),
@@ -94,9 +100,16 @@ def report_waste(request):
 # =====================================================
 @login_required
 def my_reports(request):
-    reports = WasteReport.objects.filter(
+    from django.core.paginator import Paginator
+    
+    reports_list = WasteReport.objects.filter(
         citizen=request.user
     ).order_by("-created_at")
+    
+    # Paginate: 20 reports per page
+    paginator = Paginator(reports_list, 20)
+    page_number = request.GET.get('page', 1)
+    reports = paginator.get_page(page_number)
 
     return render(request, "reports/my_reports.html", {"reports": reports})
 
@@ -105,11 +118,22 @@ def my_reports(request):
 # =====================================================
 @login_required
 def report_detail(request, pk):
-    report = get_object_or_404(
-        WasteReport,
-        pk=pk,
-        citizen=request.user
-    )
+    # Allow access if:
+    # 1. User is an Admin
+    # 2. User is the Citizen who reported it
+    # 3. User is the Worker assigned to it
+    
+    report = get_object_or_404(WasteReport, pk=pk)
+    
+    is_admin = getattr(request.user, "role", None) == "admin"
+    is_citizen = report.citizen == request.user
+    is_worker = report.assigned_worker == request.user
+    
+    if not (is_admin or is_citizen or is_worker):
+        # If no access, throw 404 to hide existence or 403 for forbidden
+        # Returning render with 403 is often cleaner for UX
+        return render(request, "403.html", status=403)
+
     return render(request, "reports/report_detail.html", {"report": report})
 
 # =====================================================
@@ -193,12 +217,82 @@ def verify_otp(request, report_id):
 # =====================================================
 @login_required
 def admin_all_reports(request):
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+    from datetime import datetime, timedelta
+    
     if getattr(request.user, "role", None) != "admin":
         return redirect("/dashboard/citizen/")
 
-    reports = WasteReport.objects.all().order_by("-created_at")
+    # Start with all reports
+    reports = WasteReport.objects.all()
+    
+    # Search functionality
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        reports = reports.filter(
+            Q(location__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(citizen__username__icontains=search_query)
+        )
+    
+    # Status filter
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        reports = reports.filter(status=status_filter)
+    
+    # Waste type filter
+    waste_type_filter = request.GET.get('waste_type', '')
+    if waste_type_filter:
+        reports = reports.filter(waste_type=waste_type_filter)
+    
+    # Severity filter
+    severity_filter = request.GET.get('severity', '')
+    if severity_filter:
+        reports = reports.filter(severity=severity_filter)
+    
+    # Date range filter
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    if date_from:
+        try:
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d')
+            reports = reports.filter(created_at__gte=date_from_obj)
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d')
+            # Add 1 day to include the entire end date
+            date_to_obj = date_to_obj + timedelta(days=1)
+            reports = reports.filter(created_at__lt=date_to_obj)
+        except ValueError:
+            pass
+    
+    # Quick date filters
+    quick_filter = request.GET.get('quick_filter', '')
+    if quick_filter == 'today':
+        reports = reports.filter(created_at__date=datetime.now().date())
+    elif quick_filter == 'week':
+        week_ago = datetime.now() - timedelta(days=7)
+        reports = reports.filter(created_at__gte=week_ago)
+    elif quick_filter == 'month':
+        month_ago = datetime.now() - timedelta(days=30)
+        reports = reports.filter(created_at__gte=month_ago)
+    
+    # Order by latest first
+    reports = reports.order_by("-created_at")
+    
+    # Pagination
+    paginator = Paginator(reports, 20)
+    page_number = request.GET.get('page', 1)
+    reports_page = paginator.get_page(page_number)
+    
     workers = User.objects.filter(role="worker")
 
+    # Handle POST for assignment
     if request.method == "POST":
         report = get_object_or_404(WasteReport, id=request.POST.get("report_id"))
         worker = get_object_or_404(User, id=request.POST.get("worker_id"))
@@ -216,8 +310,15 @@ def admin_all_reports(request):
         return redirect("/reports/admin/")
 
     return render(request, "dashboards/admin_reports.html", {
-        "reports": reports,
-        "workers": workers
+        "reports": reports_page,
+        "workers": workers,
+        "search_query": search_query,
+        "status_filter": status_filter,
+        "waste_type_filter": waste_type_filter,
+        "severity_filter": severity_filter,
+        "date_from": date_from,
+        "date_to": date_to,
+        "quick_filter": quick_filter,
     })
 
 # =====================================================

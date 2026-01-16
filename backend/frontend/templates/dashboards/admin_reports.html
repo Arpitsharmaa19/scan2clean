@@ -46,6 +46,123 @@
   </div>
 </div>
 
+<!-- 🔍 Search & Filter Section -->
+<div
+  class="glass-card spotlight-card rounded-3xl p-6 mb-8 shadow-lg border border-white/50 dark:border-gray-800 animate-fade-up">
+  <form method="GET" action="{% url 'admin_all_reports' %}" class="space-y-6">
+
+    <!-- Search Bar -->
+    <div class="relative">
+      <input type="text" name="search" value="{{ search_query }}"
+        placeholder="🔍 Search by location, description, or citizen name..."
+        class="w-full px-5 py-4 pl-12 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:border-eco-500 focus:ring-4 focus:ring-eco-500/20 transition-all outline-none font-medium">
+      <svg class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+
+    <!-- Quick Filters -->
+    <div class="flex flex-wrap gap-2">
+      <span
+        class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider self-center">Quick:</span>
+      <button type="submit" name="quick_filter" value="today"
+        class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'today' %}bg-eco-500 text-white shadow-lg shadow-eco-500/30{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-eco-50 dark:hover:bg-eco-900/20{% endif %}">
+        📅 Today
+      </button>
+      <button type="submit" name="quick_filter" value="week"
+        class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'week' %}bg-eco-500 text-white shadow-lg shadow-eco-500/30{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-eco-50 dark:hover:bg-eco-900/20{% endif %}">
+        📆 This Week
+      </button>
+      <button type="submit" name="quick_filter" value="month"
+        class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'month' %}bg-eco-500 text-white shadow-lg shadow-eco-500/30{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-eco-50 dark:hover:bg-eco-900/20{% endif %}">
+        🗓️ This Month
+      </button>
+      {% if search_query or status_filter or waste_type_filter or severity_filter or date_from or date_to or quick_filter %}
+      <a href="{% url 'admin_all_reports' %}"
+        class="px-4 py-2 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all">
+        ✕ Clear All
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- Advanced Filters Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
+      <!-- Status Filter -->
+      <div>
+        <label
+          class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Status</label>
+        <select name="status" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 focus:ring-2 focus:ring-eco-500/20 transition-all outline-none text-sm font-medium">
+          <option value="">All Statuses</option>
+          <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>⏳ Pending</option>
+          <option value="assigned" {% if status_filter == 'assigned' %}selected{% endif %}>🚛 Assigned</option>
+          <option value="resolved" {% if status_filter == 'resolved' %}selected{% endif %}>✅ Resolved</option>
+        </select>
+      </div>
+
+      <!-- Waste Type Filter -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Waste
+          Type</label>
+        <select name="waste_type" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 focus:ring-2 focus:ring-eco-500/20 transition-all outline-none text-sm font-medium">
+          <option value="">All Types</option>
+          <option value="plastic" {% if waste_type_filter == 'plastic' %}selected{% endif %}>♻️ Plastic</option>
+          <option value="organic" {% if waste_type_filter == 'organic' %}selected{% endif %}>🍂 Organic</option>
+          <option value="metal" {% if waste_type_filter == 'metal' %}selected{% endif %}>🔩 Metal</option>
+          <option value="glass" {% if waste_type_filter == 'glass' %}selected{% endif %}>🍾 Glass</option>
+          <option value="paper" {% if waste_type_filter == 'paper' %}selected{% endif %}>📄 Paper</option>
+          <option value="electronic" {% if waste_type_filter == 'electronic' %}selected{% endif %}>💻 Electronic</option>
+          <option value="hazardous" {% if waste_type_filter == 'hazardous' %}selected{% endif %}>☢️ Hazardous</option>
+          <option value="other" {% if waste_type_filter == 'other' %}selected{% endif %}>📦 Other</option>
+        </select>
+      </div>
+
+      <!-- Severity Filter -->
+      <div>
+        <label
+          class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Severity</label>
+        <select name="severity" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 focus:ring-2 focus:ring-eco-500/20 transition-all outline-none text-sm font-medium">
+          <option value="">All Severities</option>
+          <option value="low" {% if severity_filter == 'low' %}selected{% endif %}>🟢 Low</option>
+          <option value="medium" {% if severity_filter == 'medium' %}selected{% endif %}>🟡 Medium</option>
+          <option value="high" {% if severity_filter == 'high' %}selected{% endif %}>🔴 High</option>
+        </select>
+      </div>
+
+      <!-- Date From -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">From
+          Date</label>
+        <input type="date" name="date_from" value="{{ date_from }}" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 focus:ring-2 focus:ring-eco-500/20 transition-all outline-none text-sm font-medium">
+      </div>
+
+      <!-- Date To -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">To
+          Date</label>
+        <input type="date" name="date_to" value="{{ date_to }}" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 focus:ring-2 focus:ring-eco-500/20 transition-all outline-none text-sm font-medium">
+      </div>
+
+    </div>
+
+    <!-- Apply Button (for search only, filters auto-submit) -->
+    <div class="flex justify-end">
+      <button type="submit"
+        class="px-6 py-3 bg-gradient-to-r from-eco-500 to-teal-500 text-white rounded-xl font-bold shadow-lg shadow-eco-500/30 hover:shadow-eco-500/50 hover:-translate-y-0.5 transition-all">
+        🔍 Apply Search
+      </button>
+    </div>
+
+  </form>
+</div>
+
 {% if reports %}
 <div
   class="glass-card spotlight-card magnetic-card rounded-3xl shadow-xl overflow-hidden border border-white/50 dark:border-gray-800 animate-fade-up">
@@ -80,117 +197,166 @@
                 {% endif %}
               </div>
               <div>
-                <div class="font-bold text-gray-800 dark:text-gray-100 text-base mb-0.5">{{
-                  report.get_waste_type_display }}</div>
+                <div class="font-bold text-gray-800 dark:text-gray-100 text-base mb-0.5">{{ report.get_waste_type_display }}</div>
                 <div class="text-xs text-gray-400 font-mono">ID: #{{ report.id }}</div>
                 <div class="text-xs text-gray-400 font-mono mt-0.5">{{ report.created_at|date:"M d, Y" }}</div>
+                <a href="{% url 'report_detail' report.id %}"
+                  class="text-xs text-eco-600 font-bold hover:underline mt-1 inline-block">View Full File →</a>
               </div>
             </div>
-          </td>
+  </div>
+  </td>
 
-          <!-- Description -->
-          <td class="px-6 py-4 max-w-xs">
-            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 italic">
-              "{{ report.description }}"
-            </p>
-          </td>
+  <!-- Description -->
+  <td class="px-6 py-4 max-w-xs">
+    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 italic">
+      "{{ report.description }}"
+    </p>
+  </td>
 
-          <!-- Severity -->
-          <td class="px-6 py-4 text-center">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border
+  <!-- Severity -->
+  <td class="px-6 py-4 text-center">
+    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border
               {% if report.severity == 'high' %} bg-red-50 text-red-600 border-red-100
               {% elif report.severity == 'medium' %} bg-yellow-50 text-yellow-600 border-yellow-100
               {% else %} bg-green-50 text-green-600 border-green-100 {% endif %}">
-              {{ report.severity|capfirst }}
-            </span>
-          </td>
+      {{ report.severity|capfirst }}
+    </span>
+  </td>
 
-          <!-- Status -->
-          <td class="px-6 py-4 text-center">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+  <!-- Status -->
+  <td class="px-6 py-4 text-center">
+    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
               {% if report.status == 'pending' %} bg-yellow-100 text-yellow-700
               {% elif report.status == 'assigned' %} bg-blue-100 text-blue-700
               {% else %} bg-green-100 text-green-700 {% endif %}">
-              {{ report.status }}
-            </span>
-            {% if report.assigned_worker %}
-            <div class="text-[10px] font-bold text-blue-500 mt-1">
-              👷 {{ report.assigned_worker.get_full_name|default:report.assigned_worker.username }}
-            </div>
-            {% endif %}
-          </td>
+      {{ report.status }}
+    </span>
+    {% if report.assigned_worker %}
+    <div class="text-[10px] font-bold text-blue-500 mt-1">
+      👷 {{ report.assigned_worker.get_full_name|default:report.assigned_worker.username }}
+    </div>
+    {% endif %}
+  </td>
 
-          <td class="px-6 py-4">
-            {% if report.status == "resolved" %}
-              {% if report.rating %}
-                <div class="flex flex-col gap-1">
-                  <div class="text-yellow-500 font-bold text-sm">
-                    {% for i in '12345'|make_list %}{% if forloop.counter <= report.rating %}★{% else %}☆{% endif %}{% endfor %}
-                  </div>
-                  {% if report.review_text %}
-                    <p class="text-[10px] text-gray-500 italic line-clamp-2 max-w-[150px]">"{{ report.review_text }}"</p>
-                  {% endif %}
-                </div>
-              {% else %}
-                <span class="text-[10px] text-gray-400 italic">No rating yet</span>
-              {% endif %}
-            {% else %}
-              <span class="text-[10px] text-gray-400">---</span>
-            {% endif %}
-          </td>
+  <td class="px-6 py-4">
+    {% if report.status == "resolved" %}
+    {% if report.rating %}
+    <div class="flex flex-col gap-1">
+      <div class="text-yellow-500 font-bold text-sm">
+        {% for i in '12345'|make_list %}{% if forloop.counter <= report.rating %}★{% else %}☆{% endif %}{% endfor %}
+          </div>
+          {% if report.review_text %}
+          <p class="text-[10px] text-gray-500 italic line-clamp-2 max-w-[150px]">"{{ report.review_text }}"</p>
+          {% endif %}
+      </div>
+      {% else %}
+      <span class="text-[10px] text-gray-400 italic">No rating yet</span>
+      {% endif %}
+      {% else %}
+      <span class="text-[10px] text-gray-400">---</span>
+      {% endif %}
+  </td>
 
-          <!-- Actions -->
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
+  <!-- Actions -->
+  <td class="px-6 py-4">
+    <div class="flex items-center gap-3">
 
-              {% if report.status == 'pending' %}
-              <form method="post" class="flex items-center gap-2">
-                {% csrf_token %}
-                <input type="hidden" name="report_id" value="{{ report.id }}">
+      {% if report.status == 'pending' %}
+      <form method="post" class="flex items-center gap-2">
+        {% csrf_token %}
+        <input type="hidden" name="report_id" value="{{ report.id }}">
 
-                <div class="relative w-40">
-                  <select name="worker_id" required
-                    class="w-full text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-gray-200 rounded-lg px-2 py-2 outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-colors">
-                    <option value="">Select Worker...</option>
-                    {% for worker in workers %}
-                    <option value="{{ worker.id }}">
-                      {{ worker.get_full_name|default:worker.username }} (⭐ {{ worker.average_rating|floatformat:1 }})
-                    </option>
-                    {% endfor %}
-                  </select>
-                </div>
+        <div class="relative w-40">
+          <select name="worker_id" required
+            class="w-full text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 dark:text-gray-200 rounded-lg px-2 py-2 outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-colors">
+            <option value="">Select Worker...</option>
+            {% for worker in workers %}
+            <option value="{{ worker.id }}">
+              {{ worker.get_full_name|default:worker.username }} (⭐ {{ worker.average_rating|floatformat:1 }})
+            </option>
+            {% endfor %}
+          </select>
+        </div>
 
-                <button type="submit"
-                  class="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg shadow-md hover:shadow-orange-500/30 transition-all"
-                  title="Assign">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </button>
-              </form>
-              {% endif %}
+        <button type="submit"
+          class="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg shadow-md hover:shadow-orange-500/30 transition-all"
+          title="Assign">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </button>
+      </form>
+      {% endif %}
 
-              <a href="{% url 'admin_delete_report' report.id %}"
-                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                title="Delete Report">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </a>
+      <a href="{% url 'admin_delete_report' report.id %}"
+        class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Report">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </a>
 
-            </div>
-          </td>
+    </div>
+  </td>
 
-        </tr>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+</div>
+</div>
+
+<!-- Pagination Controls -->
+{% if reports.has_other_pages %}
+<div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+  <div class="text-sm text-gray-500 dark:text-gray-400">
+    Showing <span class="font-bold text-gray-700 dark:text-gray-300">{{ reports.start_index }}</span> to
+    <span class="font-bold text-gray-700 dark:text-gray-300">{{ reports.end_index }}</span> of
+    <span class="font-bold text-gray-700 dark:text-gray-300">{{ reports.paginator.count }}</span> reports
+  </div>
+
+  <div class="flex items-center gap-2">
+    {% if reports.has_previous %}
+    <a href="?page={{ reports.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if waste_type_filter %}&waste_type={{ waste_type_filter }}{% endif %}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if quick_filter %}&quick_filter={{ quick_filter }}{% endif %}"
+      class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-eco-50 dark:hover:bg-eco-900/20 hover:border-eco-500 transition-all">
+      ← Previous
+    </a>
+    {% else %}
+    <span
+      class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 font-medium cursor-not-allowed">
+      ← Previous
+    </span>
+    {% endif %}
+
+    <div class="hidden sm:flex items-center gap-1">
+      {% for num in reports.paginator.page_range %}
+      {% if reports.number == num %}
+      <span class="px-4 py-2 rounded-lg bg-eco-500 text-white font-bold shadow-sm">{{ num }}</span>
+      {% elif num > reports.number|add:'-3' and num < reports.number|add:'3' %} <a
+        href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if waste_type_filter %}&waste_type={{ waste_type_filter }}{% endif %}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if quick_filter %}&quick_filter={{ quick_filter }}{% endif %}"
+        class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-eco-50 dark:hover:bg-eco-900/20 hover:border-eco-500 transition-all">
+        {{ num }}
+        </a>
+        {% endif %}
         {% endfor %}
-      </tbody>
-    </table>
+    </div>
+
+    {% if reports.has_next %}
+    <a href="?page={{ reports.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if waste_type_filter %}&waste_type={{ waste_type_filter }}{% endif %}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if quick_filter %}&quick_filter={{ quick_filter }}{% endif %}"
+      class="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:bg-eco-50 dark:hover:bg-eco-900/20 hover:border-eco-500 transition-all">
+      Next →
+    </a>
+    {% else %}
+    <span
+      class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 font-medium cursor-not-allowed">
+      Next →
+    </span>
+    {% endif %}
   </div>
 </div>
+{% endif %}
+
 {% else %}
 <div
   class="flex flex-col items-center justify-center py-20 bg-white/50 backdrop-blur rounded-3xl border border-dashed border-gray-300 animate-fade-up">

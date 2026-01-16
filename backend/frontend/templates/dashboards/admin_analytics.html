@@ -43,30 +43,34 @@
 </div>
 
 <!-- 📈 KPI Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 animate-fade-up">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
 
   <!-- Total -->
-  <div class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-indigo-500">
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-indigo-500 cursor-default">
     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Reports</p>
     <p class="text-4xl font-heading font-bold text-gray-800 dark:text-white">{{ total_reports }}</p>
   </div>
 
   <!-- Pending -->
-  <div class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-yellow-400">
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-yellow-400 cursor-default">
     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Pending</p>
     <p class="text-4xl font-heading font-bold text-yellow-500">{{ pending_count|default:"-" }}</p>
   </div>
 
   <!-- Resolved -->
-  <div class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-green-500">
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-green-500 cursor-default">
     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Resolved</p>
     <p class="text-4xl font-heading font-bold text-green-600">{{ resolved_count|default:"-" }}</p>
   </div>
 
   <!-- Efficiency -->
-  <div class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-orange-500">
+  <div
+    class="glass-card spotlight-card magnetic-card rounded-2xl p-6 shadow-lg border-l-4 border-orange-500 cursor-default">
     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Efficiency Ratio</p>
-    <p class="text-4xl font-heading font-bold text-orange-500">Optimum</p>
+    <p class="text-4xl font-heading font-bold text-orange-500">{{ efficiency_rate }}</p>
   </div>
 
 </div>
@@ -125,11 +129,23 @@
   const wasteTypeData = JSON.parse('{{ waste_type_counts|safe }}');
   const dailyData = JSON.parse('{{ daily_reports|safe }}');
 
-  // Colors
+  // Colors - Upgraded for High Vibrancy
   const colors = {
-    green: '#22c55e', yellow: '#facc15', orange: '#f97316',
-    blue: '#3b82f6', red: '#ef4444', purple: '#a855f7'
+    green: '#22c55e', greenNeon: '#4ade80',
+    yellow: '#facc15', yellowNeon: '#fde047',
+    orange: '#f97316', orangeNeon: '#fb923c',
+    blue: '#3b82f6', blueNeon: '#60a5fa',
+    red: '#ef4444', redNeon: '#f87171',
+    purple: '#a855f7', purpleNeon: '#c084fc'
   };
+
+  // Helper: Create Linear Gradient for Charts
+  function createChartGradient(ctx, color1, color2) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
+    return gradient;
+  }
 
   /* --- 1. Daily Trend Chart --- */
   const trendCtx = document.getElementById('dailyTrendChart').getContext('2d');
@@ -141,53 +157,88 @@
         label: 'Reports',
         data: dailyData.map(d => d.count),
         borderColor: colors.blue,
-        backgroundColor: createChartGradient(trendCtx, 'rgba(59, 130, 246, 0.4)', 'transparent'),
+        backgroundColor: createChartGradient(trendCtx, 'rgba(59, 130, 246, 0.5)', 'transparent'),
         fill: true,
         tension: 0.4,
         pointBackgroundColor: colors.blue,
-        pointRadius: 4
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        borderWidth: 3
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
-      animation: {
-        x: { type: 'number', easing: 'linear', duration: 0, from: 0 },
-        y: { type: 'number', easing: 'easeOutElastic', duration: 2000, from: 500 }
-      },
       scales: {
-        y: { beginAtZero: true, grid: { borderDash: [4, 4], color: 'rgba(156, 163, 175, 0.1)' } },
+        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
         x: { grid: { display: false } }
       }
     }
   });
 
   /* --- 2. Status Chart (Doughnut) --- */
+  const statusLabels = statusData.map(d => d.status.charAt(0).toUpperCase() + d.status.slice(1).replace('_', ' '));
+  const statusColorsMap = {
+    'pending': colors.yellow,
+    'assigned': colors.blue,
+    'resolved': colors.green
+  };
+  const statusColors = statusData.map(d => statusColorsMap[d.status.toLowerCase()] || colors.purple);
+
   new Chart(document.getElementById('statusChart'), {
     type: 'doughnut',
     data: {
-      labels: statusData.map(d => d.status.charAt(0).toUpperCase() + d.status.slice(1)),
+      labels: statusLabels,
       datasets: [{
         data: statusData.map(d => d.count),
-        backgroundColor: [colors.yellow, colors.blue, colors.green],
+        backgroundColor: statusColors,
         borderWidth: 0,
-        hoverOffset: 15
+        hoverOffset: 25,
+        borderRadius: 12,
+        spacing: 8
       }]
     },
     options: {
-      cutout: '70%',
-      plugins: { legend: { position: 'right' } },
-      animation: {
-        animateRotate: true,
-        animateScale: true,
-        duration: 2500,
-        easing: 'easeOutElastic'
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '82%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#9ca3af', font: { weight: 'bold', size: 11 }, padding: 15, usePointStyle: true, boxWidth: 8 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(17, 24, 39, 0.9)',
+          padding: 12,
+          cornerRadius: 12,
+          callbacks: {
+            label: (ctx) => ` ${ctx.label}: ${ctx.raw} reports`
+          }
+        }
+      },
+      animation: { animateRotate: true, animateScale: true, duration: 2500, easing: 'easeOutElastic' }
+    },
+    plugins: [{
+      id: 'statusCenterLabel',
+      beforeDraw: (chart) => {
+        const { ctx, width, height, chartArea: { top } } = chart;
+        ctx.save();
+        const total = statusData.reduce((acc, curr) => acc + curr.count, 0);
+        ctx.font = 'bold 2rem Outfit, sans-serif';
+        ctx.fillStyle = '#f3f4f6';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(total, width / 2, height / 2 + top - 10);
+        ctx.font = 'bold 0.7rem Outfit, sans-serif';
+        ctx.fillStyle = '#9ca3af';
+        ctx.fillText('REPORTS', width / 2, height / 2 + top + 15);
+        ctx.restore();
       }
-    }
+    }]
   });
 
-  /* --- 3. Waste Type Chart (Polar Area) --- */
+  /* --- 3. Waste Type Chart (Vibrant Polar Area) --- */
   new Chart(document.getElementById('wasteTypeChart'), {
     type: 'polarArea',
     data: {
@@ -195,22 +246,29 @@
       datasets: [{
         data: wasteTypeData.map(d => d.count),
         backgroundColor: [
-          'rgba(34, 197, 94, 0.7)',
-          'rgba(249, 115, 22, 0.7)',
-          'rgba(239, 68, 68, 0.7)',
-          'rgba(59, 130, 246, 0.7)',
-          'rgba(168, 85, 247, 0.7)'
+          'rgba(16, 185, 129, 0.8)', // Emerald
+          'rgba(245, 158, 11, 0.8)', // Amber
+          'rgba(99, 102, 241, 0.8)', // Indigo
+          'rgba(236, 72, 153, 0.8)', // Pink
+          'rgba(139, 92, 246, 0.8)'  // Violet
         ],
-        borderWidth: 1
+        borderWidth: 3,
+        borderColor: '#111827',
+        hoverBorderColor: '#fff'
       }]
     },
     options: {
-      scales: { r: { ticks: { display: false }, grid: { color: 'rgba(156, 163, 175, 0.1)' } } },
-      plugins: { legend: { position: 'right' } },
-      animation: {
-        duration: 2500,
-        easing: 'easeOutQuart'
-      }
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+          pointLabels: { display: true, color: '#9ca3af', font: { weight: 'bold', size: 10 } },
+          ticks: { display: false }
+        }
+      },
+      plugins: { legend: { display: false } }
     }
   });
 
@@ -224,22 +282,25 @@
         label: 'Reports',
         data: severityData.map(d => d.count),
         backgroundColor: [
-          createChartGradient(sevCtx, colors.green, '#15803d'),
-          createChartGradient(sevCtx, colors.yellow, '#a16207'),
-          createChartGradient(sevCtx, colors.red, '#b91c1c')
+          createChartGradient(sevCtx, '#4ade80', '#16a34a'),
+          createChartGradient(sevCtx, '#fde047', '#ca8a04'),
+          createChartGradient(sevCtx, '#f87171', '#dc2626')
         ],
-        borderRadius: 12
+        borderRadius: 15,
+        borderSkew: 5,
+        hoverBackgroundColor: [colors.greenNeon, colors.yellowNeon, colors.redNeon]
       }]
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       animation: {
-        duration: 2000,
-        easing: 'easeOutElastic',
-        delay: (context) => context.dataIndex * 200
+        duration: 2500,
+        easing: 'easeOutElastic'
       },
       scales: {
-        y: { beginAtZero: true, grid: { color: 'rgba(156, 163, 175, 0.1)' } },
+        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
         x: { grid: { display: false } }
       }
     }

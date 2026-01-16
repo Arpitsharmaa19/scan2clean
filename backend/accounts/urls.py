@@ -7,18 +7,24 @@ from .views import (
     citizen_dashboard,
     worker_dashboard,
     admin_dashboard,
-    become_worker
+    become_worker,
+    user_profile,
+    delete_account,
+    toggle_dark_mode
 )
 
 urlpatterns = [
     path('login/', login_view, name='login'),
     path('register/', register_view, name='register'),
     path('logout/', logout_view, name='logout'),
+    path('profile/', user_profile, name='user_profile'),
+    path('profile/delete/', delete_account, name='delete_account'),
 
     path('dashboard/', redirect_dashboard, name='dashboard'),
     path('dashboard/citizen/', citizen_dashboard, name='citizen_dashboard'),
     path('dashboard/worker/', worker_dashboard, name='worker_dashboard'),
     path('dashboard/admin/', admin_dashboard, name='admin_dashboard'),
     path('become-worker/', become_worker, name='become_worker'),
+    path('toggle-dark-mode/', toggle_dark_mode, name='toggle_dark_mode'),
     
 ]

@@ -153,17 +153,39 @@ def worker_dashboard(request):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        identifier = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
 
-        user = authenticate(request, username=username, password=password)
+        if not identifier or not password:
+            return render(request, 'accounts/login.html', {
+                'error': 'Please provide both username/email and password'
+            })
+
+        # Try authenticating with identifier as username first
+        user = authenticate(request, username=identifier, password=password)
+
+        # If that fails, try looking up by email (case-insensitive)
+        if not user:
+            # Check if identifier looks like an email or matches any user's email field
+            try:
+                # Use iexact for case-insensitive email matching
+                user_obj = User.objects.filter(email__iexact=identifier).first()
+                if user_obj:
+                    user = authenticate(request, username=user_obj.username, password=password)
+            except Exception:
+                pass
 
         if user:
-            login(request, user)
-            return redirect('/dashboard/')
+            if user.is_active:
+                login(request, user)
+                return redirect('/dashboard/')
+            else:
+                return render(request, 'accounts/login.html', {
+                    'error': 'This account is inactive.'
+                })
         else:
             return render(request, 'accounts/login.html', {
-                'error': 'Invalid username or password'
+                'error': 'Invalid email/username or password'
             })
 
     return render(request, 'accounts/login.html')
@@ -182,6 +204,45 @@ def register_view(request):
     return render(request, 'accounts/register.html', {'form': form})
 
 
+@login_required
+def user_profile(request):
+    # Reload user from DB to ensure fresh data (e.g. recent shell updates)
+    user = User.objects.get(pk=request.user.pk)
+
+    if request.method == "POST":
+        if 'avatar' in request.FILES:
+            user.avatar = request.FILES['avatar']
+            user.save()
+        return redirect('user_profile')
+
+    context = {}
+
+    if user.role == "citizen":
+        context["total_filed"] = WasteReport.objects.filter(citizen=user).count()
+    
+    elif user.role == "worker":
+        context["completed_tasks"] = WasteReport.objects.filter(
+            assigned_worker=user, 
+            status="resolved"
+        ).count()
+    
+    # Explicitly pass details to ensure availability
+    context["user_email"] = user.email
+    context["user_phone"] = user.phone
+
+    return render(request, 'accounts/profile.html', context)
+
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete()
+        logout(request)
+        return redirect('login')
+    return redirect('user_profile')
+
+
 def logout_view(request):
     logout(request)
     return redirect('/login/')
@@ -197,3 +258,20 @@ def become_worker(request):
     # Optional: If accessed via GET (though button should be POST), redirect back
     return redirect('citizen_dashboard')
 
+
+@login_required
+def toggle_dark_mode(request):
+    """Toggle dark mode preference and save to database"""
+    from django.http import JsonResponse
+    
+    if request.method == 'POST':
+        # Toggle the current state
+        request.user.dark_mode = not request.user.dark_mode
+        request.user.save()
+        
+        return JsonResponse({
+            'success': True,
+            'dark_mode': request.user.dark_mode
+        })
+    
+    return JsonResponse({'success': False}, status=400)

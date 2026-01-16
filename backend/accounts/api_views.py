@@ -9,9 +9,21 @@ from .models import User
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def api_login(request):
-    username = request.data.get('username')
+    identifier = request.data.get('username')
     password = request.data.get('password')
-    user = authenticate(username=username, password=password)
+    
+    # Try username first
+    user = authenticate(username=identifier, password=password)
+    
+    # Try email if username fails
+    if not user:
+        try:
+            user_obj = User.objects.filter(email__iexact=identifier).first()
+            if user_obj:
+                user = authenticate(username=user_obj.username, password=password)
+        except Exception:
+            pass
+
     if user:
         login(request, user)
         serializer = UserSerializer(user)

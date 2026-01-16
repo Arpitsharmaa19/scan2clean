@@ -1,6 +1,7 @@
 {% extends "dashboards/base_dashboard.html" %}
 
 {% block dashboard_content %}
+<!-- DEBUG: VERSION 100 -->
 
 <!-- 🦴 Skeleton Loading Overlay -->
 <div id="dashboard-skeleton"
@@ -32,22 +33,29 @@
 
 <!-- 🌈 Welcome Banner -->
 <div
-  class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-down group spotlight-card">
+  class="relative min-h-[220px] rounded-[2.5rem] p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-down group">
   <div
-    class="absolute inset-0 bg-gradient-to-r from-waste-orange to-orange-500 transition-transform duration-1000 group-hover:scale-105">
+    class="absolute inset-0 bg-gradient-to-br from-gray-900 via-emerald-950 to-teal-900 transition-transform duration-1000 group-hover:scale-105">
   </div>
-  <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+  <div class="absolute top-0 right-0 p-8 opacity-10 text-8xl">🍃</div>
+  <div class="absolute bottom-0 right-1/4 p-4 opacity-5 text-6xl">🌱</div>
   <div class="scan-beam"></div>
-  <div class="absolute -right-10 -bottom-10 text-9xl opacity-20 transform animate-sway">👋</div>
 
-  <div class="relative z-10">
-    <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm">
-      Welcome back, {{ user.username|default:"Eco-Warrior" }}!
-    </h1>
-    <p class="text-orange-50 text-lg font-medium opacity-90 max-w-xl">
-      Ready to make a difference? You've helped clear <strong>{{ resolved_reports|default:"0" }}</strong> waste spots so
-      far. Let's keep the streak going! ♻️
-    </p>
+  <div class="relative z-10 flex flex-col md:flex-row items-center gap-8 h-full">
+    <div
+      class="h-20 w-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl border border-white/20 shadow-2xl animate-float">
+      🌱
+    </div>
+    <div class="text-center md:text-left">
+      <h1 class="text-4xl md:text-5xl font-heading font-black mb-2 text-white drop-shadow-lg leading-tight">
+        Welcome Back, {{ request.user.first_name|default:request.user.username }}!
+      </h1>
+      <p class="text-emerald-50/70 text-lg font-medium max-w-xl">
+        You've helped clear <span
+          class="bg-eco-500/20 px-2 rounded-lg text-white font-black">{{resolved_reports|default:0}}</span> waste spots.
+        Let's make the world greener tonight. ♻️
+      </p>
+    </div>
   </div>
 </div>
 
@@ -59,17 +67,20 @@
 
     <!-- 📊 Compact Stats Bar -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="glass-card spotlight-card magnetic-card p-4 rounded-2xl border-l-4 border-orange-400 animate-fade-up"
+      <div
+        class="glass-card spotlight-card magnetic-card p-4 rounded-2xl border-l-4 border-emerald-400 animate-fade-up shadow-lg"
         style="animation-delay: 0.1s">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Total Filed</p>
         <p class="text-2xl font-black text-gray-800 dark:text-white">{{ total_reports|default:"0" }}</p>
       </div>
-      <div class="glass-card spotlight-card magnetic-card p-4 rounded-2xl border-l-4 border-yellow-400 animate-fade-up"
+      <div
+        class="glass-card spotlight-card magnetic-card p-4 rounded-2xl border-l-4 border-teal-400 animate-fade-up shadow-lg"
         style="animation-delay: 0.2s">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">In Progress</p>
         <p class="text-2xl font-black text-gray-800 dark:text-white">{{ pending_reports|default:"0" }}</p>
       </div>
-      <div class="glass-card spotlight-card magnetic-card p-4 rounded-2xl border-l-4 border-eco-500 animate-fade-up"
+      <div
+        class="glass-card spotlight-card magnetic-card p-4 rounded-2xl border-l-4 border-eco-500 animate-fade-up shadow-lg"
         style="animation-delay: 0.3s">
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Resolved</p>
         <p class="text-2xl font-black text-gray-800 dark:text-white">{{ resolved_reports|default:"0" }}</p>
@@ -111,8 +122,7 @@
             </div>
             <div>
               <h4 class="font-bold text-gray-800 dark:text-white text-sm">Action Needed: #{{ report.id }}</h4>
-              <p class="text-xs text-gray-500">Share code with <span class="text-eco-600 font-bold">{{
-                  report.assigned_worker.username }}</span></p>
+              <p class="text-xs text-gray-500">Share code with <span class="text-eco-600 font-bold">{{ report.assigned_worker.username }}</span></p>
             </div>
           </div>
           <div
@@ -132,7 +142,7 @@
               <div>
                 <h4 class="font-extrabold text-gray-800 dark:text-white text-sm">Cleanup Confirmed for #{{ report.id }}!
                 </h4>
-                <p class="text-[11px] text-gray-500">How was the service by <b>{{
+                <p class="text-[11px] text-gray-500 dark:text-gray-300">How was the service by <b>{{
                     report.assigned_worker.get_full_name|default:report.assigned_worker.username }}</b>?</p>
               </div>
             </div>
@@ -178,7 +188,7 @@
               🚚</div>
             <div>
               <h4 class="font-bold text-gray-800 dark:text-white text-sm">Worker on Route</h4>
-              <p class="text-xs text-gray-500">Tracking for #{{ report.id }} is active</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Tracking for #{{ report.id }} is active</p>
             </div>
           </div>
           <a href="{% url 'track_worker' report.id %}"
@@ -196,11 +206,16 @@
   <div class="space-y-8 animate-fade-in" style="animation-delay: 0.5s">
     <div class="glass-card spotlight-card rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow">
       <h4 class="text-xs font-bold text-gray-400 uppercase mb-4">Resolution Rate</h4>
-      <div class="relative h-40">
+      <div class="relative h-40 flex items-center justify-center">
         <canvas id="citizenStatusChart"></canvas>
+        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span id="resolution-percentage"
+            class="text-xl md:text-2xl lg:text-3xl font-black text-gray-800 dark:text-white leading-none">0%</span>
+          <span class="text-[7px] md:text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Resolved</span>
+        </div>
         {% if total_reports == 0 %}
         <div
-          class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl">
+          class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl z-20">
           <p class="text-gray-500 font-medium">No reports yet</p>
         </div>
         {% endif %}
@@ -210,7 +225,8 @@
     <div
       class="glass-card spotlight-card rounded-2xl p-5 border border-blue-50 dark:border-blue-900/20 bg-gradient-to-br from-blue-50/50 to-transparent animate-float">
       <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-2">Join the Fleet</h4>
-      <p class="text-[11px] text-gray-500 mb-4">Upgraded workers earn priority slots based on community ratings.</p>
+      <p class="text-[11px] text-gray-500 dark:text-gray-300 mb-4">Upgraded workers earn priority slots based on
+        community ratings.</p>
       <form method="POST" action="{% url 'become_worker' %}">
         {% csrf_token %}
         <button type="submit" onclick="return confirm('⚠️ Switch to Worker view?');"
@@ -222,7 +238,8 @@
     <div
       class="glass-card spotlight-card rounded-2xl p-5 border border-red-50 dark:border-red-900/20 bg-gradient-to-br from-red-50/50 to-transparent hover:scale-[1.02] transition-transform">
       <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-2">Facing issues?</h4>
-      <p class="text-[11px] text-gray-500 mb-4">Report bugs or technical problems directly to our admin team.</p>
+      <p class="text-[11px] text-gray-500 dark:text-gray-300 mb-4">Report bugs or technical problems directly to our
+        admin team.</p>
       <a href="{% url 'report_problem' %}"
         class="block w-full py-2 bg-red-500 text-white text-center rounded-xl text-xs font-bold hover:bg-red-600 transition-all shadow-lg hover:shadow-red-500/40">Report
         a Problem</a>
@@ -284,22 +301,55 @@
     const canvas = document.getElementById('citizenStatusChart');
     if (canvas) {
       const ctx = canvas.getContext('2d');
+      const pending = parseInt(statsElem.dataset.pending || 0);
+      const assigned = parseInt(statsElem.dataset.assigned || 0);
+      const resolved = parseInt(statsElem.dataset.resolved || 0);
+      const total = pending + assigned + resolved;
+      const percentage = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+      // Update the center label
+      const percentLabel = document.getElementById('resolution-percentage');
+      if (percentLabel) {
+        // Animate the number
+        let current = 0;
+        const duration = 2000;
+        const stepTime = 2000 / percentage;
+        const timer = setInterval(() => {
+          if (current >= percentage) {
+            clearInterval(timer);
+          } else {
+            current++;
+            percentLabel.innerText = current + '%';
+          }
+        }, stepTime || 0);
+        percentLabel.innerText = percentage + '%';
+      }
+
       new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: ['Pending', 'Assigned', 'Resolved'],
           datasets: [{
-            data: [parseInt(statsElem.dataset.pending), parseInt(statsElem.dataset.assigned), parseInt(statsElem.dataset.resolved)],
+            data: [pending, assigned, resolved],
             backgroundColor: ['#facc15', '#3b82f6', '#22c55e'],
             hoverBackgroundColor: ['#fde047', '#60a5fa', '#4ade80'],
             borderWidth: 0,
-            hoverOffset: 15
+            hoverOffset: 15,
+            borderRadius: 4
           }]
         },
         options: {
-          cutout: '75%',
+          cutout: '82%',
           plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: {
+              enabled: true,
+              callbacks: {
+                label: function (context) {
+                  return ` ${context.label}: ${context.raw} reports`;
+                }
+              }
+            }
           },
           maintainAspectRatio: false,
           animation: {

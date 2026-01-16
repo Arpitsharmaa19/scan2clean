@@ -10,6 +10,55 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
+<style>
+  /* 🌈 Snap-map Aesthetics */
+  .modern-popup .leaflet-popup-content-wrapper {
+    border-radius: 24px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .dark .modern-popup .leaflet-popup-content-wrapper {
+    background: rgba(17, 24, 39, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .modern-popup .leaflet-popup-content {
+    margin: 0;
+    width: 240px !important;
+  }
+
+  .modern-popup .leaflet-popup-tip {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+  }
+
+  .dark .modern-popup .leaflet-popup-tip {
+    background: rgba(17, 24, 39, 0.9);
+  }
+
+  .cluster-icon div {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .cluster-icon:hover div {
+    transform: scale(1.15);
+  }
+
+  /* Heatmap Transition */
+  #map canvas {
+    transition: opacity 0.8s ease;
+  }
+
+  .marker-pulse:hover div {
+    transform: scale(1.3);
+  }
+</style>
+
 <!-- 🦴 Skeleton Loading Overlay -->
 <div id="dashboard-skeleton"
   class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
@@ -38,9 +87,7 @@
     <div class="flex items-center gap-2">
       <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">🌍 Global Map</h1>
       <span
-        class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 text-xs px-2 py-1 rounded-full font-bold">{{
-        reports|length }}
-        Reports</span>
+        class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 text-xs px-2 py-1 rounded-full font-bold">{{ reports|length }} Reports</span>
     </div>
 
     <!-- Filters Form -->
@@ -50,53 +97,65 @@
       <select name="days" onchange="this.form.submit()"
         class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
         <option value="" {% if not request.GET.days %}selected{% endif %}>📅 All Time</option>
-        <option value="1" {% if request.GET.days == '1' %}selected{% endif %}>Last 24 Hours</option>
-        <option value="7" {% if request.GET.days == '7' %}selected{% endif %}>Last 7 Days</option>
-        <option value="30" {% if request.GET.days == '30' %}selected{% endif %}>Last 30 Days</option>
+        <option value="1" {% if request.GET.days == "1" %}selected{% endif %}>Last 24 Hours</option>
+        <option value="7" {% if request.GET.days == "7" %}selected{% endif %}>Last 7 Days</option>
+        <option value="30" {% if request.GET.days == "30" %}selected{% endif %}>Last 30 Days</option>
       </select>
 
       <!-- Status Filter -->
       <select name="status" onchange="this.form.submit()"
         class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
         <option value="" {% if not request.GET.status %}selected{% endif %}>📌 All Status</option>
-        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
-        <option value="assigned" {% if request.GET.status == 'assigned' %}selected{% endif %}>Assigned</option>
-        <option value="resolved" {% if request.GET.status == 'resolved' %}selected{% endif %}>Resolved</option>
+        <option value="pending" {% if request.GET.status == "pending" %}selected{% endif %}>Pending</option>
+        <option value="assigned" {% if request.GET.status == "assigned" %}selected{% endif %}>Assigned</option>
+        <option value="resolved" {% if request.GET.status == "resolved" %}selected{% endif %}>Resolved</option>
       </select>
 
       <!-- Severity Filter -->
       <select name="severity" onchange="this.form.submit()"
         class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
         <option value="" {% if not request.GET.severity %}selected{% endif %}>⚠️ All Severity</option>
-        <option value="high" {% if request.GET.severity == 'high' %}selected{% endif %}>High</option>
-        <option value="medium" {% if request.GET.severity == 'medium' %}selected{% endif %}>Medium</option>
-        <option value="low" {% if request.GET.severity == 'low' %}selected{% endif %}>Low</option>
+        <option value="high" {% if request.GET.severity == "high" %}selected{% endif %}>High</option>
+        <option value="medium" {% if request.GET.severity == "medium" %}selected{% endif %}>Medium</option>
+        <option value="low" {% if request.GET.severity == "low" %}selected{% endif %}>Low</option>
       </select>
 
       <a href="{% url 'waste_map' %}" class="text-gray-400 hover:text-red-500 px-2 font-bold">✕ Clear</a>
     </form>
 
     <!-- Map Mode Toggle -->
-    <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+    <div
+      class="flex bg-gray-100 dark:bg-gray-700/50 rounded-full p-1 border border-gray-200 dark:border-gray-700 shadow-inner">
       <button onclick="setMode('markers')" id="btn-markers"
-        class="px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-100">
-        📍 Markers
+        class="px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 bg-white dark:bg-eco-600 text-eco-600 dark:text-white shadow-sm ring-1 ring-black/5">
+        <span>📍</span> Markers
       </button>
       <button onclick="setMode('heatmap')" id="btn-heatmap"
-        class="px-3 py-1.5 rounded-md text-xs font-bold transition-all text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100">
-        🔥 Heatmap
+        class="px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-orange-500">
+        <span>🔥</span> Heatmap
       </button>
     </div>
 
   </div>
 
   <!-- 🗺️ Map Container -->
-  <div class="relative flex-grow rounded-2xl overflow-hidden shadow-2xl border-2 border-white dark:border-gray-700">
-    <div id="map" class="absolute inset-0 z-0 bg-gray-100 dark:bg-gray-800"></div>
+  <div
+    class="relative flex-grow rounded-3xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 group">
+    <div id="map" class="absolute inset-0 z-0 bg-[#f8f9fa] dark:bg-gray-900 transition-opacity duration-500"></div>
+
+    <!-- 🏷️ Map Flair Overlay (Snap-map style) -->
+    <div class="absolute top-6 left-6 z-[1000] pointer-events-none flex flex-col gap-2">
+      <div
+        class="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white/20 flex items-center gap-2">
+        <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+        <span class="text-[10px] font-black text-gray-800 dark:text-white uppercase tracking-widest">Live
+          Monitoring</span>
+      </div>
+    </div>
 
     <!-- Floating 'My Location' Button -->
     <button onclick="locateUser()"
-      class="absolute bottom-6 right-6 z-[1000] bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-110 transition-transform text-blue-600 dark:text-blue-400"
+      class="absolute bottom-6 right-6 z-[1000] bg-white dark:bg-gray-800 p-4 rounded-full shadow-2xl hover:bg-eco-50 dark:hover:bg-gray-700 hover:scale-110 active:scale-95 transition-all text-eco-600 dark:text-eco-400 ring-4 ring-white/20"
       title="My Location">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -118,14 +177,27 @@
   const reports = JSON.parse(document.getElementById('reports-data').textContent);
 
   // --- Map Init ---
-  const map = L.map("map").setView([20.5937, 78.9629], 5);
+  const map = L.map("map", {
+    zoomControl: false,
+    scrollWheelZoom: true
+  }).setView([20.5937, 78.9629], 5);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap"
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    attribution: "© CartoDB"
   }).addTo(map);
 
   // --- Layers ---
-  const markersLayer = L.markerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: false });
+  const markersLayer = L.markerClusterGroup({
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    iconCreateFunction: function (cluster) {
+      return L.divIcon({
+        html: `<div class="bg-eco-600 text-white rounded-full flex items-center justify-center font-bold border-4 border-white shadow-lg text-xs" style="width:36px;height:36px;">${cluster.getChildCount()}</div>`,
+        className: 'cluster-icon',
+        iconSize: L.point(36, 36)
+      });
+    }
+  });
   let heatLayer = null;
 
   // --- Icons ---
@@ -135,38 +207,40 @@
     else if (severity === "Medium") color = "#f59e0b";
 
     return L.divIcon({
-      html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 0 5px rgba(0,0,0,0.3);"></div>`,
-      className: ''
+      html: `<div style="background:${color};width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease;"></div>`,
+      className: 'marker-pulse'
     });
   }
 
   // --- Render Markers ---
   function renderMarkers() {
     markersLayer.clearLayers();
+    if (heatLayer) map.removeLayer(heatLayer);
 
     reports.forEach(r => {
       const popup = `
-        <div class="w-48">
-          <div class="relative h-24 mb-2 overflow-hidden rounded-lg">
-            ${r.image ? `<img src="${r.image}" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gray-200"></div>'}
-            <div class="absolute bottom-0 left-0 bg-black/50 text-white text-[10px] px-2 py-1 font-bold">
+        <div class="w-56 p-2">
+          <div class="relative h-32 mb-3 overflow-hidden rounded-2xl shadow-inner">
+            ${r.image ? `<img src="${r.image}" class="w-full h-full object-cover">` : '<div class="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">📸</div>'}
+            <div class="absolute top-2 right-2 bg-white/90 dark:bg-gray-900/90 text-[10px] px-2 py-1 rounded-full font-black uppercase text-eco-600 shadow-sm">
               ${r.waste_type}
             </div>
           </div>
-          <div class="mb-2">
-            <span class="text-xs font-bold uppercase ${r.severity === 'High' ? 'text-red-500' : 'text-gray-600'}">${r.severity} Severity</span>
-            <br>
-            <span class="text-xs text-gray-400">${r.created_at}</span>
+          <div class="mb-3 space-y-1">
+            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">${r.severity} Severity</h4>
+            <p class="text-[10px] text-gray-500 font-bold">${r.created_at}</p>
           </div>
-          <a href="${r.detail_url}" class="block text-center bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1.5 rounded transition">View Details</a>
+          <a href="${r.detail_url}" class="block w-full text-center bg-eco-600 hover:bg-eco-700 text-white text-[10px] font-black uppercase tracking-widest py-2.5 rounded-xl transition-all shadow-lg shadow-eco-500/20 active:scale-95">Open Report</a>
         </div>
       `;
-      const m = L.marker([r.lat, r.lng], { icon: getIcon(r.severity) }).bindPopup(popup);
+      const m = L.marker([r.lat, r.lng], { icon: getIcon(r.severity) }).bindPopup(popup, {
+        className: 'modern-popup',
+        maxWidth: 240
+      });
       markersLayer.addLayer(m);
     });
 
     map.addLayer(markersLayer);
-    if (heatLayer) map.removeLayer(heatLayer);
 
     // Fit bounds if markers exist
     if (markersLayer.getLayers().length) {
@@ -179,24 +253,35 @@
     map.removeLayer(markersLayer);
 
     if (!heatLayer) {
-      // [lat, lng, intensity]
-      // Intensity based on severity? High=1.0, Med=0.6, Low=0.3
       const points = reports.map(r => {
-        let intensity = 0.4;
+        let intensity = 0.5;
         if (r.severity === 'High') intensity = 1.0;
-        else if (r.severity === 'Medium') intensity = 0.7;
+        else if (r.severity === 'Medium') intensity = 0.8;
         return [r.lat, r.lng, intensity];
       });
 
       heatLayer = L.heatLayer(points, {
-        radius: 25,
-        blur: 15,
-        maxZoom: 17,
-        gradient: { 0.4: 'lime', 0.65: 'yellow', 1: 'red' }
+        radius: 35,
+        blur: 25,
+        maxOpacity: 0.85,
+        max: 1.0,
+        gradient: {
+          0.0: '#00ffff', // Cyan
+          0.2: '#00ff00', // Green
+          0.4: '#ffff00', // Yellow
+          0.6: '#ffa500', // Orange
+          1.0: '#ff0000'  // Red
+        }
       });
     }
 
     map.addLayer(heatLayer);
+
+    // Zoom out slightly to see the patterns
+    if (reports.length > 0) {
+      const bounds = L.latLngBounds(reports.map(r => [r.lat, r.lng]));
+      map.fitBounds(bounds, { padding: [100, 100], maxZoom: 14 });
+    }
   }
 
   // --- Toggle Mode ---
@@ -205,12 +290,12 @@
     const btnH = document.getElementById('btn-heatmap');
 
     if (mode === 'markers') {
-      btnM.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm bg-white text-gray-800";
-      btnH.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all text-gray-500 hover:text-gray-800";
+      btnM.className = "px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 bg-white dark:bg-eco-600 text-eco-600 dark:text-white shadow-sm ring-1 ring-black/5";
+      btnH.className = "px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-orange-500";
       renderMarkers();
     } else {
-      btnH.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all shadow-sm bg-white text-red-600";
-      btnM.className = "px-3 py-1.5 rounded-md text-xs font-bold transition-all text-gray-500 hover:text-gray-800";
+      btnH.className = "px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 bg-white dark:bg-orange-600 text-orange-600 dark:text-white shadow-sm ring-1 ring-black/5";
+      btnM.className = "px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-eco-600";
       renderHeatmap();
     }
   }

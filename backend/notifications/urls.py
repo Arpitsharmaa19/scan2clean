@@ -5,7 +5,9 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'', NotificationViewSet, basename='notification')
 
+from . import views
+
 urlpatterns = [
-    # We can still keep simple paths if needed, but the router is better
-    # However, since the user wants REST, let's use the router
+    path('center/', views.notification_center, name='notification_center'),
+    path('mark-read/', views.mark_notifications_read, name='mark_notifications_read'),
 ] + router.urls

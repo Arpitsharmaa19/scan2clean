@@ -29,13 +29,30 @@
       document.documentElement.classList.remove('dark');
     }
 
-    function toggleDarkMode() {
-      if (document.documentElement.classList.contains('dark')) {
+    async function toggleDarkMode() {
+      const isDark = document.documentElement.classList.contains('dark');
+
+      // Toggle UI immediately for smooth UX
+      if (isDark) {
         document.documentElement.classList.remove('dark');
         localStorage.theme = 'light';
       } else {
         document.documentElement.classList.add('dark');
         localStorage.theme = 'dark';
+      }
+
+      // Save to database (async, non-blocking)
+      try {
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1];
+        await fetch('/toggle-dark-mode/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (err) {
+        console.error('Failed to save dark mode preference:', err);
       }
     }
   </script>
@@ -248,11 +265,12 @@
 
     /* 🧲 Magnetic Magnetic Effect on Hover */
     .magnetic-card {
-      transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, box-shadow;
     }
 
     .magnetic-card:hover {
-      transform: translateY(-8px) scale(1.02);
+      transform: translateY(-8px) scale(1.02) !important;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     }
 
@@ -481,8 +499,8 @@
         </button>
         {% if user.is_authenticated %}
         <div class="hidden md:flex flex-col text-right mr-2">
-          <span class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ user.username }}</span>
-          <span class="text-xs text-eco-600 uppercase tracking-wider font-semibold">{{ user.role }}</span>
+          <span class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ request.user.username }}</span>
+          <span class="text-xs text-eco-600 uppercase tracking-wider font-semibold">{{ request.user.role }}</span>
         </div>
         <a href="{% url 'logout' %}"
           class="px-4 py-2 rounded-full border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 transition font-medium text-sm flex items-center gap-2">
@@ -493,7 +511,8 @@
           </svg>
         </a>
         {% else %}
-        <a href="{% url 'login' %}" class="text-gray-600 hover:text-eco-600 font-medium mr-4">Login</a>
+        <a href="{% url 'login' %}"
+          class="text-gray-600 dark:text-gray-300 hover:text-eco-600 dark:hover:text-white font-medium mr-4 transition-colors">Login</a>
         <a href="{% url 'register' %}"
           class="bg-eco-600 text-white px-5 py-2.5 rounded-full hover:bg-eco-700 transition shadow-lg shadow-eco-500/30 font-medium">Get
           Started</a>

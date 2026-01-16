@@ -21,3 +21,8 @@ def get_notifications(request):
 def mark_notifications_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return JsonResponse({'status': 'ok'})
+
+@login_required
+def notification_center(request):
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'notifications/center.html', {'notifications': notifications})

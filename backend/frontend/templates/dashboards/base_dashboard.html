@@ -1,13 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="flex min-h-[calc(100vh-6rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8 relative">
+
+<!-- 🌓 Dark Mode Initialization & Smooth Transitions -->
+<script>
+  // Initialize dark mode from user preference (server-side)
+  const userDarkMode = {{ request.user.dark_mode| lower }};
+  if (userDarkMode) {
+    document.documentElement.classList.add('dark');
+  }
+</script>
+
+<style>
+  /* Smooth transitions for dark mode */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+  }
+
+  /* Prevent transition on page load */
+  .preload * {
+    transition: none !important;
+  }
+</style>
+
+<!-- 🍃 Leaf Animation Canvas -->
+<canvas id="leaves-canvas" class="fixed inset-0 pointer-events-none z-[1]"></canvas>
+
+<div class="flex min-h-[calc(100vh-6rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8 relative z-10">
   <!-- Global Background for Dashboards -->
   <div
-    class="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-eco-50/50 to-transparent dark:from-eco-900/20 dark:to-transparent -z-10 rounded-b-3xl">
+    class="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-eco-50/50 to-transparent dark:from-eco-900/20 dark:to-transparent -z-50 rounded-b-3xl">
+  </div>
+
+  <!-- 🌈 Premium Glows -->
+  <div
+    class="absolute top-1/4 -left-20 w-80 h-80 bg-eco-500/10 rounded-full blur-[120px] animate-pulse -z-50 pointer-events-none">
   </div>
   <div
-    class="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30 dark:opacity-10 pointer-events-none -z-20">
+    class="absolute bottom-1/4 -right-20 w-80 h-80 bg-teal-500/10 rounded-full blur-[120px] animate-pulse -z-50 pointer-events-none"
+    style="animation-delay: 2s"></div>
+
+  <div
+    class="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30 dark:opacity-10 pointer-events-none -z-50">
   </div>
 
   <!-- 📚 MODERN SIDEBAR -->
@@ -25,28 +59,28 @@
 
         {% if request.user.role == 'admin' %}
         <a href="{% url 'admin_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">💎</span> Dashboard
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-700 dark:text-gray-300 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">💎</span> Dashboard
         </a>
         <a href="{% url 'admin_all_reports' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">🛠️</span> Manage Reports
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">🛠️</span> Manage Reports
         </a>
         <a href="{% url 'admin_analytics' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">📊</span> Analytics
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">📊</span> Analytics
         </a>
         <a href="{% url 'worker_performance_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">👷</span> Worker Performance
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">👷</span> Performance
         </a>
         <a href="{% url 'waste_map' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">🗺️</span> Global Map
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-900/40 dark:hover:text-teal-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">🗺️</span> Global Map
         </a>
         <a href="{% url 'admin_support_tickets' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">🎫</span> Support Tickets
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">🎫</span> Tickets
         </a>
         <!-- Django Admin Link -->
         <div class="my-4 border-t border-gray-100 dark:border-gray-700"></div>
@@ -58,49 +92,71 @@
 
         {% if request.user.role == 'citizen' %}
         <a href="{% url 'citizen_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">🏡</span> Home
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-700 dark:text-gray-300 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">🏡</span> Home
         </a>
         <a href="{% url 'report_waste' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-eco-500 to-teal-500 text-white shadow-lg shadow-eco-500/30 hover:shadow-eco-500/50 transition-all duration-200 font-bold">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-eco-500 to-teal-500 text-white shadow-lg shadow-eco-500/30 hover:shadow-eco-500/50 hover:-translate-y-0.5 transition-all duration-200 font-black text-sm uppercase tracking-wider">
           <span class="animate-bounce">📸</span> Report Waste
         </a>
         <a href="{% url 'my_reports' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">📂</span> My Reports
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">📂</span> My Reports
         </a>
         <a href="{% url 'waste_map' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">🗺️</span> Map View
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">🗺️</span> Map View
         </a>
         <a href="{% url 'report_problem' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">🛠️</span> Report Problem
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">🛠️</span> Support
         </a>
         {% endif %}
 
         {% if request.user.role == 'worker' %}
         <a href="{% url 'worker_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">📋</span> Dashboard
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-700 dark:text-gray-300 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">📋</span> Dashboard
         </a>
         <a href="{% url 'worker_assigned_reports' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-medium">
-          <span class="group-hover:scale-110 transition-transform">🚛</span> Assigned Jobs
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 transition-all duration-200 group text-gray-700 dark:text-gray-300 font-bold text-sm">
+          <span class="group-hover:scale-125 transition-transform duration-300">🚛</span> Assigned Jobs
         </a>
         {% endif %}
 
       </nav>
 
       <!-- User Card -->
-      <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex items-center gap-3">
-        <div
-          class="h-10 w-10 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-300">
-          {{ user.username|first|upper }}
-        </div>
-        <div class="flex flex-col">
-          <span class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ user.username }}</span>
-          <span class="text-xs text-gray-400 dark:text-gray-500 capitalize">{{ user.role }} Account</span>
+      <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
+        <div class="flex items-center gap-2 group/user">
+          <a href="{% url 'user_profile' %}"
+            class="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+            {% if request.user.avatar %}
+            <img src="{{ request.user.avatar.url }}"
+              class="h-10 w-10 flex-shrink-0 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-md token-image">
+            {% else %}
+            <div
+              class="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-tr from-eco-500 to-teal-500 flex items-center justify-center text-sm font-bold text-white shadow-md">
+              {{ request.user.username|first|upper }}
+            </div>
+            {% endif %}
+            <div class="flex flex-col min-w-0">
+              <span class="text-sm font-bold text-gray-900 dark:text-white block truncate"
+                title="{{user.username}}">{{user.username}}</span>
+              <span class="text-[10px] text-gray-500 dark:text-gray-400 font-bold tracking-tight block">
+                {{ user.role|title }}
+              </span>
+            </div>
+          </a>
+          <a href="{% url 'logout' %}"
+            class="p-2 flex-shrink-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+            title="Logout">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </a>
         </div>
       </div>
 
@@ -116,6 +172,21 @@
       </div>
       <div></div> <!-- Spacer -->
       <div class="flex items-center gap-4">
+        <!-- 🌓 Dark Mode Toggle -->
+        <button onclick="toggleDarkMode()"
+          class="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500 hidden dark:block" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 block dark:hidden" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
         <!-- 🔔 Notification Icon -->
         <div class="relative group">
           <button id="notification-bell"
@@ -126,7 +197,7 @@
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             <span id="notification-pulse"
-              class="absolute top-2 right-2 h-2.5 w-2.5 bg-red-500 border-2 border-white dark:border-gray-800 rounded-full animate-pulse {% with unread_count=user.notifications.filter.is_read.False.count %}{% if unread_count == 0 %}hidden{% endif %}{% endwith %}"></span>
+              class="absolute top-2 right-2 h-2.5 w-2.5 bg-red-50 border-2 border-white dark:border-gray-800 rounded-full animate-pulse hidden"></span>
           </button>
 
           <div id="notification-panel"
@@ -137,26 +208,43 @@
               <button onclick="markAllAsRead()"
                 class="text-xs text-eco-600 dark:text-eco-400 font-bold hover:underline">Mark all as read</button>
             </div>
-            <div id="notification-list" class="max-h-96 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700">
+            <div id="notification-list" class="max-h-64 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700">
               <div class="p-8 text-center text-gray-400 text-sm">Loading...</div>
+            </div>
+            <div class="p-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 text-center">
+              <a href="{% url 'notification_center' %}"
+                class="text-xs font-bold text-eco-600 dark:text-eco-400 hover:underline">View All History</a>
             </div>
           </div>
         </div>
 
+        <div class="hidden md:flex flex-col text-right mr-1">
+          <span
+            class="text-[11px] font-black text-gray-800 dark:text-white uppercase leading-none">{{user.username}}</span>
+          <span class="text-[9px] font-bold text-eco-600 uppercase tracking-tighter">{{user.role}}</span>
+        </div>
+
         <a href="{% url 'logout' %}"
-          class="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300">
-          <span>🚪</span> <span class="hidden sm:inline">Logout</span>
+          class="flex items-center gap-2 px-3 md:px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 text-[10px] font-black uppercase tracking-[0.15em]">
+          <span class="hidden sm:inline text-[9px] font-black">Logout</span> 🚪
         </a>
       </div>
     </header>
 
     <style>
+      /* 🤫 Hide Global Header & Spacer from base.html */
+      header.fixed.w-full.top-0,
+      .h-24 {
+        display: none !important;
+      }
+
+      /* Adjust main padding since we hid the global h-24 spacer */
+      body {
+        padding-top: 0 !important;
+      }
+
       @media (max-width: 1024px) {
         header.fixed.glass {
-          display: none !important;
-        }
-
-        div.h-24 {
           display: none !important;
         }
       }
@@ -248,6 +336,73 @@
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // 🍃 Falling Leaves Particle System
+    const leafCanvas = document.getElementById('leaves-canvas');
+    if (leafCanvas) {
+      const leafCtx = leafCanvas.getContext('2d');
+      let leaves = [];
+
+      function resizeLeafCanvas() {
+        leafCanvas.width = window.innerWidth;
+        leafCanvas.height = window.innerHeight;
+      }
+
+      class Leaf {
+        constructor() {
+          this.reset();
+          this.y = Math.random() * leafCanvas.height;
+        }
+        reset() {
+          this.x = Math.random() * leafCanvas.width;
+          this.y = -40;
+          this.size = Math.random() * 8 + 6;
+          this.speedY = Math.random() * 1.2 + 0.5;
+          this.speedX = Math.random() * 1.5 - 0.75;
+          this.rotation = Math.random() * 360;
+          this.rotationSpeed = Math.random() * 1.5 - 0.75;
+          this.opacity = Math.random() * 0.3 + 0.05;
+          this.color = Math.random() > 0.6 ? '#22c55e' : (Math.random() > 0.5 ? '#16a34a' : '#14b8a6');
+        }
+        update() {
+          this.y += this.speedY;
+          this.x += Math.sin(this.y / 60) * 1.5;
+          this.rotation += this.rotationSpeed;
+          if (this.y > leafCanvas.height + 40) this.reset();
+        }
+        draw() {
+          leafCtx.save();
+          leafCtx.translate(this.x, this.y);
+          leafCtx.rotate(this.rotation * Math.PI / 180);
+          leafCtx.globalAlpha = this.opacity;
+          leafCtx.fillStyle = this.color;
+          leafCtx.beginPath();
+          leafCtx.moveTo(0, 0);
+          leafCtx.quadraticCurveTo(this.size, -this.size, this.size * 2, 0);
+          leafCtx.quadraticCurveTo(this.size, this.size, 0, 0);
+          leafCtx.fill();
+          leafCtx.restore();
+        }
+      }
+
+      function initLeaves() {
+        leaves = Array.from({ length: 30 }, () => new Leaf());
+        resizeLeafCanvas();
+        animateLeaves();
+      }
+
+      function animateLeaves() {
+        leafCtx.clearRect(0, 0, leafCanvas.width, leafCanvas.height);
+        leaves.forEach(leaf => {
+          leaf.update();
+          leaf.draw();
+        });
+        requestAnimationFrame(animateLeaves);
+      }
+
+      window.addEventListener('resize', resizeLeafCanvas);
+      initLeaves();
+    }
+
     const bell = document.getElementById('notification-bell');
     const panel = document.getElementById('notification-panel');
     const list = document.getElementById('notification-list');
@@ -272,7 +427,6 @@
       try {
         const response = await fetch('/api/notifications/');
         const data = await response.json();
-        // Handle DRF pagination (data.results) or direct list
         const notifications = data.results || data;
         renderNotifications(notifications);
       } catch (err) { console.error('Fetch error:', err); }
@@ -296,7 +450,6 @@
 
     async function markAllAsRead() {
       try {
-        // Get CSRF from cookie
         const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1];
         await fetch('/api/notifications/mark_all_as_read/', {
           method: 'POST',
