@@ -30,7 +30,8 @@
 </script>
 
 <!-- 🌈 Admin Header -->
-<div class="relative rounded-3xl p-10 text-white mb-10 overflow-hidden shadow-2xl animate-fade-up group spotlight-card">
+<div
+  class="relative rounded-2xl md:rounded-3xl p-6 md:p-10 text-white mb-6 md:mb-10 overflow-hidden shadow-2xl animate-fade-up group spotlight-card">
   <!-- Dynamic Background -->
   <div
     class="absolute inset-0 bg-gradient-to-br from-gray-900 via-emerald-950 to-teal-950 transition-transform duration-1000 group-hover:scale-105">
@@ -41,17 +42,18 @@
     class="absolute -right-10 -bottom-10 text-9xl opacity-10 transform rotate-12 group-hover:rotate-6 transition-transform duration-700">
     ⚙️</div>
 
-  <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+  <div class="relative z-10 flex flex-col md:flex-row items-center gap-5 md:gap-8">
     <div
-      class="h-20 w-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center text-4xl border border-white/20 shadow-2xl animate-float">
+      class="h-14 w-14 md:h-20 md:w-20 bg-white/10 backdrop-blur-md rounded-2xl md:rounded-3xl flex items-center justify-center text-2xl md:text-4xl border border-white/20 shadow-2xl animate-float">
       💎
     </div>
 
-    <div>
-      <h1 class="text-4xl font-heading font-bold mb-2 text-white drop-shadow-sm flex items-center gap-3">
+    <div class="text-center md:text-left">
+      <h1
+        class="text-xl md:text-4xl font-heading font-bold mb-1 text-white drop-shadow-sm flex items-center justify-center md:justify-start gap-3">
         Welcome, {{ request.user.first_name|default:request.user.username }}
       </h1>
-      <p class="text-gray-100 text-lg font-medium opacity-90">
+      <p class="text-gray-100 text-[10px] md:text-lg font-medium opacity-90">
         System Overview • <span class="text-green-400 font-bold">● Operational</span>
       </p>
     </div>
@@ -111,61 +113,6 @@
 
 </div>
 
-<!-- 🧪 System Health & Trends -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-
-  <!-- Uptime Sparkline -->
-  <div
-    class="glass-card spotlight-card magnetic-card rounded-2xl p-5 border-t-2 border-green-500 shadow-md cursor-default">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">System Uptime</h4>
-        <p class="text-xl font-black text-gray-800 dark:text-white">99.98%</p>
-      </div>
-      <div class="h-8 w-24">
-        <canvas id="uptimeSparkline"></canvas>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-      <span class="text-[9px] font-bold text-green-600 uppercase">All systems operational</span>
-    </div>
-  </div>
-
-  <!-- Latency Sparkline -->
-  <div
-    class="glass-card spotlight-card magnetic-card rounded-2xl p-5 border-t-2 border-blue-500 shadow-md cursor-default">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">API Latency</h4>
-        <p class="text-xl font-black text-gray-800 dark:text-white">42ms</p>
-      </div>
-      <div class="h-8 w-24">
-        <canvas id="latencySparkline"></canvas>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-[9px] font-bold text-blue-600 uppercase">⚡ Optimized routing active</span>
-    </div>
-  </div>
-
-  <!-- Socket Connections -->
-  <div
-    class="glass-card spotlight-card magnetic-card rounded-2xl p-5 border-t-2 border-purple-500 shadow-md cursor-default">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Live Nodes</h4>
-        <p class="text-xl font-black text-gray-800 dark:text-white">{{ active_workers|default:"12" }}</p>
-      </div>
-      <div class="h-8 w-24">
-        <canvas id="nodesSparkline"></canvas>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="text-[9px] font-bold text-purple-600 uppercase">📡 System Nodes Verified</span>
-    </div>
-  </div>
-</div>
 
 <!-- 📈 Data Visualization -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
@@ -291,44 +238,6 @@
     animateValue('count-reports', 0, Number("{{ total_reports|default:'0' }}"), 2000);
     animateValue('count-pending', 0, Number("{{ pending_reports|default:'0' }}"), 1500);
     animateValue('count-resolved', 0, Number("{{ resolved_reports|default:'0' }}"), 2000);
-
-    // --- Sparkline Helper (Upgraded) ---
-    function createSparkline(id, data, color) {
-      const canvas = document.getElementById(id);
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-
-      const gradient = ctx.createLinearGradient(0, 0, 0, 40)
-      gradient.addColorStop(0, color + '70');
-      gradient.addColorStop(1, 'transparent');
-
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: new Array(data.length).fill(''),
-          datasets: [{
-            data: data,
-            borderColor: color,
-            borderWidth: 2,
-            pointRadius: 0,
-            fill: true,
-            backgroundColor: gradient,
-            tension: 0.45
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { enabled: false } },
-          scales: { x: { display: false }, y: { display: false } },
-          animation: { duration: 2000, easing: 'easeOutQuart' }
-        }
-      });
-    }
-
-    createSparkline('uptimeSparkline', [99, 99.5, 99.2, 99.8, 99.7, 99.9, 99.8], '#22c55e');
-    createSparkline('latencySparkline', [60, 45, 50, 35, 48, 42, 40], '#3b82f6');
-    createSparkline('nodesSparkline', [10, 12, 11, 14, 13, 15, 12], '#a855f7');
 
     // Status Chart
     const pendingVal = Number("{{ pending_reports|default:'0' }}");

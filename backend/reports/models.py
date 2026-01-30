@@ -10,6 +10,10 @@ class WasteReport(models.Model):
     WASTE_TYPE_CHOICES = [
         ('plastic', 'Plastic'),
         ('organic', 'Organic'),
+        ('metal', 'Metal'),
+        ('glass', 'Glass'),
+        ('paper', 'Paper'),
+        ('electronic', 'Electronic'),
         ('construction', 'Construction'),
         ('ewaste', 'E-Waste'),
         ('hazardous', 'Hazardous'),
@@ -48,17 +52,19 @@ class WasteReport(models.Model):
     # ====================
     # REPORT DETAILS
     # ====================
-    image = models.ImageField(upload_to='waste_images/')
-    description = models.TextField()
+    image = models.ImageField(upload_to='waste_images/', null=True, blank=True)
+    description = models.TextField(blank=True, default='')
 
     waste_type = models.CharField(
         max_length=20,
-        choices=WASTE_TYPE_CHOICES
+        choices=WASTE_TYPE_CHOICES,
+        default='other'
     )
 
     severity = models.CharField(
         max_length=10,
-        choices=SEVERITY_CHOICES
+        choices=SEVERITY_CHOICES,
+        default='medium'
     )
 
     latitude = models.DecimalField(
@@ -75,13 +81,15 @@ class WasteReport(models.Model):
         blank=True
     )
     location_source = models.CharField(
-    max_length=10,
-    choices=[
-        ('auto', 'Auto-detected'),
-        ('manual', 'Manually Selected')
-    ],
-    default='auto'
-)
+        max_length=20,
+        choices=[
+            ('auto', 'Auto-detected'),
+            ('manual', 'Manually Selected'),
+            ('gps-high-accuracy', 'High Accuracy GPS'),
+            ('gps-low-accuracy', 'Low Accuracy GPS'),
+        ],
+        default='auto'
+    )
 
 
     status = models.CharField(

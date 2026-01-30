@@ -16,3 +16,9 @@ staticfiles/
 # OS
 .DS_Store
 
+# Backups and Certs
+*.bak
+*_ORIGINAL_BACKUP.html
+*.crt
+*.key
+

@@ -37,7 +37,7 @@
     class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 animate-fade-in relative">
 
     <!-- Left: Image Section -->
-    <div class="relative h-96 lg:h-full min-h-[500px]">
+    <div class="relative h-64 md:h-96 lg:h-full lg:min-h-[500px]">
       {% if report.image %}
       <img src="{{ report.image.url }}" class="absolute inset-0 w-full h-full object-cover">
       {% else %}
@@ -48,27 +48,27 @@
       {% endif %}
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
-      <div class="absolute bottom-8 left-8 text-white">
+      <div class="absolute bottom-4 left-4 md:bottom-8 md:left-8 text-white pr-4">
         <div
-          class="inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-sm font-bold mb-3">
+          class="inline-block px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-xs md:text-sm font-bold mb-2 md:mb-3">
           {{ report.get_waste_type_display }}
         </div>
-        <h1 class="text-4xl font-heading font-bold mb-2">Report #{{ report.id }}</h1>
-        <p class="text-white/80 flex items-center gap-2">
+        <h1 class="text-2xl md:text-3xl lg:text-4xl font-heading font-bold mb-1 md:mb-2">Report #{{ report.id }}</h1>
+        <p class="text-white/80 flex flex-wrap items-center gap-2 text-xs md:text-sm font-medium">
           <span>📅 {{ report.created_at|date:"F d, Y" }}</span>
-          <span>•</span>
+          <span class="hidden md:inline">•</span>
           <span>⏰ {{ report.created_at|date:"h:i A" }}</span>
         </p>
       </div>
     </div>
 
     <!-- Right: Details Section -->
-    <div class="p-8 lg:p-12 flex flex-col justify-center bg-white dark:bg-gray-800 relative">
+    <div class="p-6 md:p-8 lg:p-12 flex flex-col justify-center bg-white dark:bg-gray-800 relative">
 
       <!-- Status Badge (Floating) -->
-      <div class="absolute top-8 right-8">
+      <div class="absolute top-4 right-4 md:top-8 md:right-8">
         <span
-          class="px-4 py-2 rounded-xl font-bold uppercase tracking-wider text-sm shadow-sm border
+          class="px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-bold uppercase tracking-wider text-[10px] md:text-sm shadow-sm border
           {% if report.status == 'pending' %} bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800
           {% elif report.status == 'assigned' %} bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800
           {% else %} bg-eco-50 dark:bg-eco-900/30 text-eco-700 dark:text-eco-400 border-eco-200 dark:border-eco-800 {% endif %}">
@@ -137,8 +137,48 @@
         {% endif %}
 
         <!-- ACTIONS -->
+        {% if is_admin %}
+        <div class="pt-8 border-t border-gray-100 dark:border-gray-700">
+          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Admin Controls
+          </h3>
+
+          <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-2">Assign/Change Worker</label>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <select name="worker_id" required
+                  class="flex-1 px-4 py-3 rounded-xl border-2 border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-eco-500 focus:ring-0 outline-none transition-all">
+                  <option value="">{% if workers %}Select a professional...{% else %}No workers available{% endif %}
+                  </option>
+                  {% for worker in workers %}
+                  <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>
+                    {{ worker.get_full_name|default:worker.username }} (⭐ {{ worker.average_rating|floatformat:1 }})
+                  </option>
+                  {% endfor %}
+                </select>
+                <button type="submit"
+                  class="w-full sm:w-auto px-6 py-3 bg-eco-600 hover:bg-eco-700 text-white font-bold rounded-xl shadow-lg shadow-eco-500/20 transition-all flex items-center justify-center">
+                  {% if report.assigned_worker %}Update{% else %}Assign{% endif %}
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div class="mt-6 flex flex-col sm:flex-row gap-4">
+            <a href="{% url 'edit_report' report.id %}"
+              class="flex-1 text-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-3 rounded-xl font-bold transition text-sm">
+              ✏️ Edit Report
+            </a>
+            <a href="{% url 'delete_report' report.id %}"
+              class="flex-1 text-center bg-red-50 hover:bg-red-100 text-red-600 py-3 rounded-xl font-bold transition border border-red-100 text-sm">
+              🗑️ Delete Report
+            </a>
+          </div>
+        </div>
+        {% else %}
         {% if report.status == "pending" %}
-        <div class="pt-8 border-t border-gray-100 dark:border-gray-700 flex gap-4">
+        <div class="pt-8 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-4">
           <a href="{% url 'edit_report' report.id %}"
             class="flex-1 text-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-3 rounded-xl font-bold transition">
             ✏️ Edit Report
@@ -167,12 +207,12 @@
             </div>
             <div>
               <h4 class="font-bold text-green-900 dark:text-green-100">Issue Resolved</h4>
-              <p class="text-sm text-green-700 dark:text-green-300">This report was marked as resolved on {{
-                report.resolved_at|date:"M d,
-                Y" }}.</p>
+              <p class="text-sm text-green-700 dark:text-green-100">This report was marked as resolved on {{
+                report.resolved_at|date:"M d, Y" }}.</p>
             </div>
           </div>
         </div>
+        {% endif %}
         {% endif %}
 
       </div>

@@ -5,7 +5,7 @@
 <!-- 🌓 Dark Mode Initialization & Smooth Transitions -->
 <script>
   // Initialize dark mode from user preference (server-side)
-  const userDarkMode = {{ request.user.dark_mode| lower }};
+  const userDarkMode = "{{ request.user.dark_mode|lower }}" === "true";
   if (userDarkMode) {
     document.documentElement.classList.add('dark');
   }
@@ -26,7 +26,8 @@
 <!-- 🍃 Leaf Animation Canvas -->
 <canvas id="leaves-canvas" class="fixed inset-0 pointer-events-none z-[1]"></canvas>
 
-<div class="flex min-h-[calc(100vh-6rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8 relative z-10">
+<div
+  class="flex min-h-[calc(100vh-6rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 gap-4 md:gap-8 relative z-10">
   <!-- Global Background for Dashboards -->
   <div
     class="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-eco-50/50 to-transparent dark:from-eco-900/20 dark:to-transparent -z-50 rounded-b-3xl">
@@ -164,11 +165,11 @@
   </aside>
 
   <!-- 🧩 MAIN DASHBOARD CONTENT -->
-  <main class="flex-1 animate-fade-in pb-24 lg:pb-0">
+  <main class="flex-1 animate-fade-in pb-24 lg:pb-0 w-full min-w-0">
     <!-- 🔝 Top Bar -->
     <header class="relative z-[100] flex items-center justify-between mb-8 animate-fade-down">
-      <div class="lg:hidden">
-        <h2 class="text-xl font-bold text-orange-500 font-heading">♻️ Scan2Clean</h2>
+      <div class="lg:hidden flex items-center gap-2">
+        <h2 class="text-lg md:text-xl font-bold text-orange-500 font-heading whitespace-nowrap">♻️ Scan2Clean</h2>
       </div>
       <div></div> <!-- Spacer -->
       <div class="flex items-center gap-4">
@@ -226,7 +227,7 @@
 
         <a href="{% url 'logout' %}"
           class="flex items-center gap-2 px-3 md:px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 text-[10px] font-black uppercase tracking-[0.15em]">
-          <span class="hidden sm:inline text-[9px] font-black">Logout</span> 🚪
+          <span class="hidden md:inline text-[9px] font-black">Logout</span> 🚪
         </a>
       </div>
     </header>
@@ -470,6 +471,12 @@
       if (data.type === 'notification') {
         if (window.showToast) showToast(data.title, data.message, data.level);
         if (pulse) pulse.classList.remove('hidden');
+
+        // Play notification sound based on notification type
+        if (window.playNotificationSound) {
+          const soundType = data.sound_type || 'message';
+          playNotificationSound(soundType);
+        }
       }
     };
   });

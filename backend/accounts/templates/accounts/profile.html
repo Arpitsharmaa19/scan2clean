@@ -5,21 +5,21 @@
 
     <!-- Profile Header -->
     <div
-        class="relative min-h-[200px] rounded-[2.5rem] p-8 text-white mb-8 overflow-hidden shadow-2xl group spotlight-card">
+        class="relative min-h-[auto] md:min-h-[200px] rounded-[1.5rem] md:rounded-[2.5rem] p-5 md:p-8 text-white mb-6 md:mb-8 overflow-hidden shadow-2xl group spotlight-card">
         <div
             class="absolute inset-0 bg-gradient-to-r from-gray-900 via-indigo-950 to-purple-950 transition-transform duration-1000 group-hover:scale-105">
         </div>
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20">
         </div>
 
-        <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
-            <div class="relative group/avatar">
+        <div class="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
+            <div class="relative group/avatar mt-2 md:mt-0">
                 <form method="post" enctype="multipart/form-data" id="avatar-form">
                     {% csrf_token %}
                     <div
-                        class="h-32 w-32 rounded-full p-1 bg-white/20 backdrop-blur-md shadow-2xl relative group-hover:scale-105 transition-transform duration-500">
+                        class="h-24 w-24 md:h-32 md:w-32 rounded-full p-1 bg-white/20 backdrop-blur-md shadow-2xl relative group-hover:scale-105 transition-transform duration-500">
                         <div
-                            class="h-full w-full rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-5xl text-white font-bold border-4 border-white/50 overflow-hidden relative">
+                            class="h-full w-full rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-4xl md:text-5xl text-white font-bold border-4 border-white/50 overflow-hidden relative">
                             {% if request.user.avatar %}
                             <img src="{{ request.user.avatar.url }}" class="h-full w-full object-cover">
                             {% else %}
@@ -29,30 +29,33 @@
                             <!-- Overlay -->
                             <label for="avatar-input"
                                 class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer z-10">
-                                <span class="text-white text-3xl drop-shadow-md">📸</span>
+                                <span class="text-white text-2xl md:text-3xl drop-shadow-md">📸</span>
                             </label>
                         </div>
                         <input type="file" name="avatar" id="avatar-input" class="hidden" accept="image/*"
                             onchange="document.getElementById('avatar-form').submit()">
                     </div>
                 </form>
-                <div class="absolute bottom-1 right-1 bg-green-500 h-6 w-6 rounded-full border-4 border-indigo-900 shadow-md z-20"
+                <div class="absolute bottom-1 right-1 bg-green-500 h-5 w-5 md:h-6 md:w-6 rounded-full border-4 border-indigo-900 shadow-md z-20"
                     title="Online"></div>
             </div>
 
-            <div class="text-center md:text-left flex-1">
-                <h1 class="text-4xl font-heading font-bold text-white mb-2 drop-shadow-md">{{ request.user.first_name }}
-                    {{ request.user.last_name }}</h1>
-                <p class="text-indigo-200 text-lg font-medium mb-4">@{{ request.user.username }}</p>
+            <div class="text-center md:text-left flex-1 w-full">
+                <h1
+                    class="text-xl md:text-4xl font-heading font-bold text-white mb-1 drop-shadow-md leading-tight truncate">
+                    {{ request.user.first_name }} {{ request.user.last_name }}
+                </h1>
+                <p class="text-indigo-200 text-xs md:text-lg font-medium mb-4 truncate">@{{ request.user.username }}</p>
 
-                <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                <div class="flex flex-wrap justify-center md:justify-start gap-2 md:gap-3">
                     <span
-                        class="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                        {% if request.user.role == "citizen" %}🏡{% elif request.user.role == "worker" %}🚛{% else %}💎{% endif %}
+                        class="px-3 py-1.5 md:px-4 rounded-full bg-white/10 backdrop-blur border border-white/20 text-[10px] md:text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                        {% if request.user.role == "citizen" %}🏡{% elif request.user.role == "worker" %}🚛{% else
+                        %}💎{% endif %}
                         {{ request.user.get_role_display }}
                     </span>
                     <span
-                        class="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                        class="px-3 py-1.5 md:px-4 rounded-full bg-white/10 backdrop-blur border border-white/20 text-[10px] md:text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                         📅 Joined {{ request.user.date_joined|date:"M Y" }}
                     </span>
                 </div>
@@ -145,12 +148,12 @@
 
         <!-- 🚨 Danger Zone -->
         <div
-            class="md:col-span-2 glass-card spotlight-card rounded-3xl p-8 shadow-lg border border-red-200 dark:border-red-900/30 bg-red-50/30 dark:bg-red-900/10">
+            class="md:col-span-2 glass-card spotlight-card rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-lg border border-red-200 dark:border-red-900/30 bg-red-50/30 dark:bg-red-900/10">
             <div class="flex items-center gap-4 mb-6">
                 <div
                     class="h-10 w-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-xl text-red-600">
                     ⚠️</div>
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Danger Zone</h3>
+                <h3 class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">Danger Zone</h3>
             </div>
 
             <div

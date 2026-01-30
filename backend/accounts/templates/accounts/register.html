@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block title %}Register - Scan2Clean{% endblock %}
 
 {% block content %}
@@ -14,24 +13,24 @@
     style="animation-delay: 2s"></div>
 
   <div
-    class="w-full max-w-5xl glass-card rounded-[3rem] shadow-2xl overflow-hidden z-10 border border-white/20 dark:border-gray-700/30 animate-scale-in flex flex-col lg:flex-row min-h-[600px]">
+    class="w-full max-w-5xl glass-card rounded-[1.5rem] md:rounded-[3rem] shadow-2xl overflow-hidden z-10 border border-white/20 dark:border-gray-700/30 animate-scale-in flex flex-col lg:flex-row min-h-[auto] lg:min-h-[600px]">
 
     <!-- 🌿 Left Sidebar: Eco Inspiration -->
     <div
-      class="lg:w-2/5 bg-gradient-to-br from-gray-900 via-emerald-950 to-teal-900 p-12 flex flex-col justify-between relative overflow-hidden">
+      class="lg:w-2/5 bg-gradient-to-br from-gray-900 via-emerald-950 to-teal-900 p-6 md:p-12 flex flex-col justify-between relative overflow-hidden order-first lg:order-none min-h-[160px] lg:min-h-auto">
       <!-- Decor -->
       <div class="absolute top-0 right-0 p-8 opacity-10 text-9xl">🍃</div>
       <div class="absolute bottom-0 left-0 p-8 opacity-5 text-8xl">🌱</div>
 
       <div class="relative z-10">
         <div
-          class="h-14 w-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl mb-8 border border-white/20 shadow-xl">
+          class="h-10 w-10 md:h-14 md:w-14 bg-white/10 backdrop-blur-md rounded-xl md:rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-6 md:mb-8 border border-white/20 shadow-xl">
           🌍
         </div>
-        <h2 class="text-4xl font-heading font-black text-white mb-6 leading-tight">
+        <h2 class="text-2xl md:text-4xl font-heading font-black text-white mb-4 md:mb-6 leading-tight">
           Join the <span class="text-eco-500">Green</span> Revolution.
         </h2>
-        <p class="text-emerald-50/70 text-lg font-medium leading-relaxed">
+        <p class="text-emerald-50/70 text-sm md:text-lg font-medium leading-relaxed">
           Every report you file helps heal the planet. Start your journey as a certified Eco-Warrior today.
         </p>
       </div>
@@ -53,10 +52,12 @@
     </div>
 
     <!-- 📝 Right Section: Register Form -->
-    <div class="lg:w-3/5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-10 md:p-14">
-      <div class="mb-10 text-center lg:text-left">
-        <h3 class="text-3xl font-heading font-black text-gray-900 dark:text-white mb-2">Create Account</h3>
-        <p class="text-gray-500 dark:text-gray-400 font-medium">Join 5,000+ citizens cleaning the world.</p>
+    <div class="lg:w-3/5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-6 md:p-14">
+      <div class="mb-6 md:mb-10 text-center lg:text-left">
+        <h3 class="text-2xl md:text-3xl font-heading font-black text-gray-900 dark:text-white mb-1 md:mb-2">Create
+          Account</h3>
+        <p class="text-gray-500 dark:text-gray-400 font-medium text-sm md:text-base">Join 5,000+ citizens cleaning the
+          world.</p>
       </div>
 
       <form method="post" class="space-y-5">

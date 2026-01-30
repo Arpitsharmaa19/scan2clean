@@ -78,7 +78,6 @@ def citizen_dashboard(request):
         "notifications": notifications,
         "verifying_reports": verifying_reports,
         "unrated_reports": unrated_reports,
-        "test_mark": "RELOADED",
     })
 
 
@@ -89,7 +88,7 @@ def citizen_dashboard(request):
 @login_required
 def admin_dashboard(request):
     if request.user.role != "admin":
-        return redirect("/dashboard/citizen/")
+        return redirect("citizen_dashboard")
 
     # 📊 STATS
     total_users = User.objects.count()
@@ -178,7 +177,7 @@ def login_view(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return redirect('/dashboard/')
+                return redirect('dashboard')
             else:
                 return render(request, 'accounts/login.html', {
                     'error': 'This account is inactive.'
@@ -197,7 +196,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('/dashboard/')
+            return redirect('dashboard')
     else:
         form = CitizenRegisterForm()
 
@@ -245,7 +244,7 @@ def delete_account(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('/login/')
+    return redirect('login')
 
 
 @login_required

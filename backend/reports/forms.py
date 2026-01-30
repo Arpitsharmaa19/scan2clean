@@ -4,6 +4,9 @@ from decimal import Decimal, ROUND_HALF_UP
 
 
 class WasteReportForm(forms.ModelForm):
+    # Make image optional
+    image = forms.ImageField(required=False)
+    
     class Meta:
         model = WasteReport
         fields = [
@@ -15,6 +18,18 @@ class WasteReportForm(forms.ModelForm):
             "longitude",
             "location_source",
         ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set default values to prevent validation errors
+        if not self.instance.pk:  # Only for new reports
+            self.fields['waste_type'].initial = 'other'
+            self.fields['severity'].initial = 'medium'
+            self.fields['description'].initial = ''
+            
+        # Make description optional with better help text
+        self.fields['description'].required = False
+        self.fields['description'].help_text = 'Optional: Provide additional details about the waste'
 
     # ✅ FIX: normalize latitude to 6 decimal places
     def clean_latitude(self):

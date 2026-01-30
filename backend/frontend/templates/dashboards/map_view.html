@@ -81,59 +81,54 @@
 <div style="height: calc(100vh - 8rem);" class="flex flex-col animate-fade-up">
 
   <!-- 🛠️ Map Controls Header -->
-  <div
-    class="glass-card p-4 rounded-xl shadow-lg mb-4 flex flex-col md:flex-row flex-wrap gap-4 items-center justify-between z-10">
+  <div class="glass-card p-3 md:p-4 rounded-xl shadow-lg mb-4 flex flex-col items-center justify-between gap-3 z-10">
 
-    <div class="flex items-center gap-2">
-      <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">🌍 Global Map</h1>
-      <span
-        class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 text-xs px-2 py-1 rounded-full font-bold">{{ reports|length }} Reports</span>
+    <div class="flex items-center justify-between w-full md:w-auto gap-4">
+      <div class="flex items-center gap-2">
+        <h1 class="text-sm md:text-xl font-bold text-gray-800 dark:text-gray-100 uppercase tracking-tight">🌍 Global Map
+        </h1>
+        <span
+          class="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-black">{{
+          reports|length }}</span>
+      </div>
+
+      <!-- Map Mode Toggle (Mobile) -->
+      <div
+        class="flex md:hidden bg-gray-100 dark:bg-gray-700/50 rounded-full p-1 border border-gray-200 dark:border-gray-700 shadow-inner">
+        <button onclick="setMode('markers')" id="btn-markers-mob"
+          class="p-2 rounded-full text-xs transition-all">📍</button>
+        <button onclick="setMode('heatmap')" id="btn-heatmap-mob"
+          class="p-2 rounded-full text-xs transition-all">🔥</button>
+      </div>
     </div>
 
     <!-- Filters Form -->
-    <form method="get" class="flex flex-wrap gap-2 items-center text-sm">
-
-      <!-- Time Filter -->
+    <form method="get"
+      class="flex flex-wrap md:flex-nowrap gap-2 items-center text-xs w-full justify-center md:justify-end">
       <select name="days" onchange="this.form.submit()"
-        class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
-        <option value="" {% if not request.GET.days %}selected{% endif %}>📅 All Time</option>
-        <option value="1" {% if request.GET.days == "1" %}selected{% endif %}>Last 24 Hours</option>
-        <option value="7" {% if request.GET.days == "7" %}selected{% endif %}>Last 7 Days</option>
-        <option value="30" {% if request.GET.days == "30" %}selected{% endif %}>Last 30 Days</option>
+        class="flex-1 md:flex-none border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 bg-gray-50 dark:bg-gray-800 text-[10px] font-bold">
+        <option value="">📅 All Time</option>
+        <option value="1">Last 24h</option>
+        <option value="7">Last 7d</option>
       </select>
-
-      <!-- Status Filter -->
       <select name="status" onchange="this.form.submit()"
-        class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
-        <option value="" {% if not request.GET.status %}selected{% endif %}>📌 All Status</option>
-        <option value="pending" {% if request.GET.status == "pending" %}selected{% endif %}>Pending</option>
-        <option value="assigned" {% if request.GET.status == "assigned" %}selected{% endif %}>Assigned</option>
-        <option value="resolved" {% if request.GET.status == "resolved" %}selected{% endif %}>Resolved</option>
+        class="flex-1 md:flex-none border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 bg-gray-50 dark:bg-gray-800 text-[10px] font-bold">
+        <option value="">📌 All Status</option>
+        <option value="pending">Pending</option>
+        <option value="assigned">Assigned</option>
       </select>
-
-      <!-- Severity Filter -->
-      <select name="severity" onchange="this.form.submit()"
-        class="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none">
-        <option value="" {% if not request.GET.severity %}selected{% endif %}>⚠️ All Severity</option>
-        <option value="high" {% if request.GET.severity == "high" %}selected{% endif %}>High</option>
-        <option value="medium" {% if request.GET.severity == "medium" %}selected{% endif %}>Medium</option>
-        <option value="low" {% if request.GET.severity == "low" %}selected{% endif %}>Low</option>
-      </select>
-
-      <a href="{% url 'waste_map' %}" class="text-gray-400 hover:text-red-500 px-2 font-bold">✕ Clear</a>
+      <a href="{% url 'waste_map' %}" class="text-gray-400 hover:text-red-500 px-2 font-black text-[10px]">✕</a>
     </form>
 
-    <!-- Map Mode Toggle -->
+    <!-- Map Mode Toggle (Desktop) -->
     <div
-      class="flex bg-gray-100 dark:bg-gray-700/50 rounded-full p-1 border border-gray-200 dark:border-gray-700 shadow-inner">
+      class="hidden md:flex bg-gray-100 dark:bg-gray-700/50 rounded-full p-1 border border-gray-200 dark:border-gray-700 shadow-inner">
       <button onclick="setMode('markers')" id="btn-markers"
-        class="px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 bg-white dark:bg-eco-600 text-eco-600 dark:text-white shadow-sm ring-1 ring-black/5">
-        <span>📍</span> Markers
-      </button>
+        class="px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 bg-white dark:bg-eco-600 text-eco-600 dark:text-white">📍
+        Markers</button>
       <button onclick="setMode('heatmap')" id="btn-heatmap"
-        class="px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-orange-500">
-        <span>🔥</span> Heatmap
-      </button>
+        class="px-4 py-2 rounded-full text-xs font-black transition-all duration-300 flex items-center gap-2 text-gray-500 hover:text-orange-500">🔥
+        Heatmap</button>
     </div>
 
   </div>

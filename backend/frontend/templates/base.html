@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,6 +21,10 @@
 
   <!-- Tailwind CSS (Unpkg Fallback) -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Notification Sound Manager -->
+  <script src="{% static 'js/notification-sound.js' %}"></script>
+  <script src="{% static 'js/sound-toggle-ui.js' %}"></script>
 
   <!-- Dark Mode Logic -->
   <script>
@@ -325,6 +330,35 @@
       padding-bottom: env(safe-area-inset-bottom);
     }
 
+    /* Responsive Utilities */
+    @media (max-width: 640px) {
+      .responsive-p {
+        padding: 1.25rem !important;
+      }
+
+      .responsive-rounded {
+        border-radius: 1.25rem !important;
+      }
+
+      .responsive-text-title {
+        font-size: 1.5rem !important;
+      }
+    }
+
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .responsive-p {
+        padding: 1.75rem !important;
+      }
+
+      .responsive-rounded {
+        border-radius: 1.75rem !important;
+      }
+
+      .responsive-text-title {
+        font-size: 2rem !important;
+      }
+    }
+
     /* Disable text selection on UI elements */
     nav,
     button,
@@ -464,16 +498,16 @@
 
   <!-- 🌟 GLOBAL NAVBAR (Sticky Glass) -->
   <header class="fixed w-full top-0 z-50 glass shadow-sm transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
 
       <!-- Logo -->
-      <a href="/" class="flex items-center gap-2 group">
+      <a href="/" class="flex items-center gap-1.5 md:gap-2 group">
         <div
-          class="bg-gradient-to-br from-eco-500 to-teal-500 rounded-lg p-2 shadow-lg group-hover:scale-105 transition-transform duration-300">
-          <span class="text-2xl">♻️</span>
+          class="bg-gradient-to-br from-eco-500 to-teal-500 rounded-lg p-1 md:p-2 shadow-lg group-hover:scale-105 transition-transform duration-300">
+          <span class="text-lg md:text-2xl">♻️</span>
         </div>
         <span
-          class="text-2xl font-heading font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300">
+          class="text-lg md:text-2xl font-heading font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300">
           Scan<span class="text-eco-600">2Clean</span>
         </span>
       </a>
@@ -502,7 +536,7 @@
           <span class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ request.user.username }}</span>
           <span class="text-xs text-eco-600 uppercase tracking-wider font-semibold">{{ request.user.role }}</span>
         </div>
-        <a href="{% url 'logout' %}"
+        <a href="{% url 'logout' %}" onclick="return confirm('⚠️ Are you sure you want to log out?');"
           class="px-4 py-2 rounded-full border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 transition font-medium text-sm flex items-center gap-2">
           Logout
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -512,10 +546,9 @@
         </a>
         {% else %}
         <a href="{% url 'login' %}"
-          class="text-gray-600 dark:text-gray-300 hover:text-eco-600 dark:hover:text-white font-medium mr-4 transition-colors">Login</a>
+          class="text-gray-600 dark:text-gray-300 hover:text-eco-600 dark:hover:text-white font-bold transition-colors text-xs md:text-base">Login</a>
         <a href="{% url 'register' %}"
-          class="bg-eco-600 text-white px-5 py-2.5 rounded-full hover:bg-eco-700 transition shadow-lg shadow-eco-500/30 font-medium">Get
-          Started</a>
+          class="bg-eco-600 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-full hover:bg-eco-700 transition shadow-lg shadow-eco-500/30 font-black text-[10px] md:text-base uppercase tracking-tighter sm:tracking-normal">Register</a>
         {% endif %}
       </div>
 
@@ -523,7 +556,7 @@
   </header>
 
   <!-- Spacer for fixed header -->
-  <div class="h-24"></div>
+  <div class="h-20 md:h-24"></div>
 
   <!-- 🍞 GLOBAL TOAST CONTAINER -->
   <div id="toast-container"
@@ -554,7 +587,55 @@
   </style>
 
   <script>
+    function playNotificationSound(level = 'info') {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+
+        // Frequencies for different types
+        const freqMap = {
+          'info': 880,    // A5
+          'success': 1046, // C6
+          'warning': 587, // D5
+          'error': 220    // A3
+        };
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const freq = freqMap[level] || 880;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq / 2, ctx.currentTime + 0.3);
+
+        // Envelope
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {
+        console.error("Audio play error:", e);
+      }
+    }
+
     function showToast(title, message, level = 'info') {
+      // 🔊 Play Sound using new notification sound manager
+      if (window.playNotificationSound) {
+        const soundMap = {
+          'success': 'success',
+          'error': 'error',
+          'warning': 'alert',
+          'info': 'message'
+        };
+        playNotificationSound(soundMap[level] || 'message');
+      }
+
       const container = document.getElementById('toast-container');
       if (!container) return;
       const toast = document.createElement('div');

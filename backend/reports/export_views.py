@@ -24,7 +24,7 @@ def export_reports_csv(request):
     
     # Check admin permission
     if not (request.user.is_superuser or getattr(request.user, "role", None) == "admin"):
-        return render(request, "403.html")
+        return render(request, "403.html", status=403)
     
     # Get all reports
     reports = WasteReport.objects.all().order_by('-created_at')
@@ -104,7 +104,7 @@ def export_report_pdf(request, report_id):
     # Check permission (citizen can only view their own reports, admin/worker can view all)
     user_role = getattr(request.user, "role", "citizen")
     if user_role == "citizen" and report.citizen != request.user:
-        return render(request, "403.html")
+        return render(request, "403.html", status=403)
     
     # Create PDF buffer
     buffer = io.BytesIO()

@@ -86,9 +86,31 @@ class WasteReportViewSet(viewsets.ModelViewSet):
         review = request.data.get('review', '')
         
         if rating:
-            report.rating = int(rating)
+            rating_val = int(rating)
+            report.rating = rating_val
             report.review_text = review
             report.save()
+
+            # Update Worker Performance
+            worker = report.assigned_worker
+            if worker:
+                from django.db.models import Avg, Count
+                # Calculate new average
+                stats = WasteReport.objects.filter(assigned_worker=worker, rating__isnull=False).aggregate(
+                    avg_rating=Avg('rating'),
+                    count=Count('id')
+                )
+                worker.average_rating = stats['avg_rating'] or 0.0
+                worker.total_ratings = stats['count'] or 0
+                worker.save()
+
+                send_realtime_notification(
+                    user=worker,
+                    title="New Review Received! ⭐",
+                    message=f"A citizen rated your cleanup for Report #{report.id} as {rating_val}/5 stars.",
+                    level="success"
+                )
+
             return Response({'status': 'rated'})
         return Response({'error': 'Rating required'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -114,6 +136,14 @@ class WasteReportViewSet(viewsets.ModelViewSet):
             .order_by("day")
         )
 
+        return Response({
+            "total_reports": total_reports,
+            "status_counts": status_counts,
+            "severity_counts": severity_counts,
+            "waste_type_counts": waste_type_counts,
+            "daily_reports": daily_reports
+        })
+
     @action(detail=False, methods=['get'])
     def optimized_route(self, request):
         from .utils import get_optimized_route, batch_reports_by_proximity
@@ -126,31 +156,70 @@ class WasteReportViewSet(viewsets.ModelViewSet):
         worker_lng = float(user.longitude) if user.longitude else None
         
         if not worker_lat or not worker_lng:
-            return Response({'error': 'Please turn on your online status to provide location'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'Worker location required',
+                'message': 'Please turn on your online status to provide your current location'
+            }, status=status.HTTP_400_BAD_REQUEST)
             
         reports = WasteReport.objects.filter(assigned_worker=user, status='assigned')
         if not reports.exists():
-            return Response({'status': 'no jobs', 'batches': []})
+            return Response({
+                'status': 'no_jobs',
+                'message': 'No assigned reports found',
+                'batches': []
+            })
             
-        report_data = [
-            {'id': r.id, 'lat': float(r.latitude), 'lng': float(r.longitude), 'type': r.get_waste_type_display(), 'severity': r.severity}
-            for r in reports if r.latitude and r.longitude
-        ]
+        # Separate reports with and without location
+        reports_with_location = []
+        reports_without_location = []
         
-        if not report_data:
-            return Response({'error': 'Assigned reports missing location data'}, status=status.HTTP_400_BAD_REQUEST)
+        for r in reports:
+            if r.latitude and r.longitude:
+                reports_with_location.append({
+                    'id': r.id,
+                    'lat': float(r.latitude),
+                    'lng': float(r.longitude),
+                    'type': r.get_waste_type_display(),
+                    'severity': r.severity,
+                    'description': r.description[:50] + '...' if len(r.description) > 50 else r.description
+                })
+            else:
+                reports_without_location.append({
+                    'id': r.id,
+                    'type': r.get_waste_type_display(),
+                    'severity': r.severity,
+                    'description': r.description[:50] + '...' if len(r.description) > 50 else r.description
+                })
+        
+        # If no reports have location data
+        if not reports_with_location:
+            return Response({
+                'error': 'no_location_data',
+                'message': f'All {len(reports_without_location)} assigned report(s) are missing location data',
+                'reports_without_location': reports_without_location,
+                'suggestion': 'Please contact admin to update report locations'
+            }, status=status.HTTP_400_BAD_REQUEST)
             
-        # 1. Optimize order
-        optimized = get_optimized_route(worker_lat, worker_lng, report_data)
+        # Optimize route for reports with location
+        optimized = get_optimized_route(worker_lat, worker_lng, reports_with_location)
         
-        # 2. Group into batches
+        # Group into batches
         batches = batch_reports_by_proximity(optimized)
         
-        return Response({
+        response_data = {
             'worker_location': {'lat': worker_lat, 'lng': worker_lng},
             'batches': batches,
-            'optimized_order': [r['id'] for r in optimized]
-        })
+            'optimized_order': [r['id'] for r in optimized],
+            'total_reports': len(reports),
+            'routable_reports': len(reports_with_location)
+        }
+        
+        # Include warning if some reports lack location
+        if reports_without_location:
+            response_data['warning'] = f'{len(reports_without_location)} report(s) excluded due to missing location'
+            response_data['reports_without_location'] = reports_without_location
+        
+        return Response(response_data)
 
 class SupportTicketViewSet(viewsets.ModelViewSet):
     queryset = SupportTicket.objects.all()

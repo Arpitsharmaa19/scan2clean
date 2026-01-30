@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth import get_user_model
 
 from django.db.models import Count
@@ -7,6 +8,10 @@ from django.db.models.functions import TruncDay, TruncMonth
 from django.utils.timezone import localdate
 from datetime import timedelta
 import json
+import urllib.request
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .models import WasteReport, SupportTicket
 from .forms import WasteReportForm, WasteReportEditForm, SupportTicketForm
@@ -24,7 +29,7 @@ User = get_user_model()
 @login_required
 def admin_analytics(request):
     if not (request.user.is_superuser or getattr(request.user, "role", None) == "admin"):
-        return render(request, "403.html")
+        return render(request, "403.html", status=403)
 
     total_reports = WasteReport.objects.count()
     pending_count = WasteReport.objects.filter(status='pending').count()
@@ -88,7 +93,7 @@ def report_waste(request):
             report = form.save(commit=False)
             report.citizen = request.user
             report.save()
-            return redirect("/dashboard/citizen/")
+            return redirect("citizen_dashboard")
         return render(request, "reports/report_waste.html", {"form": form})
 
     return render(request, "reports/report_waste.html", {
@@ -118,11 +123,6 @@ def my_reports(request):
 # =====================================================
 @login_required
 def report_detail(request, pk):
-    # Allow access if:
-    # 1. User is an Admin
-    # 2. User is the Citizen who reported it
-    # 3. User is the Worker assigned to it
-    
     report = get_object_or_404(WasteReport, pk=pk)
     
     is_admin = getattr(request.user, "role", None) == "admin"
@@ -130,11 +130,33 @@ def report_detail(request, pk):
     is_worker = report.assigned_worker == request.user
     
     if not (is_admin or is_citizen or is_worker):
-        # If no access, throw 404 to hide existence or 403 for forbidden
-        # Returning render with 403 is often cleaner for UX
         return render(request, "403.html", status=403)
 
-    return render(request, "reports/report_detail.html", {"report": report})
+    workers = None
+    if is_admin:
+        workers = User.objects.filter(role="worker")
+        if request.method == "POST" and "worker_id" in request.POST:
+            worker_id = request.POST.get("worker_id")
+            if worker_id:
+                worker = get_object_or_404(User, id=worker_id)
+                report.assigned_worker = worker
+                report.status = "assigned"
+                report.save()
+                
+                # Notify Worker
+                send_realtime_notification(
+                    user=worker,
+                    title="Job Assigned 🚛",
+                    message=f"You have been assigned to Waste Report #{report.id}.",
+                    level="info"
+                )
+                return redirect("report_detail", pk=pk)
+
+    return render(request, "reports/report_detail.html", {
+        "report": report,
+        "is_admin": is_admin,
+        "workers": workers
+    })
 
 # =====================================================
 # 👷 WORKER — ASSIGNED REPORTS
@@ -173,9 +195,9 @@ def resolve_report(request, report_id):
         
         # Add a success message or flag to the session to show OTP input on the dashboard
         request.session[f'verifying_report_{report_id}'] = True
-        return redirect(f"/dashboard/worker/?verify={report_id}")
+        return redirect(f"{reverse('worker_dashboard')}?verify={report_id}")
     
-    return redirect("/reports/assigned/")
+    return redirect("worker_assigned_reports")
 
 @login_required
 def verify_otp(request, report_id):
@@ -210,7 +232,7 @@ def verify_otp(request, report_id):
             # Handle incorrect OTP (maybe add a flash message)
             return redirect(f"/dashboard/worker/?verify={report_id}&error=1")
             
-    return redirect("/dashboard/worker/")
+    return redirect("worker_dashboard")
 
 # =====================================================
 # 🛠️ ADMIN — ALL REPORTS
@@ -222,7 +244,7 @@ def admin_all_reports(request):
     from datetime import datetime, timedelta
     
     if getattr(request.user, "role", None) != "admin":
-        return redirect("/dashboard/citizen/")
+        return redirect("citizen_dashboard")
 
     # Start with all reports
     reports = WasteReport.objects.all()
@@ -307,7 +329,7 @@ def admin_all_reports(request):
             message=f"You have been assigned to clean up Waste Report #{report.id} ({report.get_waste_type_display()}).",
             level="info"
         )
-        return redirect("/reports/admin/")
+        return redirect("admin_all_reports")
 
     return render(request, "dashboards/admin_reports.html", {
         "reports": reports_page,
@@ -381,11 +403,11 @@ def delete_report(request, pk):
 
     # Optional safety: prevent deleting resolved reports
     if report.status != "pending":
-        return redirect("/reports/my-reports/")
+        return redirect("my_reports")
 
     if request.method == "POST":
         report.delete()
-        return redirect("/reports/my-reports/")
+        return redirect("my_reports")
 
     return render(request, "reports/confirm_delete.html", {
         "report": report
@@ -393,13 +415,13 @@ def delete_report(request, pk):
 @login_required
 def admin_delete_report(request, pk):
     if not (request.user.is_superuser or getattr(request.user, "role", None) == "admin"):
-        return redirect("/dashboard/citizen/")
+        return redirect("citizen_dashboard")
 
     report = get_object_or_404(WasteReport, pk=pk)
 
     if request.method == "POST":
         report.delete()
-        return redirect("/reports/admin/")
+        return redirect("admin_all_reports")
 
     return render(request, "reports/admin_confirm_delete.html", {
         "report": report
@@ -416,7 +438,7 @@ def edit_report(request, pk):
 
     # Safety: do not allow editing resolved reports
     if report.status != "pending":
-        return redirect("/reports/my-reports/")
+        return redirect("my_reports")
 
     if request.method == "POST":
         form = WasteReportEditForm(

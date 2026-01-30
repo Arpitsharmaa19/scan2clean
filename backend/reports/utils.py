@@ -4,7 +4,8 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from notifications.models import Notification
 from django.conf import settings
-import googlemaps
+import json
+import urllib.request
 
 def send_realtime_notification(user, title, message, level='info'):
     # 1. Save to database
@@ -29,47 +30,42 @@ def send_realtime_notification(user, title, message, level='info'):
 def get_optimized_route(worker_lat, worker_lng, report_locations):
     """
     report_locations: list of {'id': id, 'lat': lat, 'lng': lng}
-    Returns optimized list of reports using Google Maps Directions API.
+    Returns optimized list of reports using OSRM (Free Open Source Routing Machine).
     """
-    gmaps_key = os.getenv('GOOGLE_MAPS_API_KEY')
-    if not gmaps_key:
-        # Fallback: Simple distance-based sorting (Nearest Neighbor)
-        return sort_by_distance(worker_lat, worker_lng, report_locations)
+    # OSRM expects Longitude, Latitude
+    coords = [f"{worker_lng},{worker_lat}"]
+    coords += [f"{r['lng']},{r['lat']}" for r in report_locations]
+    
+    coords_str = ";".join(coords)
+    # Using OSRM Trip API which solves the TSP
+    url = f"https://router.project-osrm.org/trip/v1/driving/{coords_str}?source=first&roundtrip=false"
 
-    gmaps = googlemaps.Client(key=gmaps_key)
-    
-    # Format origin and waypoints
-    origin = (worker_lat, worker_lng)
-    destinations = [(r['lat'], r['lng']) for r in report_locations]
-    
-    # Since worker needs to return or stop at the last point, 
-    # we take the first point as origin and others as waypoints
-    # For simplicity, we'll just use waypoints optimization
-    
     try:
-        # Directions API supports up to 25 waypoints
-        result = gmaps.directions(
-            origin=origin,
-            destination=destinations[-1],
-            waypoints=destinations[:-1],
-            optimize_waypoints=True
-        )
-        
-        if not result:
-            return sort_by_distance(worker_lat, worker_lng, report_locations)
+        # Set a timeout for the request
+        req = urllib.request.Request(url, headers={'User-Agent': 'Scan2Clean/1.0'})
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read().decode())
             
-        waypoint_order = result[0]['waypoint_order']
-        # waypoint_order gives the indices of waypoints list (destinations[:-1])
-        optimized = []
-        # Add the optimized waypoints
-        for idx in waypoint_order:
-            optimized.append(report_locations[idx])
-        # Add the final destination (destinations[-1])
-        optimized.append(report_locations[-1])
+        if data.get('code') != 'Ok':
+            return sort_by_distance(worker_lat, worker_lng, report_locations)
+
+        # OSRM returns waypoints in the order they are visited in the 'waypoints' array
+        waypoints = data.get('waypoints', [])
         
-        return optimized
+        optimized_reports = []
+        for wp in waypoints:
+            original_input_index = wp['waypoint_index']
+            # original_input_index 0 is the worker's start position
+            if original_input_index == 0:
+                continue
+            
+            # report_locations[original_input_index - 1] is the corresponding report
+            optimized_reports.append(report_locations[original_input_index - 1])
+            
+        return optimized_reports
+        
     except Exception as e:
-        print(f"Routing Error: {e}")
+        print(f"OSRM Routing Error: {e}")
         return sort_by_distance(worker_lat, worker_lng, report_locations)
 
 def sort_by_distance(lat, lng, locations):

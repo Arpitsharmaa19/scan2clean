@@ -32,6 +32,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 # Security Settings
+# Security Settings
 if os.getenv('DJANGO_ENV') == 'production':
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -41,6 +42,10 @@ if os.getenv('DJANGO_ENV') == 'production':
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+else:
+    # Relax security for dev to avoid console noise
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+    SECURE_SSL_REDIRECT = False
 
 
 
@@ -127,7 +132,10 @@ ASGI_APPLICATION = 'config.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379')],
+        },
     },
 }
 
