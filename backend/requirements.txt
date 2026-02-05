@@ -42,3 +42,4 @@ django-cors-headers
 drf-spectacular
 djangorestframework-simplejwt
 uvicorn[standard]
+gunicorn
