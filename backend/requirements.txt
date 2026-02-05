@@ -41,3 +41,4 @@ dj-database-url
 django-cors-headers
 drf-spectacular
 djangorestframework-simplejwt
+uvicorn[standard]

@@ -1,14 +1,22 @@
 #!/bin/bash
 set -e
 
-# Verify PORT is set, default to 10000 if not (for local testing mostly)
+# Verify PORT is set, default to 10000 if not
 PORT=${PORT:-10000}
 
-echo "--> Starting app on 0.0.0.0:$PORT"
-
-# Run migrations one more time to be safe (idempotent)
+echo "--> Starting migration..."
 python manage.py migrate --no-input
 
-# Start Daphne
-# We explicitly allow all IPs (-b 0.0.0.0) and use the rendered PORT
-exec daphne -b 0.0.0.0 -p $PORT config.asgi:application
+echo "--> Starting Gunicorn on 0.0.0.0:$PORT"
+# Use Gunicorn with Uvicorn workers for production-grade ASGI handling
+# -k uvicorn.workers.UvicornWorker: Use Uvicorn worker class
+# --bind 0.0.0.0:$PORT: Explicitly bind to all interfaces on the correct port
+# --chdir backend: Ensure we are in the correct directory (though root-dir setting handles this mostly)
+# --workers 4: standard worker count
+# --access-logfile -: log to stdout
+exec gunicorn config.asgi:application \
+    -k uvicorn.workers.UvicornWorker \
+    --bind 0.0.0.0:$PORT \
+    --workers 4 \
+    --access-logfile - \
+    --error-logfile -
