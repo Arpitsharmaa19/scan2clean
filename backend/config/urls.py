@@ -20,32 +20,9 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import render
-
 from django.conf import settings
 from django.conf.urls.static import static
-
-
-from reports.models import WasteReport
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-def home(request):
-    total_resolved = WasteReport.objects.filter(status='resolved').count()
-    total_citizens = User.objects.count()
-    total_reports = WasteReport.objects.count()
-    
-    # Calculate cleanup rate
-    cleanup_rate = 100 if total_reports == 0 else int((total_resolved / total_reports) * 100)
-    
-    return render(request, 'home.html', {
-        'total_resolved': total_resolved,
-        'total_citizens': total_citizens,
-        'cleanup_rate': cleanup_rate,
-        'total_reports': total_reports
-    })
-
+from .views import home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -66,5 +43,3 @@ urlpatterns = [
 # Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
