@@ -37,3 +37,4 @@ whitenoise==6.11.0
 zope.interface==8.0.1
 djangorestframework
 channels-redis==4.3.0
+dj-database-url
