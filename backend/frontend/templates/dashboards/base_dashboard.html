@@ -60,23 +60,23 @@
 
         {% if request.user.role == 'admin' %}
         <a href="{% url 'admin_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-700 dark:text-gray-300 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/dashboard/admin/' %} bg-eco-500 text-white shadow-lg {% else %} hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 text-gray-700 dark:text-gray-300 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">💎</span> Dashboard
         </a>
         <a href="{% url 'admin_all_reports' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/admin/' %} bg-orange-500 text-white shadow-lg {% else %} hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🛠️</span> Manage Reports
         </a>
         <a href="{% url 'admin_analytics' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/admin/analytics/' %} bg-blue-500 text-white shadow-lg {% else %} hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">📊</span> Analytics
         </a>
         <a href="{% url 'worker_performance_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/worker-performance/' %} bg-indigo-500 text-white shadow-lg {% else %} hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">👷</span> Performance
         </a>
         <a href="{% url 'waste_map' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-900/40 dark:hover:text-teal-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/map/' %} bg-teal-500 text-white shadow-lg {% else %} hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-900/40 dark:hover:text-teal-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🗺️</span> Global Map
         </a>
         <a href="{% url 'admin_support_tickets' %}"
@@ -93,7 +93,7 @@
 
         {% if request.user.role == 'citizen' %}
         <a href="{% url 'citizen_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-700 dark:text-gray-300 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/dashboard/citizen/' %} bg-eco-500 text-white shadow-lg {% else %} hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 text-gray-700 dark:text-gray-300 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🏡</span> Home
         </a>
         <a href="{% url 'report_waste' %}"
@@ -101,15 +101,15 @@
           <span class="animate-bounce">📸</span> Report Waste
         </a>
         <a href="{% url 'my_reports' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/my-reports/' %} bg-orange-500 text-white shadow-lg {% else %} hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">📂</span> My Reports
         </a>
         <a href="{% url 'waste_map' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/map/' %} bg-blue-500 text-white shadow-lg {% else %} hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🗺️</span> Map View
         </a>
         <a href="{% url 'report_problem' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/report-problem/' %} bg-red-500 text-white shadow-lg {% else %} hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🛠️</span> Support
         </a>
         {% endif %}
