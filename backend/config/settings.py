@@ -27,9 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
+# Allow all Render subdomains and local hosts
+ALLOWED_HOSTS = ['*'] if DEBUG else os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
 
 # Security Settings
 # Security Settings
@@ -166,16 +167,28 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARNING',
+        'level': os.getenv('LOG_LEVEL', 'INFO'),
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'django.db.backends': {
             'level': 'ERROR',
+            'handlers': ['console'],
             'propagate': False,
         },
     },
@@ -209,6 +222,8 @@ WHITENOISE_MIMETYPES = {
     '.avif': 'image/avif',
     '.webp': 'image/webp',
 }
+WHITENOISE_MANIFEST_STRICT = False  # Avoid 500 if a file is missing in manifest
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 STORAGES = {
     "default": {
