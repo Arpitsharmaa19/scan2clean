@@ -219,15 +219,15 @@
           </div>
         </div>
 
-        <div class="hidden md:flex flex-col text-right mr-1">
+        <div class="hidden sm:flex flex-col text-right mr-1 min-w-0">
           <span
-            class="text-[11px] font-black text-gray-800 dark:text-white uppercase leading-none">{{user.username}}</span>
-          <span class="text-[9px] font-bold text-eco-600 uppercase tracking-tighter">{{user.role}}</span>
+            class="text-[10px] md:text-[11px] font-black text-gray-800 dark:text-white uppercase leading-none truncate">{{user.username}}</span>
+          <span class="text-[8px] md:text-[9px] font-bold text-eco-600 uppercase tracking-tighter">{{user.role}}</span>
         </div>
 
         <a href="{% url 'logout' %}"
           class="flex items-center gap-2 px-3 md:px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 text-[10px] font-black uppercase tracking-[0.15em]">
-          <span class="hidden md:inline text-[9px] font-black">Logout</span> 🚪
+          <span class="hidden sm:inline text-[9px] font-black">Logout</span> 🚪
         </a>
       </div>
     </header>
@@ -297,34 +297,52 @@
       <div class="p-2 rounded-xl transition-all">
         <span class="text-xl">📋</span>
       </div>
-      <span class="text-[10px] font-bold text-gray-400">Dashboard</span>
+      <span
+        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Dashboard</span>
     </a>
     <a href="{% url 'worker_assigned_reports' %}" class="flex flex-col items-center gap-1 group">
       <div class="p-2 rounded-xl transition-all">
         <span class="text-xl">🚛</span>
       </div>
-      <span class="text-[10px] font-bold text-gray-400">Active Jobs</span>
+      <span
+        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Jobs</span>
+    </a>
+    <a href="{% url 'waste_map' %}" class="flex flex-col items-center gap-1 group">
+      <div class="p-2 rounded-xl transition-all">
+        <span class="text-xl">🗺️</span>
+      </div>
+      <span
+        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Map</span>
     </a>
     {% endif %}
 
-    {% if request.user.role == 'admin' %}
     <a href="{% url 'admin_dashboard' %}" class="flex flex-col items-center gap-1 group">
       <div class="p-2 rounded-xl">
         <span class="text-xl">💎</span>
       </div>
-      <span class="text-[10px] font-bold text-gray-400">Overview</span>
+      <span
+        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Home</span>
     </a>
     <a href="{% url 'admin_all_reports' %}" class="flex flex-col items-center gap-1 group">
       <div class="p-2 rounded-xl">
         <span class="text-xl">🛠️</span>
       </div>
-      <span class="text-[10px] font-bold text-gray-400">Manage</span>
+      <span
+        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Manage</span>
     </a>
     <a href="{% url 'admin_analytics' %}" class="flex flex-col items-center gap-1 group">
       <div class="p-2 rounded-xl">
         <span class="text-xl">📊</span>
       </div>
-      <span class="text-[10px] font-bold text-gray-400">Stats</span>
+      <span
+        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Stats</span>
+    </a>
+    <a href="{% url 'waste_map' %}" class="flex flex-col items-center gap-1 group">
+      <div class="p-2 rounded-xl">
+        <span class="text-xl">🗺️</span>
+      </div>
+      <span
+        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Map</span>
     </a>
     {% endif %}
 

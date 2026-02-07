@@ -1,34 +1,40 @@
 {% extends "dashboards/base_dashboard.html" %}
 
 {% block dashboard_content %}
-<div class="max-w-xl mx-auto bg-white rounded-xl shadow p-8 mt-10">
+<div
+  class="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 mt-10 border border-gray-100 dark:border-gray-700 animate-scale-in">
 
-  <h1 class="text-2xl font-bold text-red-600 mb-4">
-    ⚠️ Delete Report
-  </h1>
+  <div class="flex items-center gap-3 mb-6">
+    <div class="h-12 w-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center text-2xl shadow-sm">
+      ⚠️</div>
+    <h1 class="text-3xl font-heading font-black text-red-600 dark:text-red-500">
+      Delete Report
+    </h1>
+  </div>
 
-  <p class="mb-6 text-gray-700">
-    Are you sure you want to delete this report?
-    <br>
-    <span class="font-semibold">
-      Waste Type: {{ report.get_waste_type_display }}
-    </span>
-  </p>
+  <div class="space-y-4 mb-8">
+    <p class="text-gray-600 dark:text-gray-300 font-medium text-lg">
+      Are you sure you want to delete this report?
+    </p>
 
-  <form method="POST" class="flex gap-4">
+    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700">
+      <p class="font-bold text-gray-800 dark:text-gray-100">
+        Waste Type: <span class="text-eco-600 dark:text-eco-400">{{ report.get_waste_type_display }}</span>
+      </p>
+      <p class="text-xs text-gray-500 mt-1 italic">Report ID: #{{ report.id }}</p>
+    </div>
+  </div>
+
+  <form method="POST" class="flex flex-col sm:flex-row gap-4">
     {% csrf_token %}
 
-    <button
-      type="submit"
-      class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold"
-    >
+    <button type="submit"
+      class="flex-1 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all active:scale-95">
       Yes, Delete
     </button>
 
-    <a
-      href="/reports/my-reports/"
-      class="bg-gray-200 hover:bg-gray-300 px-6 py-2 rounded-lg font-semibold"
-    >
+    <a href="{% url 'my_reports' %}"
+      class="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-8 py-4 rounded-xl font-black uppercase tracking-widest text-center transition-all active:scale-95">
       Cancel
     </a>
   </form>

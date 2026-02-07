@@ -287,7 +287,7 @@
       pointer-events: none;
     }
 
-    /* ⭐ Interactive Star Rating */
+    /* Interactive Star Rating */
     .star-rating {
       display: flex;
       flex-direction: row-reverse;
@@ -301,26 +301,39 @@
     .star-rating label {
       cursor: pointer;
       font-size: 1.875rem;
-      /* 3xl */
       color: #e5e7eb;
-      /* gray-200 */
       transition: all 0.2s ease;
     }
 
     .dark .star-rating label {
       color: #374151;
-      /* gray-700 */
     }
 
     .star-rating input:checked~label,
     .star-rating label:hover,
     .star-rating label:hover~label {
       color: #facc15 !important;
-      /* yellow-400 */
       transform: scale(1.1);
     }
 
-    /* 📱 Native Mobile Feel */
+    /* Responsive Typography System */
+    @media (max-width: 768px) {
+      html {
+        font-size: 14px;
+      }
+
+      .font-heading {
+        letter-spacing: -0.02em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      html {
+        font-size: 12px;
+      }
+    }
+
+    /* Native Mobile Feel */
     body {
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
