@@ -121,9 +121,8 @@
             </div>
             <div class="min-w-0">
               <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate">Verify: #{{ report.id }}</h4>
-              <p class="text-[10px] text-gray-500 truncate">Share with <span class="text-eco-600 font-bold">{% if
-                  report.assigned_worker %}{{
-                  report.assigned_worker.username }}{% else %}Assigned Worker{% endif %}</span></p>
+              <p class="text-[10px] text-gray-500 truncate">Share with <span class="text-eco-600 font-bold">{% if                   report.assigned_worker %}{{ report.assigned_worker.username }}{% else %}Assigned Worker{% endif
+                  %}</span></p>
             </div>
           </div>
           <div
@@ -143,8 +142,7 @@
               <div>
                 <h4 class="font-extrabold text-gray-800 dark:text-white text-sm">Cleanup Confirmed for #{{ report.id }}!
                 </h4>
-                <p class="text-[11px] text-gray-500 dark:text-gray-300">How was the service by <b>{% if
-                    report.assigned_worker %}{{
+                <p class="text-[11px] text-gray-500 dark:text-gray-300">How was the service by <b>{% if                     report.assigned_worker %}{{
                     report.assigned_worker.get_full_name|default:report.assigned_worker.username }}{% else %}our team{%
                     endif %}</b>?</p>
               </div>
