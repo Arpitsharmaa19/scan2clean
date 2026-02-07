@@ -121,8 +121,9 @@
             </div>
             <div class="min-w-0">
               <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate">Verify: #{{ report.id }}</h4>
-              <p class="text-[10px] text-gray-500 truncate">Share with <span class="text-eco-600 font-bold">{{
-                  report.assigned_worker.username }}</span></p>
+              <p class="text-[10px] text-gray-500 truncate">Share with <span class="text-eco-600 font-bold">{% if
+                  report.assigned_worker %}{{
+                  report.assigned_worker.username }}{% else %}Assigned Worker{% endif %}</span></p>
             </div>
           </div>
           <div
@@ -142,13 +143,18 @@
               <div>
                 <h4 class="font-extrabold text-gray-800 dark:text-white text-sm">Cleanup Confirmed for #{{ report.id }}!
                 </h4>
-                <p class="text-[11px] text-gray-500 dark:text-gray-300">How was the service by <b>{{
-                    report.assigned_worker.get_full_name|default:report.assigned_worker.username }}</b>?</p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-300">How was the service by <b>{% if
+                    report.assigned_worker %}{{
+                    report.assigned_worker.get_full_name|default:report.assigned_worker.username }}{% else %}our team{%
+                    endif %}</b>?</p>
               </div>
             </div>
             <div
               class="h-10 w-10 rounded-lg overflow-hidden border border-gray-100 group-hover:rotate-6 transition-transform">
-              {% if report.image %}<img src="{{ report.image.url }}" class="w-full h-full object-cover">{% endif %}
+              {% if report.image %}
+              <img src="{{ report.image.url }}" class="w-full h-full object-cover"
+                onerror="this.src='https://plus.unsplash.com/premium_photo-1663045498422-9a95cca250ed?q=80&w=100&auto=format&fit=crop'">
+              {% endif %}
             </div>
           </div>
 
@@ -266,7 +272,8 @@
       <div class="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl">
         {% if report.image %}
         <img src="{{ report.image.url }}"
-          class="h-full w-full object-cover transition-transform group-hover:scale-125 duration-500">
+          class="h-full w-full object-cover transition-transform group-hover:scale-125 duration-500"
+          onerror="this.parentElement.innerHTML='<div class=\'h-full w-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-xl\'>📸</div>'">
         {% else %}
         <div class="h-full w-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-xl">
           📸</div>
