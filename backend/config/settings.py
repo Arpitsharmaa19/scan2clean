@@ -32,6 +32,11 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 # Allow all Render subdomains and local hosts
 ALLOWED_HOSTS = ['*'] if DEBUG else os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
 
+# Trust Render's proxy for HTTPS detection
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
 # Security Settings
 # Security Settings
 if os.getenv('DJANGO_ENV') == 'production':
@@ -43,6 +48,10 @@ if os.getenv('DJANGO_ENV') == 'production':
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    # Ensure CSRF and Session cookies are Lax for cross-site compatibility but secure
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SECURE_REFERRER_POLICY = 'same-origin'
 else:
     # Relax security for dev to avoid console noise
     SECURE_CROSS_ORIGIN_OPENER_POLICY = None
@@ -153,7 +162,12 @@ DATABASES = {
     )
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://*.onrender.com,http://localhost,http://127.0.0.1').split(',')
+CSRF_COOKIE_HTTPONLY = False  # Allows JS to read the cookie if needed
+CSRF_USE_SESSIONS = False   # Keep it in cookies for standard behavior
+CSRF_COOKIE_SECURE = os.getenv('DJANGO_ENV') == 'production'
+# Explicitly allow the origin header to vary
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 
 # Password validation
