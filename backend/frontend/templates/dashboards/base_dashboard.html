@@ -316,6 +316,7 @@
     </a>
     {% endif %}
 
+    {% if request.user.role == 'admin' %}
     <a href="{% url 'admin_dashboard' %}" class="flex flex-col items-center gap-1 group">
       <div class="p-2 rounded-xl">
         <span class="text-xl">💎</span>
