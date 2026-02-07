@@ -4,11 +4,6 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.db.models import Count
 import json
-import os
-import logging
-import traceback
-
-logger = logging.getLogger(__name__)
 
 from .forms import LoginForm, CitizenRegisterForm
 from reports.models import WasteReport
@@ -40,57 +35,50 @@ def redirect_dashboard(request):
 
 @login_required
 def citizen_dashboard(request):
-    try:
-        user = request.user
+    user = request.user
 
-        total_reports = WasteReport.objects.filter(citizen=user).count()
-        pending_reports = WasteReport.objects.filter(
-            citizen=user, status="pending"
-        ).count()
-        resolved_reports = WasteReport.objects.filter(
-            citizen=user, status="resolved"
-        ).count()
+    total_reports = WasteReport.objects.filter(citizen=user).count()
+    pending_reports = WasteReport.objects.filter(
+        citizen=user, status="pending"
+    ).count()
+    resolved_reports = WasteReport.objects.filter(
+        citizen=user, status="resolved"
+    ).count()
 
-        recent_reports = WasteReport.objects.filter(
-            citizen=user
-        ).order_by("-created_at")[:5]
+    recent_reports = WasteReport.objects.filter(
+        citizen=user
+    ).order_by("-created_at")[:5]
 
-        # Tasks needing OTP verification
-        verifying_reports = WasteReport.objects.filter(
-            citizen=user, 
-            status="assigned",
-            verification_otp__isnull=False
-        )
+    # Tasks needing OTP verification
+    verifying_reports = WasteReport.objects.filter(
+        citizen=user, 
+        status="assigned",
+        verification_otp__isnull=False
+    )
 
-        # Resolved tasks needing rating
-        unrated_reports = WasteReport.objects.filter(
-            citizen=user,
-            status="resolved",
-            rating__isnull=True
-        ).order_by("-resolved_at")[:3]
-        
-        assigned_reports = WasteReport.objects.filter(
-            citizen=user, status="assigned"
-        ).count()
+    # Resolved tasks needing rating
+    unrated_reports = WasteReport.objects.filter(
+        citizen=user,
+        status="resolved",
+        rating__isnull=True
+    ).order_by("-resolved_at")[:3]
+    
+    assigned_reports = WasteReport.objects.filter(
+        citizen=user, status="assigned"
+    ).count()
 
-        notifications = user.notifications.filter(is_read=False)[:5]
+    notifications = user.notifications.filter(is_read=False)[:5]
 
-        return render(request, "dashboards/citizen_dashboard.html", {
-            "total_reports": total_reports,
-            "pending_reports": pending_reports,
-            "resolved_reports": resolved_reports,
-            "assigned_reports": assigned_reports,
-            "recent_reports": recent_reports,
-            "notifications": notifications,
-            "verifying_reports": verifying_reports,
-            "unrated_reports": unrated_reports,
-        })
-    except Exception as e:
-        logger.error(f"Citizen Dashboard Error: {str(e)}")
-        logger.error(traceback.format_exc())
-        if os.getenv('DJANGO_ENV') != 'production' or request.user.is_staff:
-             return HttpResponse(f"<h1>Dashboard Error</h1><pre>{str(e)}\n\n{traceback.format_exc()}</pre>", status=500)
-        return HttpResponse("<h1>Dashboard Error</h1><p>Our team has been notified of this issue. Please try again later.</p>", status=500)
+    return render(request, "dashboards/citizen_dashboard.html", {
+        "total_reports": total_reports,
+        "pending_reports": pending_reports,
+        "resolved_reports": resolved_reports,
+        "assigned_reports": assigned_reports,
+        "recent_reports": recent_reports,
+        "notifications": notifications,
+        "verifying_reports": verifying_reports,
+        "unrated_reports": unrated_reports,
+    })
 
 
 # =========================
