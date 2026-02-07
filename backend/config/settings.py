@@ -204,6 +204,12 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# WhiteNoise Configuration for AVIF support and performance
+WHITENOISE_MIMETYPES = {
+    '.avif': 'image/avif',
+    '.webp': 'image/webp',
+}
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
