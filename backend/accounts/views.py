@@ -35,56 +35,50 @@ def redirect_dashboard(request):
 
 @login_required
 def citizen_dashboard(request):
-    try:
-        user = request.user
+    user = request.user
 
-        total_reports = WasteReport.objects.filter(citizen=user).count()
-        pending_reports = WasteReport.objects.filter(
-            citizen=user, status="pending"
-        ).count()
-        resolved_reports = WasteReport.objects.filter(
-            citizen=user, status="resolved"
-        ).count()
+    total_reports = WasteReport.objects.filter(citizen=user).count()
+    pending_reports = WasteReport.objects.filter(
+        citizen=user, status="pending"
+    ).count()
+    resolved_reports = WasteReport.objects.filter(
+        citizen=user, status="resolved"
+    ).count()
 
-        recent_reports = WasteReport.objects.filter(
-            citizen=user
-        ).order_by("-created_at")[:5]
+    recent_reports = WasteReport.objects.filter(
+        citizen=user
+    ).order_by("-created_at")[:5]
 
-        # Tasks needing OTP verification
-        verifying_reports = WasteReport.objects.filter(
-            citizen=user, 
-            status="assigned",
-            verification_otp__isnull=False
-        )
+    # Tasks needing OTP verification
+    verifying_reports = WasteReport.objects.filter(
+        citizen=user, 
+        status="assigned",
+        verification_otp__isnull=False
+    )
 
-        # Resolved tasks needing rating
-        unrated_reports = WasteReport.objects.filter(
-            citizen=user,
-            status="resolved",
-            rating__isnull=True
-        ).order_by("-resolved_at")[:3]
-        
-        assigned_reports = WasteReport.objects.filter(
-            citizen=user, status="assigned"
-        ).count()
+    # Resolved tasks needing rating
+    unrated_reports = WasteReport.objects.filter(
+        citizen=user,
+        status="resolved",
+        rating__isnull=True
+    ).order_by("-resolved_at")[:3]
+    
+    assigned_reports = WasteReport.objects.filter(
+        citizen=user, status="assigned"
+    ).count()
 
-        notifications = user.notifications.filter(is_read=False)[:5]
+    notifications = user.notifications.filter(is_read=False)[:5]
 
-        return render(request, "dashboards/citizen_dashboard.html", {
-            "total_reports": total_reports,
-            "pending_reports": pending_reports,
-            "resolved_reports": resolved_reports,
-            "assigned_reports": assigned_reports,
-            "recent_reports": recent_reports,
-            "notifications": notifications,
-            "verifying_reports": verifying_reports,
-            "unrated_reports": unrated_reports,
-        })
-    except Exception as e:
-        import traceback
-        error_info = f"Dashboard Error: {str(e)}\n{traceback.format_exc()}"
-        print(error_info)
-        return HttpResponse(f"<h1>Dashboard Diagnostic</h1><pre>{error_info}</pre>", status=500)
+    return render(request, "dashboards/citizen_dashboard.html", {
+        "total_reports": total_reports,
+        "pending_reports": pending_reports,
+        "resolved_reports": resolved_reports,
+        "assigned_reports": assigned_reports,
+        "recent_reports": recent_reports,
+        "notifications": notifications,
+        "verifying_reports": verifying_reports,
+        "unrated_reports": unrated_reports,
+    })
 
 
 # =========================

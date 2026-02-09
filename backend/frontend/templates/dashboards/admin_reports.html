@@ -91,7 +91,8 @@
       <button type="submit" name="quick_filter" value="month"
         class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'month' %}bg-eco-500 text-white shadow-lg{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">🗓️
         This Month</button>
-      {% if search_query or status_filter or waste_type_filter or severity_filter or date_from or date_to or       quick_filter %}
+      {% if search_query or status_filter or waste_type_filter or severity_filter or date_from or date_to or
+      quick_filter %}
       <a href="{% url 'admin_all_reports' %}"
         class="px-4 py-2 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 transition-all">✕
         Clear All</a>
@@ -223,24 +224,36 @@
             </div>{% endif %}
           </td>
           <td class="px-6 py-4">
-            {% if report.status == "resolved" and report.rating %}<div class="flex flex-col gap-1">
-              <div class="text-yellow-500 font-bold text-sm">{% for i in '12345'|make_list %}{% if forloop.counter <=
-                  report.rating %}★{% else %}☆{% endif %}{% endfor %}</div>{% if report.review_text %}<p
-                    class="text-[10px] text-gray-500 italic line-clamp-2">"{{ report.review_text }}"</p>{% endif %}
-              </div>{% else %}<span class="text-xs text-gray-400 dark:text-gray-600 italic">No feedback yet</span>{%
-              endif %}
+            {% if report.status == "resolved" and report.rating %}
+            <div class="flex flex-col gap-1">
+              <div class="text-yellow-500 font-bold text-sm">
+                {% for i in '12345'|make_list %}{% if forloop.counter <= report.rating %}★{% else %}☆{% endif %}{%
+                  endfor %} </div>
+                  {% if report.review_text %}
+                  <p class="text-[10px] text-gray-500 italic line-clamp-2">"{{ report.review_text }}"</p>
+                  {% endif %}
+              </div>
+              {% else %}
+              <span class="text-xs text-gray-400 dark:text-gray-600 italic">No feedback yet</span>
+              {% endif %}
           </td>
           <td class="px-6 py-4">
             <div class="flex items-center gap-3">
-              {% if report.status == "pending" or report.status == "assigned" %}<form method="post"
-                class="flex items-center gap-2">{% csrf_token %}<input type="hidden" name="report_id"
-                  value="{{ report.id }}"><select name="worker_id" required
+              {% if report.status == "pending" or report.status == "assigned" %}
+              <form method="post" class="flex items-center gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="report_id" value="{{ report.id }}">
+                <select name="worker_id" required
                   class="text-[11px] font-bold border rounded-xl px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-inner">
-                  <option value="">Assign Worker...</option>{% for worker in workers %}<option value="{{ worker.id }}"
-                    {% if report.assigned_worker==worker %}selected{% endif %}>{{
-                    worker.get_full_name|default:worker.username }}</option>{% endfor %}
-                </select><button type="submit" class="p-2 rounded-lg bg-orange-500 text-white">🚀</button></form>{%
-              endif %}
+                  <option value="">Assign Worker...</option>
+                  {% for worker in workers %}
+                  <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>{{
+                    worker.get_full_name|default:worker.username }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="p-2 rounded-lg bg-orange-500 text-white">🚀</button>
+              </form>
+              {% endif %}
               <a href="{% url 'admin_delete_report' report.id %}" class="p-2 text-gray-400 hover:text-red-600">🗑️</a>
             </div>
           </td>
@@ -290,17 +303,24 @@
               {{ report.assigned_worker.username }}{% else %}Unassigned{% endif %}</p>
           </div>
         </div>
-        {% if report.status == "pending" or report.status == "assigned" %}<form method="post"
-          class="flex flex-col gap-2 pt-2">{% csrf_token %}<input type="hidden" name="report_id"
-            value="{{ report.id }}">
-          <div class="flex gap-2"><select name="worker_id" required
+        {% if report.status == "pending" or report.status == "assigned" %}
+        <form method="post" class="flex flex-col gap-2 pt-2">
+          {% csrf_token %}
+          <input type="hidden" name="report_id" value="{{ report.id }}">
+          <div class="flex gap-2">
+            <select name="worker_id" required
               class="flex-1 text-[11px] font-bold border rounded-xl px-3 py-2.5 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700 outline-none">
-              <option value="">Assign Worker...</option>{% for worker in workers %}<option value="{{ worker.id }}" {% if                 report.assigned_worker==worker %}selected{% endif %}>{{ worker.get_full_name|default:worker.username }}
-              </option>{% endfor %}
-            </select><button type="submit"
+              <option value="">Assign Worker...</option>
+              {% for worker in workers %}
+              <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>{{
+                worker.get_full_name|default:worker.username }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit"
               class="bg-orange-600 text-white px-4 py-2 rounded-xl font-bold text-lg shadow-lg shadow-orange-500/20 active:scale-95 transition-transform">🚀</button>
           </div>
-        </form>{% endif %}
+        </form>
+        {% endif %}
         <div class="flex justify-between items-center pt-2">
           <a href="{% url 'report_detail' report.id %}"
             class="text-[10px] font-black text-eco-600 uppercase tracking-widest hover:underline">View Details →</a>
