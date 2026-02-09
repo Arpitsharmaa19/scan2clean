@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # exit on error
 set -o errexit
+cd "$(dirname "$0")"
 
 pip install -r requirements.txt
 

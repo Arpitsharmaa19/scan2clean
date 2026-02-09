@@ -600,45 +600,8 @@
   </style>
 
   <script>
-    function playNotificationSound(level = 'info') {
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
-
-        // Frequencies for different types
-        const freqMap = {
-          'info': 880,    // A5
-          'success': 1046, // C6
-          'warning': 587, // D5
-          'error': 220    // A3
-        };
-
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        const freq = freqMap[level] || 880;
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(freq / 2, ctx.currentTime + 0.3);
-
-        // Envelope
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-      } catch (e) {
-        console.error("Audio play error:", e);
-      }
-    }
-
     function showToast(title, message, level = 'info') {
-      // 🔊 Play Sound using new notification sound manager
+      // 🔊 Play Sound using fancy manager if available
       if (window.playNotificationSound) {
         const soundMap = {
           'success': 'success',
@@ -646,7 +609,7 @@
           'warning': 'alert',
           'info': 'message'
         };
-        playNotificationSound(soundMap[level] || 'message');
+        window.playNotificationSound(soundMap[level] || 'message');
       }
 
       const container = document.getElementById('toast-container');

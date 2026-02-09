@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_spectacular',
+    'rest_framework_simplejwt',
 ]
 
 REST_FRAMEWORK = {
@@ -95,7 +96,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-CORS_ALLOW_ALL_ORIGINS = True # Change this for production
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+if not DEBUG:
+    CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'https://*.onrender.com').split(',')
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Scan2Clean API',
@@ -237,7 +240,7 @@ WHITENOISE_MIMETYPES = {
     '.webp': 'image/webp',
 }
 WHITENOISE_MANIFEST_STRICT = False  # Avoid 500 if a file is missing in manifest
-WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 
 STORAGES = {
     "default": {
