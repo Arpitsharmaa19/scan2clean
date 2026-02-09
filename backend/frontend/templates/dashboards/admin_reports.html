@@ -91,8 +91,7 @@
       <button type="submit" name="quick_filter" value="month"
         class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'month' %}bg-eco-500 text-white shadow-lg{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">🗓️
         This Month</button>
-      {% if search_query or status_filter or waste_type_filter or severity_filter or date_from or date_to or
-      quick_filter %}
+      {% if search_query or status_filter or waste_type_filter or severity_filter or date_from or date_to or quick_filter %}
       <a href="{% url 'admin_all_reports' %}"
         class="px-4 py-2 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 transition-all">✕
         Clear All</a>
@@ -227,8 +226,7 @@
             {% if report.status == "resolved" and report.rating %}
             <div class="flex flex-col gap-1">
               <div class="text-yellow-500 font-bold text-sm">
-                {% for i in '12345'|make_list %}{% if forloop.counter <= report.rating %}★{% else %}☆{% endif %}{%
-                  endfor %} </div>
+                {% for i in '12345'|make_list %}{% if forloop.counter <= report.rating %}★{% else %}☆{% endif %}{% endfor %} </div>
                   {% if report.review_text %}
                   <p class="text-[10px] text-gray-500 italic line-clamp-2">"{{ report.review_text }}"</p>
                   {% endif %}
@@ -340,8 +338,7 @@
     {% if reports.has_previous %}<a href="?page={{ reports.previous_page_number }}"
       class="px-3 py-1 border rounded">Prev</a>{% endif %}
     <span class="px-3 py-1 bg-eco-500 text-white rounded">{{ reports.number }}</span>
-    {% if reports.has_next %}<a href="?page={{ reports.next_page_number }}" class="px-3 py-1 border rounded">Next</a>{%
-    endif %}
+    {% if reports.has_next %}<a href="?page={{ reports.next_page_number }}" class="px-3 py-1 border rounded">Next</a>{% endif %}
   </div>
 </div>
 {% endif %}
