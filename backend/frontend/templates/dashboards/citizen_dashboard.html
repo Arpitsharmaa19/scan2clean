@@ -141,8 +141,7 @@
               <div>
                 <h4 class="font-extrabold text-gray-800 dark:text-white text-sm">Cleanup Confirmed for #{{ report.id }}!
                 </h4>
-<p class="text-[11px] text-gray-500 dark:text-gray-300">How was the service by <b>{% if report.assigned_worker %}{{
-                    report.assigned_worker.get_full_name|default:report.assigned_worker.username }}{% else %}our team{%
+<p class="text-[11px] text-gray-500 dark:text-gray-300">How was the service by <b>{% if report.assigned_worker %}{{ report.assigned_worker.get_full_name|default:report.assigned_worker.username }}{% else %}our team{%
                     endif %}</b>?</p>
               </div>
             </div>
