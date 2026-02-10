@@ -1,0 +1,416 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% block dashboard_content %}
+
+<style>
+  @keyframes bounce-slow {
+
+    0%,
+    100% {
+      transform: translateY(-5%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+
+    50% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+
+  .animate-bounce-slow {
+    animation: bounce-slow 2s infinite;
+  }
+</style>
+
+<!-- 🦴 Skeleton Loading Overlay -->
+<div id="dashboard-skeleton"
+  class="fixed inset-0 z-[60] bg-gray-50 dark:bg-gray-900 overflow-hidden pointer-events-none transition-opacity duration-700 p-8">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <div class="h-16 w-full skeleton rounded-xl"></div>
+    <div class="h-[600px] w-full skeleton rounded-3xl"></div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const skeleton = document.getElementById('dashboard-skeleton');
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      setTimeout(() => skeleton.remove(), 700);
+    }
+  });
+</script>
+
+<!-- 🌈 Header -->
+<div
+  class="relative overflow-hidden rounded-2xl md:rounded-3xl p-6 md:p-8 text-white mb-6 md:mb-10 shadow-2xl animate-fade-down group spotlight-card bg-gradient-to-r from-gray-800 to-gray-900 border border-white/10">
+  <div class="scan-beam"></div>
+  <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div class="text-center md:text-left">
+      <h2
+        class="text-xl md:text-3xl font-heading font-bold text-white flex items-center justify-center md:justify-start gap-3">
+        <span class="animate-sway">📋</span> <span class="hidden xs:inline">Operations Dashboard</span><span
+          class="xs:hidden">Ops Dashboard</span>
+      </h2>
+      <p class="text-gray-300 text-xs md:text-base mt-1 font-medium italic opacity-80">
+        Audit, assign, and verify systemic waste resolutions.
+      </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center gap-3 md:gap-4">
+      <a href="{% url 'export_reports_csv' %}"
+        class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-5 md:px-6 py-2.5 md:py-3 rounded-xl font-bold font-heading text-xs md:text-sm shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 relative z-10 uppercase tracking-wider">
+        <span>📥</span> Export Audit
+      </a>
+      <div
+        class="w-full sm:w-auto bg-white/10 backdrop-blur-md px-5 py-2 md:py-3 rounded-xl border border-white/10 shadow-inner flex sm:flex-col items-center sm:items-start justify-between sm:justify-center gap-2">
+        <p class="text-[9px] md:text-[10px] text-gray-400 uppercase font-bold tracking-widest leading-none">Payload</p>
+        <p class="text-lg md:text-xl font-black text-white leading-none">{{ reports.paginator.count }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔍 Search & Filter Section -->
+<div
+  class="glass-card spotlight-card rounded-3xl p-6 mb-8 shadow-lg border border-white/50 dark:border-gray-800 animate-fade-up">
+  <form method="GET" action="{% url 'admin_all_reports' %}" class="space-y-6">
+
+    <!-- Search Bar -->
+    <div class="relative">
+      <input type="text" name="search" value="{{ search_query }}" placeholder="🔍 Search..."
+        class="w-full px-5 py-4 pl-12 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 focus:ring-4 focus:ring-eco-500/20 transition-all outline-none font-medium">
+      <svg class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+
+    <!-- Quick Filters -->
+    <div class="flex flex-wrap gap-2">
+      <span
+        class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider self-center">Quick:</span>
+      <button type="submit" name="quick_filter" value="today"
+        class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'today' %}bg-eco-500 text-white shadow-lg{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">📅
+        Today</button>
+      <button type="submit" name="quick_filter" value="week"
+        class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'week' %}bg-eco-500 text-white shadow-lg{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">📆
+        This Week</button>
+      <button type="submit" name="quick_filter" value="month"
+        class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'month' %}bg-eco-500 text-white shadow-lg{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">🗓️
+        This Month</button>
+      {% if search_query or status_filter or waste_type_filter %}
+      <a href="{% url 'admin_all_reports' %}"
+        class="px-4 py-2 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 transition-all">✕
+        Clear All</a>
+      {% elif severity_filter or date_from or date_to or quick_filter %}
+      <a href="{% url 'admin_all_reports' %}"
+        class="px-4 py-2 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 transition-all">✕
+        Clear All</a>
+      {% endif %}
+    </div>
+
+    <!-- Advanced Filters Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+
+      <!-- Status Filter -->
+      <div>
+        <label
+          class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Status</label>
+        <select name="status" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 text-sm font-medium">
+          <option value="">All Statuses</option>
+          <option value="pending" {% if status_filter=='pending' %}selected{% endif %}>⏳ Pending</option>
+          <option value="assigned" {% if status_filter=='assigned' %}selected{% endif %}>🚛 Assigned</option>
+          <option value="resolved" {% if status_filter=='resolved' %}selected{% endif %}>✅ Resolved</option>
+        </select>
+      </div>
+
+      <!-- Waste Type Filter -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Waste
+          Type</label>
+        <select name="waste_type" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 text-sm font-medium">
+          <option value="">All Types</option>
+          <option value="plastic" {% if waste_type_filter=='plastic' %}selected{% endif %}>♻️ Plastic</option>
+          <option value="organic" {% if waste_type_filter=='organic' %}selected{% endif %}>🍂 Organic</option>
+          <option value="metal" {% if waste_type_filter=='metal' %}selected{% endif %}>🔩 Metal</option>
+          <option value="glass" {% if waste_type_filter=='glass' %}selected{% endif %}>🍾 Glass</option>
+          <option value="paper" {% if waste_type_filter=='paper' %}selected{% endif %}>📄 Paper</option>
+          <option value="electronic" {% if waste_type_filter=='electronic' %}selected{% endif %}>💻 Electronic</option>
+          <option value="hazardous" {% if waste_type_filter=='hazardous' %}selected{% endif %}>☢️ Hazardous</option>
+          <option value="other" {% if waste_type_filter=='other' %}selected{% endif %}>📦 Other</option>
+        </select>
+      </div>
+
+      <!-- Severity Filter -->
+      <div>
+        <label
+          class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Severity</label>
+        <select name="severity" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-eco-500 text-sm font-medium">
+          <option value="">All Severities</option>
+          <option value="low" {% if severity_filter=='low' %}selected{% endif %}>🟢 Low</option>
+          <option value="medium" {% if severity_filter=='medium' %}selected{% endif %}>🟡 Medium</option>
+          <option value="high" {% if severity_filter=='high' %}selected{% endif %}>🔴 High</option>
+        </select>
+      </div>
+
+      <!-- Date From -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">From
+          Date</label>
+        <input type="date" name="date_from" value="{{ date_from }}" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 bg-white text-gray-800 text-sm font-medium">
+      </div>
+
+      <!-- Date To -->
+      <div>
+        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">To
+          Date</label>
+        <input type="date" name="date_to" value="{{ date_to }}" onchange="this.form.submit()"
+          class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 bg-white text-gray-800 text-sm font-medium">
+      </div>
+
+    </div>
+
+    <!-- Apply Button -->
+    <div class="flex justify-center sm:justify-end">
+      <button type="submit"
+        class="w-full sm:w-auto px-10 py-3.5 bg-gradient-to-r from-eco-500 to-teal-500 text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-lg shadow-eco-500/25 hover:shadow-eco-500/40 transition-all active:scale-95">
+        🔍 Apply Filter
+      </button>
+    </div>
+
+  </form>
+</div>
+
+{% if reports %}
+<div class="glass-card rounded-3xl shadow-xl overflow-hidden animate-fade-up">
+  <div class="md:overflow-x-auto">
+    <!-- Desktop Table -->
+    <table class="w-full text-left border-collapse hidden md:table">
+      <thead>
+        <tr
+          class="bg-gray-50/50 dark:bg-gray-800/50 text-xs uppercase text-gray-400 font-bold border-b border-gray-100 dark:border-gray-800">
+          <th class="px-6 py-5">Issue Details</th>
+          <th class="px-6 py-5">Description</th>
+          <th class="px-6 py-5 text-center">Severity</th>
+          <th class="px-6 py-5 text-center">Status</th>
+          <th class="px-6 py-5">Feedback</th>
+          <th class="px-6 py-5">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+        {% for report in reports %}
+        <tr
+          class="hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10 transition-all duration-200 group border-b border-gray-100 dark:border-gray-800/50">
+
+          <!-- Issue Details -->
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-4">
+              <div class="h-16 w-16 rounded-xl overflow-hidden border">
+                {% if report.image %}
+                <img src="{{ report.image.url }}" class="h-full w-full object-cover">
+                {% else %}
+                <div class="h-full w-full bg-gray-100 flex items-center justify-center">📸</div>
+                {% endif %}
+              </div>
+              <div>
+                <div
+                  class="font-bold text-gray-800 dark:text-white text-base group-hover:text-eco-600 transition-colors">
+                  {{ report.get_waste_type_display }}
+                </div>
+                <div class="text-[10px] text-gray-400 dark:text-gray-500 font-mono">ID: #{{ report.id }}</div>
+                <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{{ report.created_at|date:"M d, Y" }}
+                </div>
+                <a href="{% url 'report_detail' report.id %}"
+                  class="text-xs text-eco-600 font-bold hover:underline">View Full File →</a>
+              </div>
+            </div>
+          </td>
+
+          <!-- Description -->
+          <td class="px-6 py-4 max-w-xs">
+            <p class="text-sm text-gray-600 dark:text-gray-400 italic line-clamp-2">"{{ report.description }}"</p>
+          </td>
+
+          <!-- Severity -->
+          <td class="px-6 py-4 text-center">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold
+              {% if report.severity == 'high' %} bg-red-50 text-red-600 
+              {% elif report.severity == 'medium' %} bg-yellow-50 text-yellow-600 
+              {% else %} bg-green-50 text-green-600 {% endif %}">
+              {{ report.severity|capfirst }}
+            </span>
+          </td>
+
+          <!-- Status -->
+          <td class="px-6 py-4 text-center">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase
+              {% if report.status == 'pending' %} bg-yellow-100 text-yellow-700 
+              {% elif report.status == 'assigned' %} bg-blue-100 text-blue-700 
+              {% else %} bg-green-100 text-green-700 {% endif %}">
+              {{ report.status }}
+            </span>
+            {% if report.assigned_worker %}
+            <div
+              class="text-xs font-black text-blue-500 dark:text-blue-400 mt-2 flex items-center justify-center gap-1.5 bg-blue-50/50 dark:bg-blue-900/20 py-1 px-2 rounded-lg border border-blue-100 dark:border-blue-800/30">
+              <span class="animate-bounce-slow">👷</span> {{
+              report.assigned_worker.get_full_name|default:report.assigned_worker.username }}
+            </div>
+            {% endif %}
+          </td>
+
+          <td class="px-6 py-4">
+            {% if report.status == "resolved" and report.rating %}
+            <div class="flex flex-col gap-1">
+              <div class="text-yellow-500 font-bold text-sm">
+                {% for i in '12345'|make_list %}
+                {% if forloop.counter <= report.rating %}★{% else %}☆{% endif %} {% endfor %} </div>
+                  {% if report.review_text %}
+                  <p class="text-[10px] text-gray-500 italic line-clamp-2">"{{ report.review_text }}"</p>
+                  {% endif %}
+              </div>
+              {% else %}
+              <span class="text-xs text-gray-400 dark:text-gray-600 italic">No feedback yet</span>
+              {% endif %}
+          </td>
+
+          <!-- Actions -->
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              {% if report.status == "pending" or report.status == "assigned" %}
+              <form method="post" class="flex items-center gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="report_id" value="{{ report.id }}">
+                <select name="worker_id" required
+                  class="text-[11px] font-bold border rounded-xl px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-inner">
+                  <option value="">Assign Worker...</option>
+                  {% for worker in workers %}
+                  <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>
+                    {{ worker.get_full_name|default:worker.username }}
+                  </option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="p-2 rounded-lg bg-orange-500 text-white">🚀</button>
+              </form>
+              {% endif %}
+              <a href="{% url 'admin_delete_report' report.id %}" class="p-2 text-gray-400 hover:text-red-600">🗑️</a>
+            </div>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Mobile Stack Layout -->
+    <div class="md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+      {% for report in reports %}
+      <div class="p-5 flex flex-col gap-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+
+        <!-- Header: Type & Status -->
+        <div class="flex justify-between items-start">
+          <div class="flex items-center gap-3">
+            <div class="h-14 w-14 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm">
+              {% if report.image %}<img src="{{ report.image.url }}" class="h-full w-full object-cover">
+              {% else %}<div class="h-full w-full bg-gray-100 flex items-center justify-center text-xl">📸</div>{% endif
+              %}
+            </div>
+            <div>
+              <h3 class="font-black text-gray-800 dark:text-white text-sm line-clamp-1">{{ report.get_waste_type_display
+                }}</h3>
+              <p class="text-[10px] text-gray-400 font-mono">#{{ report.id }} • {{ report.created_at|date:"M d, Y" }}
+              </p>
+            </div>
+          </div>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter
+            {% if report.status == 'pending' %} bg-yellow-100 text-yellow-700 
+            {% elif report.status == 'assigned' %} bg-blue-100 text-blue-700 
+            {% else %} bg-green-100 text-green-700 {% endif %}">
+            {{ report.status }}
+          </span>
+        </div>
+
+        <!-- Description -->
+        <p
+          class="text-xs text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800/50">
+          "{{ report.description }}"
+        </p>
+
+        <!-- Details Grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-gray-50/50 dark:bg-gray-800/30 p-2 rounded-lg border border-gray-100 dark:border-gray-700/50">
+            <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Severity</p>
+            <span class="text-[10px] font-bold uppercase 
+              {% if report.severity == 'high' %} text-red-600 
+              {% elif report.severity == 'medium' %} text-yellow-600 
+              {% else %} text-green-600 {% endif %}">{{ report.severity }}</span>
+          </div>
+          <div
+            class="bg-gray-50/50 dark:bg-gray-800/30 p-2 rounded-lg border border-gray-100 dark:border-gray-700/50 text-right">
+            <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Assigned To</p>
+            <p class="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate">
+              {% if report.assigned_worker %}👷 {{ report.assigned_worker.username }}{% else %}Unassigned{% endif %}
+            </p>
+          </div>
+        </div>
+
+        <!-- Assignment Form -->
+        {% if report.status == "pending" or report.status == "assigned" %}
+        <form method="post" class="flex flex-col gap-2 pt-2">
+          {% csrf_token %}
+          <input type="hidden" name="report_id" value="{{ report.id }}">
+          <div class="flex gap-2">
+            <select name="worker_id" required
+              class="flex-1 text-[11px] font-bold border rounded-xl px-3 py-2.5 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700 outline-none">
+              <option value="">Assign Worker...</option>
+              {% for worker in workers %}
+              <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>{{
+                worker.get_full_name|default:worker.username }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit"
+              class="bg-orange-600 text-white px-4 py-2 rounded-xl font-bold text-lg shadow-lg shadow-orange-500/20 active:scale-95 transition-transform">🚀</button>
+          </div>
+        </form>
+        {% endif %}
+
+        <!-- Footer Actions -->
+        <div class="flex justify-between items-center pt-2">
+          <a href="{% url 'report_detail' report.id %}"
+            class="text-[10px] font-black text-eco-600 uppercase tracking-widest hover:underline">View Details →</a>
+          <a href="{% url 'admin_delete_report' report.id %}"
+            class="p-2 text-gray-400 hover:text-red-600 transition-colors">🗑️ Delete</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if reports.has_other_pages %}
+<div class="mt-8 flex justify-between items-center text-sm text-gray-500">
+  <div>Showing {{ reports.start_index }} - {{ reports.end_index }} of {{ reports.paginator.count }}</div>
+  <div class="flex gap-1">
+    {% if reports.has_previous %}<a href="?page={{ reports.previous_page_number }}"
+      class="px-3 py-1 border rounded">Prev</a>{% endif %}
+    <span class="px-3 py-1 bg-eco-500 text-white rounded">{{ reports.number }}</span>
+    {% if reports.has_next %}<a href="?page={{ reports.next_page_number }}" class="px-3 py-1 border rounded">Next</a>{%
+    endif %}
+  </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="flex flex-col items-center justify-center py-20 bg-white/50 border-2 border-dashed rounded-3xl">
+  <div class="text-6xl mb-4">📭</div>
+  <p class="text-gray-500 font-medium">No reports found.</p>
+</div>
+{% endif %}
+
+{% endblock %}
