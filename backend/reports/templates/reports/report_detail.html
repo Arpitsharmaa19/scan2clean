@@ -152,7 +152,7 @@
                   <option value="">{% if workers %}Select a professional...{% else %}No workers available{% endif %}
                   </option>
                   {% for worker in workers %}
-                  <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>
+                  <option value="{{ worker.id }}" {% if report.assigned_worker == worker %}selected{% endif %}>
                     {{ worker.get_full_name|default:worker.username }} (⭐ {{ worker.average_rating|floatformat:1 }})
                   </option>
                   {% endfor %}
