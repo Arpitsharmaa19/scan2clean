@@ -1,37 +1,69 @@
 {% extends "dashboards/base_dashboard.html" %}
-
 {% block dashboard_content %}
-<div class="max-w-xl mx-auto bg-white rounded-xl shadow p-8 mt-10">
 
-  <h1 class="text-2xl font-bold text-red-600 mb-4">
-    ⚠️ Delete Report
-  </h1>
+<div
+  class="max-w-xl mx-auto dark:bg-gray-800 rounded-3xl shadow-2xl p-8 mt-10 border border-gray-100 dark:border-gray-700 animate-fade-in relative overflow-hidden bg-white">
 
-  <p class="mb-6 text-gray-700">
-    Are you sure you want to delete this report?
-    <br>
-    <span class="font-semibold">
-      Waste Type: {{ report.get_waste_type_display }}
-    </span>
-  </p>
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 bg-red-500/5 pointer-events-none"></div>
 
-  <form method="POST" class="flex gap-4">
-    {% csrf_token %}
+  <div class="relative z-10 text-center">
+    <!-- Icon -->
+    <div
+      class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 mb-6 animate-pulse">
+      <span class="text-4xl">⚠️</span>
+    </div>
 
-    <button
-      type="submit"
-      class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold"
-    >
-      Yes, Delete
-    </button>
+    <!-- Heading -->
+    <h1 class="text-3xl font-heading font-black text-gray-900 dark:text-white mb-2">
+      Are you sure?
+    </h1>
 
-    <a
-      href="/reports/my-reports/"
-      class="bg-gray-200 hover:bg-gray-300 px-6 py-2 rounded-lg font-semibold"
-    >
-      Cancel
-    </a>
-  </form>
+    <!-- Warning Text -->
+    <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto text-sm leading-relaxed">
+      You are about to delete your waste report. This action cannot be undone.
+    </p>
+
+    <!-- Report Summary Card -->
+    <div
+      class="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-5 mb-8 text-left border border-gray-200 dark:border-gray-600 transform transition hover:scale-[1.02]">
+      <div class="flex items-center gap-4">
+        {% if report.image %}
+        <div
+          class="w-16 h-16 rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-200 dark:border-gray-600">
+          <img src="{{ report.image.url }}" class="w-full h-full object-cover">
+        </div>
+        {% else %}
+        <div
+          class="w-16 h-16 rounded-xl bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xl shrink-0">
+          📸
+        </div>
+        {% endif %}
+
+        <div>
+          <h3 class="font-bold text-gray-900 dark:text-white mb-0.5">Report #{{ report.id }}</h3>
+          <span class="text-xs font-bold text-eco-600 dark:text-eco-400 uppercase tracking-widest">{{
+            report.get_waste_type_display }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <form method="POST" class="flex flex-col sm:flex-row gap-3">
+      {% csrf_token %}
+
+      <a href="{% url 'my_reports' %}"
+        class="flex-1 px-6 py-3.5 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-center">
+        Cancel
+      </a>
+
+      <button type="submit"
+        class="flex-1 px-6 py-3.5 rounded-xl font-bold bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-1 active:translate-y-0">
+        Yes, Delete It
+      </button>
+    </form>
+  </div>
 
 </div>
+
 {% endblock %}

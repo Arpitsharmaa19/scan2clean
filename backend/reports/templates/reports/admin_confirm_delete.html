@@ -1,36 +1,59 @@
 {% extends "dashboards/base_dashboard.html" %}
 {% block dashboard_content %}
 
-<div class="max-w-xl mx-auto bg-white rounded-xl shadow p-8 mt-10">
+<div
+  class="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 mt-10 border border-gray-100 dark:border-gray-700 animate-fade-in relative overflow-hidden">
 
-  <h1 class="text-2xl font-bold text-red-600 mb-4">
-    ⚠️ Admin Delete Report
-  </h1>
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 bg-red-500/5 pointer-events-none"></div>
 
-  <p class="mb-6">
-    Are you sure you want to permanently delete this report?
-  </p>
+  <div class="relative z-10 text-center">
+    <div
+      class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 mb-6 animate-pulse">
+      <span class="text-4xl">🗑️</span>
+    </div>
 
-  <p class="font-semibold mb-6">
-    Report ID: {{ report.id }} |
-    {{ report.get_waste_type_display }} |
-    {{ report.status }}
-  </p>
+    <h1 class="text-3xl font-heading font-black text-gray-900 dark:text-white mb-2">
+      Delete Report?
+    </h1>
 
-  <form method="POST" class="flex gap-4">
-    {% csrf_token %}
+    <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto">
+      Are you sure you want to permanently delete <strong class="text-gray-800 dark:text-gray-200">Report #{{ report.id
+        }}</strong>? This action cannot be undone.
+    </p>
 
-    <button
-      type="submit"
-      class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold">
-      Delete
-    </button>
+    <!-- Report Details Preview -->
+    <div
+      class="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4 mb-8 text-left border border-gray-200 dark:border-gray-600">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Type</span>
+        <span class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ report.get_waste_type_display }}</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Status</span>
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase
+          {% if report.status == 'pending' %} bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400
+          {% elif report.status == 'assigned' %} bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400
+          {% else %} bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 {% endif %}">
+          {{ report.status }}
+        </span>
+      </div>
+    </div>
 
-    <a href="/reports/admin/"
-       class="bg-gray-200 px-6 py-2 rounded-lg font-semibold">
-      Cancel
-    </a>
-  </form>
+    <form method="POST" class="flex flex-col sm:flex-row gap-3">
+      {% csrf_token %}
+
+      <a href="{% url 'admin_all_reports' %}"
+        class="flex-1 px-6 py-3.5 rounded-xl font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-center">
+        Cancel
+      </a>
+
+      <button type="submit"
+        class="flex-1 px-6 py-3.5 rounded-xl font-bold bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30 transition-all transform hover:-translate-y-1">
+        Yes, Delete It
+      </button>
+    </form>
+  </div>
 
 </div>
 
