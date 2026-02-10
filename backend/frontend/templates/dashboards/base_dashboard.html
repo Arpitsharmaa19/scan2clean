@@ -494,7 +494,7 @@
         // Play notification sound based on notification type
         if (window.playNotificationSound) {
           const soundType = data.sound_type || 'message';
-          playNotificationSound(soundType);
+          window.playNotificationSound(soundType);
         }
       }
     };

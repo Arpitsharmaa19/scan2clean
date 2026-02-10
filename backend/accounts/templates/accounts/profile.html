@@ -146,6 +146,127 @@
             </div>
         </div>
 
+        <!-- System Preferences -->
+        <div class="glass-card spotlight-card rounded-3xl p-8 shadow-lg border border-white/40 dark:border-gray-700">
+            <div class="flex items-center gap-4 mb-6">
+                <div
+                    class="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xl text-amber-600">
+                    ⚙️</div>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">System Preferences</h3>
+            </div>
+
+            <div class="space-y-6">
+                <div class="group">
+                    <label
+                        class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex justify-between">
+                        <span>Notification Sounds</span>
+                        <span id="sound-status-text" class="text-eco-600">Enabled</span>
+                    </label>
+                    <div
+                        class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                        <button id="profile-sound-toggle"
+                            class="h-10 w-10 rounded-xl bg-white dark:bg-gray-700 shadow-sm flex items-center justify-center text-xl">
+                            🔊
+                        </button>
+                        <div class="flex-1">
+                            <input type="range" id="volume-slider" min="0" max="1" step="0.01"
+                                class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-eco-500">
+                            <div class="flex justify-between mt-1">
+                                <span class="text-[10px] text-gray-400 font-bold">Mute</span>
+                                <span class="text-[10px] text-gray-400 font-bold">Loud</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Display
+                        Theme</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setTheme('light')"
+                            class="p-3 rounded-xl border-2 border-transparent bg-gray-50 dark:bg-gray-800 text-sm font-bold flex items-center justify-center gap-2 hover:border-eco-500 transition-all dark:text-gray-300">
+                            ☀️ Light
+                        </button>
+                        <button onclick="setTheme('dark')"
+                            class="p-3 rounded-xl border-2 border-transparent bg-gray-50 dark:bg-gray-800 text-sm font-bold flex items-center justify-center gap-2 hover:border-eco-500 transition-all dark:text-gray-300">
+                            🌙 Dark
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const volumeSlider = document.getElementById('volume-slider');
+                const soundToggle = document.getElementById('profile-sound-toggle');
+                const statusText = document.getElementById('sound-status-text');
+
+                // Initialize from localStorage/manager
+                if (window.notificationSound) {
+                    volumeSlider.value = window.notificationSound.volume;
+                    updateSoundUI(window.notificationSound.isEnabled());
+                }
+
+                volumeSlider.addEventListener('input', (e) => {
+                    const vol = parseFloat(e.target.value);
+                    if (window.notificationSound) {
+                        window.notificationSound.setVolume(vol);
+                        if (vol > 0 && !window.notificationSound.isEnabled()) {
+                            window.notificationSound.toggle();
+                            updateSoundUI(true);
+                        } else if (vol === 0 && window.notificationSound.isEnabled()) {
+                            window.notificationSound.toggle();
+                            updateSoundUI(false);
+                        }
+                    }
+                });
+
+                soundToggle.addEventListener('click', () => {
+                    if (window.notificationSound) {
+                        const enabled = window.notificationSound.toggle();
+                        updateSoundUI(enabled);
+                        if (enabled && volumeSlider.value == 0) {
+                            volumeSlider.value = 0.7;
+                            window.notificationSound.setVolume(0.7);
+                        }
+                        window.playNotificationSound('success');
+
+                        // Sync with navbar toggle if exists
+                        const navToggle = document.getElementById('sound-toggle');
+                        if (navToggle) navToggle.click(); // This is a bit hacky but works for sync
+                    }
+                });
+
+                function updateSoundUI(enabled) {
+                    soundToggle.innerHTML = enabled ? '🔊' : '🔇';
+                    statusText.innerText = enabled ? 'Enabled' : 'Disabled';
+                    statusText.className = enabled ? 'text-eco-600 font-bold' : 'text-gray-400 font-bold';
+                }
+            });
+
+            function setTheme(theme) {
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.theme = 'dark';
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.theme = 'light';
+                }
+                // Call global toggle to save to DB
+                const isDark = document.documentElement.classList.contains('dark');
+                // We want to sync with the toggleDarkMode function in base.html but it's a toggle
+                // So we check if we need to change it
+                fetch('/toggle-dark-mode/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1],
+                        'Content-Type': 'application/json'
+                    }
+                });
+            }
+        </script>
+
         <!-- 🚨 Danger Zone -->
         <div
             class="md:col-span-2 glass-card spotlight-card rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-lg border border-red-200 dark:border-red-900/30 bg-red-50/30 dark:bg-red-900/10">
