@@ -120,7 +120,7 @@
               {% endif %}
             </div>
             <div class="min-w-0">
-              <h4 class="font-bold text-gray-800 dark:text-white text-sm truncate">Verify: #{{ report.id }}</h4>
+              <h4 class="font-bold text-gray-800 dark:text-gray-100 text-sm truncate">Verify: #{{ report.id }}</h4>
               <p class="text-[10px] text-gray-500 truncate">Share with <span class="text-eco-600 font-bold">{{
                   report.assigned_worker.username }}</span></p>
             </div>
@@ -140,15 +140,19 @@
             <div class="flex items-center gap-3">
               <span class="text-2xl animate-sway">🎉</span>
               <div>
-                <h4 class="font-extrabold text-gray-800 dark:text-white text-sm">Cleanup Confirmed for #{{ report.id }}!
+                <h4 class="font-extrabold text-gray-800 dark:text-gray-100 text-sm">Cleanup Confirmed for #{{ report.id
+                  }}!
                 </h4>
                 <p class="text-[11px] text-gray-500 dark:text-gray-300">How was the service by <b>{{
                     report.assigned_worker.get_full_name|default:report.assigned_worker.username }}</b>?</p>
               </div>
             </div>
             <div
-              class="h-10 w-10 rounded-lg overflow-hidden border border-gray-100 group-hover:rotate-6 transition-transform">
-              {% if report.image %}<img src="{{ report.image.url }}" class="w-full h-full object-cover">{% endif %}
+              class="h-10 w-10 rounded-lg overflow-hidden border border-gray-100 group-hover:rotate-6 transition-transform relative bg-gray-100 dark:bg-gray-700">
+              {% if report.image %}
+              <img src="{{ report.image.url }}" class="w-full h-full object-cover"
+                onerror="this.style.display='none'; this.parentElement.innerText='📸'; this.parentElement.classList.add('flex','items-center','justify-center');">
+              {% endif %}
             </div>
           </div>
 
