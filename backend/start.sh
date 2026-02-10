@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-cd "$(dirname "$0")"
 
 # Verify PORT is set, default to 10000 if not
 PORT=${PORT:-10000}

@@ -137,7 +137,7 @@
         <div class="flex items-center gap-2">
           <p class="text-3xl font-black text-gray-800 dark:text-white">{{ request.user.average_rating|floatformat:1 }}
           </p>
-          <span class="text-xl text-amber-400">★</span>
+          <span class="text-xl text-yellow-400">★</span>
         </div>
         <p class="text-[9px] text-gray-500 font-bold uppercase mt-1">{{ request.user.total_ratings }} reviews</p>
       </div>
@@ -185,7 +185,8 @@
         <div>
           <div class="flex justify-between items-start mb-1">
             <h4 class="font-bold text-gray-800 dark:text-white truncate text-sm">Job #{{ report.id }}</h4>
-            <span class="px-2 py-0.5 rounded-md text-[8px] font-black uppercase bg-red-100 text-red-600">{{ report.severity }}</span>
+            <span class="px-2 py-0.5 rounded-md text-[8px] font-black uppercase bg-red-100 text-red-600">{{
+              report.severity }}</span>
           </div>
           <p class="text-[10px] text-gray-500 dark:text-gray-300 mb-3 line-clamp-1 italic">"{{ report.description }}"
           </p>

@@ -60,23 +60,23 @@
 
         {% if request.user.role == 'admin' %}
         <a href="{% url 'admin_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/dashboard/admin/' %} bg-eco-500 text-white shadow-lg {% else %} hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 text-gray-700 dark:text-gray-300 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-700 dark:text-gray-300 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">💎</span> Dashboard
         </a>
         <a href="{% url 'admin_all_reports' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/admin/' %} bg-orange-500 text-white shadow-lg {% else %} hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🛠️</span> Manage Reports
         </a>
         <a href="{% url 'admin_analytics' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/admin/analytics/' %} bg-blue-500 text-white shadow-lg {% else %} hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">📊</span> Analytics
         </a>
         <a href="{% url 'worker_performance_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/worker-performance/' %} bg-indigo-500 text-white shadow-lg {% else %} hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-900/40 dark:hover:text-indigo-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">👷</span> Performance
         </a>
         <a href="{% url 'waste_map' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/map/' %} bg-teal-500 text-white shadow-lg {% else %} hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-900/40 dark:hover:text-teal-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-900/40 dark:hover:text-teal-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🗺️</span> Global Map
         </a>
         <a href="{% url 'admin_support_tickets' %}"
@@ -93,7 +93,7 @@
 
         {% if request.user.role == 'citizen' %}
         <a href="{% url 'citizen_dashboard' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/dashboard/citizen/' %} bg-eco-500 text-white shadow-lg {% else %} hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 text-gray-700 dark:text-gray-300 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-eco-50 hover:text-eco-700 dark:hover:bg-eco-900/40 dark:hover:text-eco-400 transition-all duration-200 group text-gray-700 dark:text-gray-300 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🏡</span> Home
         </a>
         <a href="{% url 'report_waste' %}"
@@ -101,15 +101,15 @@
           <span class="animate-bounce">📸</span> Report Waste
         </a>
         <a href="{% url 'my_reports' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/my-reports/' %} bg-orange-500 text-white shadow-lg {% else %} hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 hover:text-orange-700 dark:hover:bg-orange-900/40 dark:hover:text-orange-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">📂</span> My Reports
         </a>
         <a href="{% url 'waste_map' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/map/' %} bg-blue-500 text-white shadow-lg {% else %} hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/40 dark:hover:text-blue-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🗺️</span> Map View
         </a>
         <a href="{% url 'report_problem' %}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl {% if request.path == '/reports/report-problem/' %} bg-red-500 text-white shadow-lg {% else %} hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-400 text-gray-600 dark:text-gray-400 {% endif %} transition-all duration-200 group font-bold text-sm">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/40 dark:hover:text-red-400 transition-all duration-200 group text-gray-600 dark:text-gray-400 font-bold text-sm">
           <span class="group-hover:scale-125 transition-transform duration-300">🛠️</span> Support
         </a>
         {% endif %}
@@ -176,7 +176,7 @@
         <!-- 🌓 Dark Mode Toggle -->
         <button onclick="toggleDarkMode()"
           class="p-2.5 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 hidden dark:block" fill="none"
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500 hidden dark:block" fill="none"
             viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -219,15 +219,15 @@
           </div>
         </div>
 
-        <div class="hidden sm:flex flex-col text-right mr-1 min-w-0">
+        <div class="hidden md:flex flex-col text-right mr-1">
           <span
-            class="text-[10px] md:text-[11px] font-black text-gray-800 dark:text-white uppercase leading-none truncate">{{user.username}}</span>
-          <span class="text-[8px] md:text-[9px] font-bold text-eco-600 uppercase tracking-tighter">{{user.role}}</span>
+            class="text-[11px] font-black text-gray-800 dark:text-white uppercase leading-none">{{user.username}}</span>
+          <span class="text-[9px] font-bold text-eco-600 uppercase tracking-tighter">{{user.role}}</span>
         </div>
 
         <a href="{% url 'logout' %}"
           class="flex items-center gap-2 px-3 md:px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 text-[10px] font-black uppercase tracking-[0.15em]">
-          <span class="hidden sm:inline text-[9px] font-black">Logout</span> 🚪
+          <span class="hidden md:inline text-[9px] font-black">Logout</span> 🚪
         </a>
       </div>
     </header>
@@ -297,22 +297,13 @@
       <div class="p-2 rounded-xl transition-all">
         <span class="text-xl">📋</span>
       </div>
-      <span
-        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Dashboard</span>
+      <span class="text-[10px] font-bold text-gray-400">Dashboard</span>
     </a>
     <a href="{% url 'worker_assigned_reports' %}" class="flex flex-col items-center gap-1 group">
       <div class="p-2 rounded-xl transition-all">
         <span class="text-xl">🚛</span>
       </div>
-      <span
-        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Jobs</span>
-    </a>
-    <a href="{% url 'waste_map' %}" class="flex flex-col items-center gap-1 group">
-      <div class="p-2 rounded-xl transition-all">
-        <span class="text-xl">🗺️</span>
-      </div>
-      <span
-        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Map</span>
+      <span class="text-[10px] font-bold text-gray-400">Active Jobs</span>
     </a>
     {% endif %}
 
@@ -321,29 +312,19 @@
       <div class="p-2 rounded-xl">
         <span class="text-xl">💎</span>
       </div>
-      <span
-        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Home</span>
+      <span class="text-[10px] font-bold text-gray-400">Overview</span>
     </a>
     <a href="{% url 'admin_all_reports' %}" class="flex flex-col items-center gap-1 group">
       <div class="p-2 rounded-xl">
         <span class="text-xl">🛠️</span>
       </div>
-      <span
-        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Manage</span>
+      <span class="text-[10px] font-bold text-gray-400">Manage</span>
     </a>
     <a href="{% url 'admin_analytics' %}" class="flex flex-col items-center gap-1 group">
       <div class="p-2 rounded-xl">
         <span class="text-xl">📊</span>
       </div>
-      <span
-        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Stats</span>
-    </a>
-    <a href="{% url 'waste_map' %}" class="flex flex-col items-center gap-1 group">
-      <div class="p-2 rounded-xl">
-        <span class="text-xl">🗺️</span>
-      </div>
-      <span
-        class="text-[10px] font-bold text-gray-400 group-hover:text-eco-600 dark:group-hover:text-eco-400">Map</span>
+      <span class="text-[10px] font-bold text-gray-400">Stats</span>
     </a>
     {% endif %}
 
@@ -494,7 +475,7 @@
         // Play notification sound based on notification type
         if (window.playNotificationSound) {
           const soundType = data.sound_type || 'message';
-          window.playNotificationSound(soundType);
+          playNotificationSound(soundType);
         }
       }
     };

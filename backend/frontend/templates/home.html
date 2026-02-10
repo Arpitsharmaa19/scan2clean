@@ -28,7 +28,7 @@
             class="absolute top-0 right-0 w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
         </div>
         <div
-            class="absolute -bottom-32 left-20 w-96 h-96 bg-amber-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
+            class="absolute -bottom-32 left-20 w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
         </div>
     </div>
 
@@ -121,7 +121,7 @@
             <div
                 class="group p-8 rounded-3xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 <div
-                    class="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                    class="w-16 h-16 rounded-2xl bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 flex items-center justify-center text-3xl mb-6 shadow-sm group-hover:scale-110 transition-transform">
                     ✅
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track & Resolve</h3>
@@ -156,9 +156,9 @@
             </div>
 
             <div>
-                <div class="text-6xl font-heading font-extrabold text-amber-400 mb-2 counter"
+                <div class="text-6xl font-heading font-extrabold text-yellow-400 mb-2 counter"
                     data-target="{{ cleanup_rate }}">{{ cleanup_rate }}</div>
-                <div class="text-lg text-amber-100 opacity-80 uppercase tracking-widest font-bold">% Cleanup Rate</div>
+                <div class="text-lg text-yellow-100 opacity-80 uppercase tracking-widest font-bold">% Cleanup Rate</div>
             </div>
 
         </div>
@@ -206,75 +206,6 @@
 
         counters.forEach(counter => observer.observe(counter));
     });
-</script>
-
-<script>
-    // 🍃 Falling Leaves Particle System
-    const leafCanvas = document.getElementById('leaves-canvas');
-    if (leafCanvas) {
-        const leafCtx = leafCanvas.getContext('2d');
-        let leaves = [];
-
-        function resizeLeafCanvas() {
-            leafCanvas.width = window.innerWidth;
-            leafCanvas.height = window.innerHeight;
-        }
-
-        class Leaf {
-            constructor() {
-                this.reset();
-                this.y = Math.random() * leafCanvas.height;
-            }
-            reset() {
-                this.x = Math.random() * leafCanvas.width;
-                this.y = -40;
-                this.size = Math.random() * 10 + 8;
-                this.speedY = Math.random() * 1.5 + 0.8;
-                this.speedX = Math.random() * 2 - 1;
-                this.rotation = Math.random() * 360;
-                this.rotationSpeed = Math.random() * 2 - 1;
-                this.opacity = Math.random() * 0.4 + 0.1;
-                this.color = Math.random() > 0.6 ? '#22c55e' : (Math.random() > 0.5 ? '#16a34a' : '#14b8a6');
-            }
-            update() {
-                this.y += this.speedY;
-                this.x += Math.sin(this.y / 60) * 1.8;
-                this.rotation += this.rotationSpeed;
-                if (this.y > leafCanvas.height + 40) this.reset();
-            }
-            draw() {
-                leafCtx.save();
-                leafCtx.translate(this.x, this.y);
-                leafCtx.rotate(this.rotation * Math.PI / 180);
-                leafCtx.globalAlpha = this.opacity;
-                leafCtx.fillStyle = this.color;
-                leafCtx.beginPath();
-                leafCtx.moveTo(0, 0);
-                leafCtx.quadraticCurveTo(this.size, -this.size, this.size * 2, 0);
-                leafCtx.quadraticCurveTo(this.size, this.size, 0, 0);
-                leafCtx.fill();
-                leafCtx.restore();
-            }
-        }
-
-        function initLeaves() {
-            leaves = Array.from({ length: 45 }, () => new Leaf());
-            resizeLeafCanvas();
-            animateLeaves();
-        }
-
-        function animateLeaves() {
-            leafCtx.clearRect(0, 0, leafCanvas.width, leafCanvas.height);
-            leaves.forEach(leaf => {
-                leaf.update();
-                leaf.draw();
-            });
-            requestAnimationFrame(animateLeaves);
-        }
-
-        window.addEventListener('resize', resizeLeafCanvas);
-        initLeaves();
-    }
 </script>
 
 <!-- CSS for Blobs -->

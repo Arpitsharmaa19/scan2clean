@@ -29,13 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Allow all Render subdomains and local hosts
-ALLOWED_HOSTS = ['*'] if DEBUG else os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
-
-# Trust Render's proxy for HTTPS detection
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-USE_X_FORWARDED_HOST = True
-USE_X_FORWARDED_PORT = True
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.onrender.com').split(',')
 
 # Security Settings
 # Security Settings
@@ -48,10 +42,6 @@ if os.getenv('DJANGO_ENV') == 'production':
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    # Ensure CSRF and Session cookies are Lax for cross-site compatibility but secure
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    CSRF_COOKIE_SAMESITE = 'Lax'
-    SECURE_REFERRER_POLICY = 'same-origin'
 else:
     # Relax security for dev to avoid console noise
     SECURE_CROSS_ORIGIN_OPENER_POLICY = None
@@ -79,7 +69,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_spectacular',
-    'rest_framework_simplejwt',
 ]
 
 REST_FRAMEWORK = {
@@ -96,9 +85,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG
-if not DEBUG:
-    CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'https://*.onrender.com').split(',')
+CORS_ALLOW_ALL_ORIGINS = True # Change this for production
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Scan2Clean API',
@@ -165,12 +152,7 @@ DATABASES = {
     )
 }
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://*.onrender.com,http://localhost,http://127.0.0.1').split(',')
-CSRF_COOKIE_HTTPONLY = False  # Allows JS to read the cookie if needed
-CSRF_USE_SESSIONS = False   # Keep it in cookies for standard behavior
-CSRF_COOKIE_SECURE = os.getenv('DJANGO_ENV') == 'production'
-# Explicitly allow the origin header to vary
-SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
 
 
 # Password validation
@@ -184,28 +166,16 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': os.getenv('LOG_LEVEL', 'INFO'),
+        'level': 'WARNING',
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-            'propagate': False,
-        },
-        'django.db.backends': {
             'level': 'ERROR',
-            'handlers': ['console'],
             'propagate': False,
         },
     },
@@ -233,14 +203,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# WhiteNoise Configuration for AVIF support and performance
-WHITENOISE_MIMETYPES = {
-    '.avif': 'image/avif',
-    '.webp': 'image/webp',
-}
-WHITENOISE_MANIFEST_STRICT = False  # Avoid 500 if a file is missing in manifest
-WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 
 STORAGES = {
     "default": {

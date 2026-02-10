@@ -16,21 +16,16 @@ def send_realtime_notification(user, title, message, level='info'):
     )
 
     # 2. Send to WebSocket
-    try:
-        channel_layer = get_channel_layer()
-        if channel_layer:
-            async_to_sync(channel_layer.group_send)(
-                f"user_{user.id}",
-                {
-                    "type": "send_notification",
-                    "title": title,
-                    "message": message,
-                    "level": level
-                }
-            )
-    except Exception as e:
-        # Log to console but don't crash the request
-        print(f"WebSocket Notification Error: {e}")
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"user_{user.id}",
+        {
+            "type": "send_notification",
+            "title": title,
+            "message": message,
+            "level": level
+        }
+    )
 
 def get_optimized_route(worker_lat, worker_lng, report_locations):
     """
