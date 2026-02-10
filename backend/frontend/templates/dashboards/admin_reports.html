@@ -91,7 +91,8 @@
       <button type="submit" name="quick_filter" value="month"
         class="px-4 py-2 rounded-lg text-xs font-bold transition-all {% if quick_filter == 'month' %}bg-eco-500 text-white shadow-lg{% else %}bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300{% endif %}">🗓️
         This Month</button>
-      {% if search_query or status_filter or waste_type_filter or severity_filter or date_from or date_to or quick_filter %}
+      {% if search_query or status_filter or waste_type_filter or severity_filter or date_from or date_to or
+      quick_filter %}
       <a href="{% url 'admin_all_reports' %}"
         class="px-4 py-2 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 transition-all">✕
         Clear All</a>
@@ -209,21 +210,25 @@
           </td>
           <td class="px-6 py-4 text-center">
             <span
-              class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold {% if report.severity == 'high' %}bg-red-50 text-red-600{% elif report.severity == 'medium' %}bg-amber-50 text-amber-600{% else %}bg-green-50 text-green-600{% endif %}">{{ report.severity|capfirst }}</span>
+              class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold {% if report.severity == 'high' %}bg-red-50 text-red-600{% elif report.severity == 'medium' %}bg-amber-50 text-amber-600{% else %}bg-green-50 text-green-600{% endif %}">{{
+              report.severity|capfirst }}</span>
           </td>
           <td class="px-6 py-4 text-center">
             <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase {% if report.status == 'pending' %}bg-amber-100 text-amber-700{% elif report.status == 'assigned' %}bg-blue-100 text-blue-700{% else %}bg-green-100 text-green-700{% endif %}">{{ report.status }}</span>
+              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase {% if report.status == 'pending' %}bg-amber-100 text-amber-700{% elif report.status == 'assigned' %}bg-blue-100 text-blue-700{% else %}bg-green-100 text-green-700{% endif %}">{{
+              report.status }}</span>
             {% if report.assigned_worker %}<div
               class="text-xs font-black text-blue-500 dark:text-blue-400 mt-2 flex items-center justify-center gap-1.5 bg-blue-50/50 dark:bg-blue-900/20 py-1 px-2 rounded-lg border border-blue-100 dark:border-blue-800/30">
-              <span class="animate-bounce-slow">👷</span> {{ report.assigned_worker.get_full_name|default:report.assigned_worker.username }}
+              <span class="animate-bounce-slow">👷</span> {{
+              report.assigned_worker.get_full_name|default:report.assigned_worker.username }}
             </div>{% endif %}
           </td>
           <td class="px-6 py-4">
             {% if report.status == "resolved" and report.rating %}
             <div class="flex flex-col gap-1">
               <div class="text-amber-500 font-bold text-sm">
-                {% for i in '12345'|make_list %}{% if forloop.counter <= report.rating %}★{% else %}☆{% endif %}{% endfor %} </div>
+                {% for i in '12345'|make_list %}{% if forloop.counter <= report.rating %}★{% else %}☆{% endif %}{%
+                  endfor %} </div>
                   {% if report.review_text %}
                   <p class="text-[10px] text-gray-500 italic line-clamp-2">"{{ report.review_text }}"</p>
                   {% endif %}
@@ -242,7 +247,8 @@
                   class="text-[11px] font-bold border rounded-xl px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-inner">
                   <option value="">Assign Worker...</option>
                   {% for worker in workers %}
-                  <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>{{ worker.get_full_name|default:worker.username }}</option>
+                  <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>{{
+                    worker.get_full_name|default:worker.username }}</option>
                   {% endfor %}
                 </select>
                 <button type="submit" class="p-2 rounded-lg bg-orange-500 text-white">🚀</button>
@@ -270,13 +276,15 @@
               {% endif %}
             </div>
             <div>
-              <h3 class="font-black text-gray-800 dark:text-white text-sm line-clamp-1">{{ report.get_waste_type_display }}</h3>
+              <h3 class="font-black text-gray-800 dark:text-white text-sm line-clamp-1">{{ report.get_waste_type_display
+                }}</h3>
               <p class="text-[10px] text-gray-400 font-mono">#{{ report.id }} • {{ report.created_at|date:"M d, Y" }}
               </p>
             </div>
           </div>
           <span
-            class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter {% if report.status == 'pending' %}bg-amber-100 text-amber-700{% elif report.status == 'assigned' %}bg-blue-100 text-blue-700{% else %}bg-green-100 text-green-700{% endif %}">{{ report.status }}</span>
+            class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter {% if report.status == 'pending' %}bg-amber-100 text-amber-700{% elif report.status == 'assigned' %}bg-blue-100 text-blue-700{% else %}bg-green-100 text-green-700{% endif %}">{{
+            report.status }}</span>
         </div>
         <p
           class="text-xs text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800/50">
@@ -285,7 +293,8 @@
           <div class="bg-gray-50/50 dark:bg-gray-800/30 p-2 rounded-lg border border-gray-100 dark:border-gray-700/50">
             <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Severity</p>
             <span
-              class="text-[10px] font-bold uppercase {% if report.severity == 'high' %}text-red-600{% elif report.severity == 'medium' %}text-amber-600{% else %}text-green-600{% endif %}">{{ report.severity }}</span>
+              class="text-[10px] font-bold uppercase {% if report.severity == 'high' %}text-red-600{% elif report.severity == 'medium' %}text-amber-600{% else %}text-green-600{% endif %}">{{
+              report.severity }}</span>
           </div>
           <div
             class="bg-gray-50/50 dark:bg-gray-800/30 p-2 rounded-lg border border-gray-100 dark:border-gray-700/50 text-right">
@@ -303,7 +312,8 @@
               class="flex-1 text-[11px] font-bold border rounded-xl px-3 py-2.5 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700 outline-none">
               <option value="">Assign Worker...</option>
               {% for worker in workers %}
-              <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>{{ worker.get_full_name|default:worker.username }}</option>
+              <option value="{{ worker.id }}" {% if report.assigned_worker==worker %}selected{% endif %}>{{
+                worker.get_full_name|default:worker.username }}</option>
               {% endfor %}
             </select>
             <button type="submit"
@@ -330,7 +340,8 @@
     {% if reports.has_previous %}<a href="?page={{ reports.previous_page_number }}"
       class="px-3 py-1 border rounded">Prev</a>{% endif %}
     <span class="px-3 py-1 bg-eco-500 text-white rounded">{{ reports.number }}</span>
-    {% if reports.has_next %}<a href="?page={{ reports.next_page_number }}" class="px-3 py-1 border rounded">Next</a>{% endif %}
+    {% if reports.has_next %}<a href="?page={{ reports.next_page_number }}" class="px-3 py-1 border rounded">Next</a>{%
+    endif %}
   </div>
 </div>
 {% endif %}
