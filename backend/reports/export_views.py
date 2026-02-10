@@ -144,11 +144,15 @@ def export_report_pdf(request, report_id):
     # Report Image (if exists)
     if report.image:
         try:
+            import os
             img_path = report.image.path
-            img = Image(img_path, width=4*inch, height=3*inch)
-            story.append(img)
-            story.append(Spacer(1, 0.2*inch))
-        except:
+            if os.path.exists(img_path):
+                img = Image(img_path, width=4*inch, height=3*inch)
+                story.append(img)
+                story.append(Spacer(1, 0.2*inch))
+        except Exception as e:
+            # Silently fail if image cannot be loaded
+            print(f"Error loading image for PDF: {e}")
             pass
     
     # Report Details Table
