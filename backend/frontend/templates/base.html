@@ -19,48 +19,8 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap"
     rel="stylesheet">
 
-  <!-- Tailwind CSS (Play CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Notification Sound Manager -->
-  <script src="{% static 'js/notification-sound.js' %}"></script>
-  <script src="{% static 'js/sound-toggle-ui.js' %}"></script>
-
-  <!-- Dark Mode Logic -->
-  <script>
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-
-    async function toggleDarkMode() {
-      const isDark = document.documentElement.classList.contains('dark');
-
-      // Toggle UI immediately for smooth UX
-      if (isDark) {
-        document.documentElement.classList.remove('dark');
-        localStorage.theme = 'light';
-      } else {
-        document.documentElement.classList.add('dark');
-        localStorage.theme = 'dark';
-      }
-
-      // Save to database (async, non-blocking)
-      try {
-        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1];
-        await fetch('/toggle-dark-mode/', {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': csrfToken,
-            'Content-Type': 'application/json'
-          }
-        });
-      } catch (err) {
-        console.error('Failed to save dark mode preference:', err);
-      }
-    }
-  </script>
+  <!-- Tailwind CSS (Versioned Play CDN) -->
+  <script src="https://cdn.tailwindcss.com/3.4.1"></script>
 
   <!-- Tailwind Configuration -->
   <script>
@@ -152,6 +112,44 @@
             }
           }
         }
+      }
+    }
+  </script>
+
+  <!-- Notification Sound & UI Scripts -->
+  <script src="{% static 'js/notification-sound.js' %}" defer></script>
+  <script src="{% static 'js/sound-toggle-ui.js' %}" defer></script>
+
+  <!-- Dark Mode Logic -->
+  <script>
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    async function toggleDarkMode() {
+      const isDark = document.documentElement.classList.contains('dark');
+
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        localStorage.theme = 'light';
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.theme = 'dark';
+      }
+
+      try {
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1];
+        await fetch('/toggle-dark-mode/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (err) {
+        console.error('Failed to save dark mode preference:', err);
       }
     }
   </script>
